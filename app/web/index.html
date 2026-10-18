@@ -1208,7 +1208,7 @@ function addLeg(gid, sel) {
   const g = data.games.find(x => x.id === gid);
   if (finished(g || l)) return toast('Este jogo já terminou');
   slip.push(l); saveSlip();
-  toast(`Juntado ao boletim · ${slip.length} ${slip.length === 1 ? 'seleção' : 'seleções'}${new Date(l.kickoff) <= Date.now() ? ' (jogo a decorrer)' : ''}. Continua a escolher; guarda na barra em baixo.`);
+  toast('Adicionado');
 }
 function slipSheet() {
   if (!slip.length) {
