@@ -13,3 +13,9 @@ deploy/bigodds.tar.gz
 wrangler.toml
 .wrangler/
 node_modules/
+
+# documentos pessoais (acessos, notas) nunca vão para o GitHub
+*.odt
+*.docx
+*.txt
+.~lock.*
