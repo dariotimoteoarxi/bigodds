@@ -344,7 +344,7 @@ ESP_SEL = re.compile(r"^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|fav)$
 RESULTS = {"ganha": 1.0, "meio-ganha": 0.5, "anulada": 0.0, "meio-perdida": -0.5, "perdida": -1.0}
 MODEL_VERSION = "especialista v2.4 (18/10/2026) · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
 LEG_SCHEMA = """create table if not exists legs(bet_id integer, div text, date text, home text, away text, kickoff text,
-  sel text, label text, market text, line real, odd real, p real, result text default 'pendente')"""
+  sel text, label text, market text, line real, odd real, p real, result text default 'pendente', dono text)"""
 PUB_SCHEMA = """create table if not exists published(day text, game_id text, ord integer, pick text, published_at text,
   version text, primary key(day, game_id))"""
 
@@ -424,18 +424,18 @@ def f(row, k):
 
 BET_SCHEMA = """create table if not exists bets(id integer primary key, created text, div text, date text, home text,
   away text, kickoff text, sel text, label text, market text, line real, book text, odd real, stake real, p_fair real,
-  result text default 'pendente', profit real, closing_p real, clv real)"""
+  result text default 'pendente', profit real, closing_p real, clv real, dono text)"""
 
 
 ODDS_SCHEMA = """create table if not exists odds(ts text, game_id text, sel text, label text, market text, book text,
-  odd real, p real, kickoff text, origem text)"""
+  odd real, p real, kickoff text, origem text, dono text)"""
 VALUE_MIN = 1.02  # odd x probabilidade: abaixo disto a entrada não tem margem
 
 
 def log_odd(con, game_id, sel, label, market, book, odd, p, kickoff, origem):
     """Cada odd que o utilizador vê ou aposta fica guardada: é o histórico de preços da 22bet e da Betclic."""
-    con.execute("insert into odds values(?,?,?,?,?,?,?,?,?,?)", (datetime.now(TZ).isoformat(), game_id, sel, str(label)[:80],
-                str(market or "")[:60], book, odd, p, kickoff, origem))
+    con.execute("insert into odds(ts, game_id, sel, label, market, book, odd, p, kickoff, origem) values(?,?,?,?,?,?,?,?,?,?)",
+                (datetime.now(TZ).isoformat(), game_id, sel, str(label)[:80], str(market or "")[:60], book, odd, p, kickoff, origem))
 
 
 def odds_report(con):
@@ -460,6 +460,11 @@ def db():
     con.execute(PUB_SCHEMA)
     con.execute(LEG_SCHEMA)
     con.execute(ODDS_SCHEMA)
+    for t in ("bets", "legs", "odds"):  # dono: contas separadas na Cloudflare (no PC fica vazio)
+        try:
+            con.execute(f"alter table {t} add column dono text")
+        except sqlite3.OperationalError:
+            pass  # já existe
     return con
 
 

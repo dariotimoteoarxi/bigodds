@@ -21,11 +21,11 @@ jobs:
         run: python3 cloud/instalar.py
       - name: Projeto Pages (só cria da primeira vez)
         run: npx --yes wrangler@4 pages project create bigodds --production-branch main || true
-      - name: Palavra-passe da app
+      - name: Contas da app (Nome:palavra-passe, separadas por ;)
         env:
-          APP_KEY: ${{ secrets.BIGODDS_PALAVRA_PASSE }}
+          APP_USERS: ${{ secrets.BIGODDS_UTILIZADORES }}
         run: |
-          test -n "$APP_KEY" || { echo "Falta o segredo BIGODDS_PALAVRA_PASSE no GitHub"; exit 1; }
-          printf '%s' "$APP_KEY" | npx --yes wrangler@4 pages secret put APP_KEY --project-name bigodds
+          test -n "$APP_USERS" || { echo "Falta o segredo BIGODDS_UTILIZADORES no GitHub"; exit 1; }
+          printf '%s' "$APP_USERS" | npx --yes wrangler@4 pages secret put APP_USERS --project-name bigodds
       - name: Publicar
         run: npx --yes wrangler@4 pages deploy --project-name bigodds --branch main --commit-dirty=true

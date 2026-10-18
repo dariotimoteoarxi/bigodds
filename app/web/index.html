@@ -471,6 +471,10 @@ async function api(path, body) {
   const r = await apiFetch(path, body);
   const j = await r.json(); if (!r.ok) throw new Error(j.error || r.statusText); return j;
 }
+document.addEventListener('click', e => {
+  if (!e.target.closest('[data-trocar]')) return;
+  store.set('chave', ''); slip = []; saveSlip(); location.reload();  // pede a palavra-passe da outra conta
+});
 document.addEventListener('click', async e => {
   if (!e.target.closest('[data-csv]')) return;
   try {
@@ -520,7 +524,7 @@ document.addEventListener('pointermove', e => { const t = e.target.closest && e.
   const r = t.getBoundingClientRect(); t.style.setProperty('--mx', (e.clientX - r.left) + 'px'); t.style.setProperty('--my', (e.clientY - r.top) + 'px'); });
 
 const DAY_LIMIT = 0.05, STOP_LOSSES = 2, WEEK_LOSS = 0.15;  // 5% da banca por dia; pausa depois de 2 perdidas no dia ou de perder 15% da banca em 7 dias
-let allBets = [];
+let allBets = [], me = '';  // me: nome da conta (só na Cloudflare)
 let todayBets = [];
 function disciplina() {
   const used = todayBets.reduce((s, b) => s + b.stake, 0), limit = bank() * DAY_LIMIT;
@@ -586,7 +590,7 @@ function hojeTabs(tips, now) {
 document.addEventListener('click', e => { const b = e.target.closest('[data-htab]'); if (b) { hojeTab = b.dataset.htab; store.set('hojeTab', hojeTab); renderHoje(); } });
 function renderHoje() {
   const sel = data.selecao, byId = Object.fromEntries(data.games.map(g => [g.id, g])), now = Date.now(), hour = new Date().getHours();
-  const hello = hour < 13 ? 'Bom dia' : hour < 20 ? 'Boa tarde' : 'Boa noite';
+  const hello = (hour < 13 ? 'Bom dia' : hour < 20 ? 'Boa tarde' : 'Boa noite') + (me ? ', ' + me : '');
   const isToday = sel.dia === new Date().toLocaleDateString('sv-SE');
   const dayName = sel.dia ? new Date(sel.dia + 'T12:00').toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
   const tips = sel.apostas.map(p => ({ p, g: byId[p.game_id] || p.jogo })), n = tips.length;
@@ -872,6 +876,8 @@ let dtab = ['resumo', 'equipas', 'mercados'].includes(store.get('dtab')) ? store
 document.addEventListener('click', e => { const b = e.target.closest('[data-dtab]'); if (b) { dtab = b.dataset.dtab; store.set('dtab', dtab); bets ? renderDesempenho() : loadBets(); } });
 function renderDefinicoes() {
   $('#definicoes').innerHTML = `<div class="hero"><p class="eyebrow">Definições</p><h1>O teu Bigodds</h1></div>
+    ${me ? `<div class="chart"><h3>Conta</h3><p>Estás na conta <b>${esc(me)}</b>. As apostas, o desempenho e os avisos são só desta conta; as análises são iguais para todos.</p>
+      <button class="btn ghost" data-trocar style="width:100%">Trocar de conta</button></div>` : ''}
     <div class="chart" id="phone"></div>
       <div class="chart"><h3>Banca</h3><p>Serve para calcular o valor sugerido de cada aposta e o limite diário (5%).</p>
         <div class="bankset">Banca <input id="bank" type="number" min="1" step="1" value="${bank()}"> €</div></div>
@@ -968,7 +974,7 @@ async function renderPhone(c) {
   try { c = c || await api('/api/avisos'); } catch { return; }
   const url = c.topic ? `https://ntfy.sh/${c.topic}` : '';
   $('#phone').innerHTML = `<h3>Avisos no telemóvel</h3>
-    <p>${c.ativo ? 'Ligados. O Bigodds vigia os jogos de minuto a minuto, mesmo com esta página fechada (o computador tem de estar ligado).'
+    <p>${c.ativo ? (me ? 'Ligados. O Bigodds vigia os jogos de 5 em 5 minutos na nuvem, com a app fechada e o computador desligado.' : 'Ligados. O Bigodds vigia os jogos de minuto a minuto, mesmo com esta página fechada (o computador tem de estar ligado).')
       : 'Recebe no telemóvel as leituras ao vivo acima de 85%, os onzes dos teus jogos e os golos, cartões e cantos dos jogos onde tens aposta. É grátis e não precisa de conta.'}</p>
     ${c.ativo ? `<ol style="color:var(--muted);font-size:14px;line-height:1.6;padding-left:18px;margin:8px 0">
         <li>Instala a app <b>ntfy</b> (Android: Play Store ou F-Droid · iPhone: App Store).</li>
@@ -1483,7 +1489,7 @@ async function load() {
   try {
     const [d, b] = await Promise.all([api('/api/agenda?banca=' + bank()), api('/api/apostas').catch(() => ({ bets: [] }))]);
     data = d; const today = new Date().toLocaleDateString('sv-SE');
-    todayBets = b.bets.filter(x => (x.created || '').slice(0, 10) === today); allBets = b.bets;
+    todayBets = b.bets.filter(x => (x.created || '').slice(0, 10) === today); allBets = b.bets; me = b.dono || '';
     setOpenLegs(b.bets);
     const stale = slip.filter(l => Date.now() - new Date(l.kickoff) > 3 * 36e5);  // 3 h depois do início o jogo acabou
     if (stale.length) { slip = slip.filter(l => !stale.includes(l)); saveSlip(); toast(`Tirei do rascunho ${stale.length} ${stale.length === 1 ? 'seleção' : 'seleções'}: o jogo já acabou`); }

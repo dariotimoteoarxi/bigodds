@@ -33,12 +33,23 @@ class FakeCF:
     def kv_get(self, k):
         return self.kv.get(k)
 
+    def kv_keys(self, prefix):
+        return [k for k in self.kv if k.startswith(prefix)]
+
     def kv_put(self, k, v):
         assert isinstance(v, str)
         self.kv[k] = v
 
 
 cf = FakeCF(os.path.join(os.path.dirname(HERE), "app", "data", "apostas.sqlite"))
+for t in ("bets", "legs", "odds"):
+    cf.query(f"update {t} set dono='Dário'")  # como depois do migrar.py
+cf.query("insert into bets(created, div, date, home, away, kickoff, sel, label, market, book, odd, stake, dono) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+         ["2026-10-18T10:00", "SP1", "18/10/2026", "Real Madrid", "Sevilla", "2026-10-18T20:00:00+01:00", "1x2:1", "Real Madrid ganha", "Resultado (1X2)", "Betclic", 1.3, 2, "Ana"])
+cf.kv["ntfy:Ana"] = json.dumps({"ativo": True, "topic": "bigodds-teste"})
+import avisos  # noqa: E402
+sent_to = []
+avisos.send = lambda t, b, tags="": sent_to.append(avisos.config()["topic"]) or True  # nada sai para a internet no teste
 n_bets = cf.query("select count(*) n from bets")[0]["n"]
 cf.query("delete from preds where date like '18/10/2026'")  # força previsões novas a voltar para a D1
 sync.completo(cf)
@@ -49,6 +60,12 @@ assert cf.query("select count(*) n from preds")[0]["n"] > 0
 assert cf.query("select count(*) n from bets")[0]["n"] == n_bets  # a tarefa nunca cria nem apaga apostas
 rel = json.loads(cf.kv["relatorio"])
 assert {"aprendizagem", "equipas", "historico"} <= set(rel)
+assert "relatorio:Dário" in cf.kv and "relatorio:Ana" in cf.kv
+eq = lambda k: {x["equipa"]: x for x in json.loads(cf.kv[k])["equipas"]["equipas"]}
+assert "Real Madrid" in eq("relatorio:Ana") and eq("relatorio:Ana")["Real Madrid"]["apostas"]["n"] == 0  # ainda aberta
+assert all(x["apostas"]["n"] == 0 for x in eq("relatorio").values())  # o geral não tem apostas de ninguém
+assert "ntfy_vistos:Ana" in cf.kv and "ntfy_vistos:Dário" not in cf.kv  # só quem ligou os avisos
+assert set(sent_to) <= {"bigodds-teste"}
 sync.aovivo(cf)
 assert "_lembretes" in json.loads(cf.kv["live"])
 print("sync ok ·", cf.calls, "pedidos à D1")

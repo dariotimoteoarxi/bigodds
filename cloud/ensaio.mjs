@@ -15,7 +15,7 @@ const stmt = (sql, args = []) => ({ bind: (...a) => stmt(sql, a), all: async () 
 const DB = { prepare: sql => stmt(sql), batch: async l => { for (const x of l) await x.run(); } };
 const kv = JSON.parse(readFileSync(base + '.kv.json', 'utf8'));
 const KV = { get: async (k, t) => (k in kv ? (t === 'json' ? JSON.parse(kv[k]) : kv[k]) : null), put: async (k, v) => { kv[k] = v; } };
-const env = { DB, KV, APP_KEY: 'ensaio' };
+const env = { DB, KV, APP_USERS: 'Dário:ensaio;Ana:ensaio2' };
 const WEB = fileURLToPath(new URL('../app/web/', import.meta.url));  // o caminho tem acentos
 const TYPES = { '.html': 'text/html; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.js': 'text/javascript' };
 
@@ -28,4 +28,4 @@ http.createServer(async (req, res) => {
   const f = join(WEB, normalize(req.url.split('?')[0] === '/' ? 'index.html' : req.url.split('?')[0]).replace(/^(\.\.[/\\])+/, ''));
   if (!f.startsWith(WEB) || !existsSync(f)) { res.writeHead(404); res.end(); return; }
   res.writeHead(200, { 'Content-Type': TYPES[extname(f)] || 'application/octet-stream' }); res.end(readFileSync(f));
-}).listen(+port, '127.0.0.1', () => console.log(`Ensaio Cloudflare em http://127.0.0.1:${port} (palavra-passe: ensaio)`));
+}).listen(+port, '127.0.0.1', () => console.log(`Ensaio Cloudflare em http://127.0.0.1:${port} (contas: Dário/ensaio e Ana/ensaio2)`));

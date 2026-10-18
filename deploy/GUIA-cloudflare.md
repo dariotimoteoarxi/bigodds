@@ -48,9 +48,13 @@ gh secret set CLOUDFLARE_API_TOKEN -R "$(gh api user -q .login)/bigodds"
 gh secret set CLOUDFLARE_ACCOUNT_ID -R "$(gh api user -q .login)/bigodds"
 ```
 ```bash
-gh secret set BIGODDS_PALAVRA_PASSE -R "$(gh api user -q .login)/bigodds"
+gh secret set BIGODDS_UTILIZADORES -R "$(gh api user -q .login)/bigodds"
 ```
-A palavra-passe é a que vais escrever na app. Usa uma longa.
+Aqui ficam as **contas da app**, uma por pessoa, no formato `Nome:palavra-passe`, separadas por `;`. Por exemplo:
+`Dário:uma-palavra-passe-longa;Ana:outra-palavra-passe-longa`
+- Cada pessoa vê só as suas apostas, o seu desempenho e os seus avisos. As análises são iguais para todos.
+- Para juntar alguém mais tarde: volta a correr este comando com a lista completa e depois corre a tarefa *Publicar* no GitHub.
+- Não uses `;` dentro das palavras-passe.
 
 ## 4. Enviar o código (2 min)
 ```bash
@@ -63,14 +67,16 @@ O envio arranca sozinho a tarefa **Publicar**. Ela cria a base de dados, o espa�
 export CLOUDFLARE_API_TOKEN='o-teu-token' CLOUDFLARE_ACCOUNT_ID='o-teu-account-id'
 ```
 ```bash
-python3 cloud/migrar.py
+python3 cloud/migrar.py "Dário"
 ```
+Usa o teu nome **exatamente** como está em `BIGODDS_UTILIZADORES`: as apostas do PC passam para a tua conta.
 
 ## 6. Primeira análise
 Abre *Actions → Bigodds → Run workflow* (modo `completo`), ou espera até 30 minutos.
 
 ## 7. Usar
-- Abre o endereço da Cloudflare no telemóvel e escreve a palavra-passe (só uma vez por aparelho). No Chrome, usa *Adicionar ao ecrã principal*.
+- Abre o endereço da Cloudflare no telemóvel e escreve a palavra-passe da tua conta (só uma vez por aparelho). A tua mulher faz o mesmo no telemóvel dela, com a palavra-passe da conta dela.
+- Na roda dentada aparece a conta em uso e o botão *Trocar de conta*. No Chrome, usa *Adicionar ao ecrã principal*.
 - Na **roda dentada**, ativa os *Avisos no telemóvel* (app ntfy).
 - A partir daqui usa **só** o endereço da Cloudflare. A versão do PC deixa de receber as apostas novas.
 

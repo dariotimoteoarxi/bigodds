@@ -80,30 +80,69 @@ def age_cached_files():
                 os.utime(os.path.join(d, f), (old, old))
 
 
+OWNED = ("bets", "legs", "odds")  # tabelas com dono (contas separadas)
+
+
 def setup_local(cf, tables):
-    import avisos, server
+    import server
     server.DB = os.path.join(tempfile.mkdtemp(), "apostas.sqlite")
     con = server.db()
     pull(cf, con, tables)
-    for key, path in (("ntfy", avisos.CFG), ("ntfy_vistos", avisos.SEEN)):
-        v = cf.kv_get(key)
-        if v:
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w", encoding="utf-8") as fh:
-                fh.write(v)
     return server, con
 
 
+def user_con(server, src, dono):
+    """Cópia só com as apostas de uma conta (dono=None: nenhuma aposta), mais as previsões e boletins de todos."""
+    path, old = os.path.join(tempfile.mkdtemp(), "conta.sqlite"), server.DB
+    server.DB = path
+    con = server.db()
+    server.DB = old
+    for t in TABLES:
+        rows = src.execute(f"select * from {t}" + (" where dono=?" if t in OWNED else ""), (dono,) if t in OWNED else ()).fetchall()
+        for r in rows:
+            con.execute(f"insert into {t}({', '.join(r.keys())}) values({', '.join('?' * len(r.keys()))})", tuple(r))
+    con.commit()
+    return con
+
+
+def owners(cf, con):
+    """Contas a servir: quem tem apostas e quem ligou os avisos no telemóvel."""
+    found = {r[0] for r in con.execute("select distinct dono from bets where dono is not null")}
+    return sorted(found | {k.split(":", 1)[1] for k in cf.kv_keys("ntfy:")})
+
+
 def send_alerts(cf, server, con, games, now):
+    """Avisos ntfy de cada conta: o seu canal, os lances das suas apostas e os seus lembretes."""
     import avisos
-    if not avisos.config().get("ativo"):
-        return 0
     day = now.date().isoformat()
     picks = {r["game_id"].split("|")[0] for r in con.execute("select game_id from published where day=?", (day,))}
-    sent = avisos.run_once(games, server.open_bet_games(con), picks, server.lembretes(con, games, now))
-    with open(avisos.SEEN, encoding="utf-8") as fh:
-        cf.kv_put("ntfy_vistos", fh.read())
+    sent, tmp = 0, tempfile.mkdtemp()
+    for dono in owners(cf, con):
+        cfg = cf.kv_get("ntfy:" + dono)
+        if not cfg or not json.loads(cfg).get("ativo"):
+            continue
+        avisos.CFG, avisos.SEEN = os.path.join(tmp, "cfg.json"), os.path.join(tmp, "vistos.json")
+        with open(avisos.CFG, "w", encoding="utf-8") as fh:
+            fh.write(cfg)
+        with open(avisos.SEEN, "w", encoding="utf-8") as fh:
+            fh.write(cf.kv_get("ntfy_vistos:" + dono) or "{}")
+        cu = user_con(server, con, dono)
+        sent += avisos.run_once(games, server.open_bet_games(cu), picks, server.lembretes(cu, games, now))
+        with open(avisos.SEEN, encoding="utf-8") as fh:
+            cf.kv_put("ntfy_vistos:" + dono, fh.read())
     return sent
+
+
+def report(server, con, games):
+    return {"aprendizagem": server.learning(con), "odds": server.odds_report(con), "equipas": server.teams_report(con),
+            "clv_mercados": server.clv_markets(con), "historico": server.track_record(con, games)}
+
+
+def live_payload(server, con, games, now):
+    """Estado ao vivo para a app; os lembretes vão sem filtro de conta (a app esconde os que já registaste)."""
+    state = server.live_state(games, now)
+    state["_lembretes"] = server.lembretes(user_con(server, con, None), games, now)
+    return state
 
 
 def completo(cf):
@@ -113,16 +152,19 @@ def completo(cf):
     before = snapshot(con)
     now = datetime.now(server.TZ)
     agenda = server.agenda(100, now=now)
-    report = server.bets_report(now)
-    after = snapshot(server.db())
+    warning = server.bets_report(now)["warning"]  # fecha as apostas de todas as contas
+    con = server.db()
+    after = snapshot(con)
     changed = push(cf, before, after)
     games = server._LAST["games"]
     cf.kv_put("agenda", json.dumps(agenda, ensure_ascii=False))
-    cf.kv_put("live", json.dumps(server.live_state(games, now), ensure_ascii=False))
+    cf.kv_put("live", json.dumps(live_payload(server, con, games, now), ensure_ascii=False))
     cf.kv_put("calendario", json.dumps(live.calendario(games, server.LEAGUES, now), ensure_ascii=False))
-    cf.kv_put("relatorio", json.dumps({k: report[k] for k in ("aprendizagem", "odds", "equipas", "clv_mercados", "historico")}
-                                      | {"aviso": report.get("warning"), "atualizado": now.isoformat()}, ensure_ascii=False))
-    sent = send_alerts(cf, server, server.db(), games, now)
+    extra = {"aviso": warning, "atualizado": now.isoformat()}
+    cf.kv_put("relatorio", json.dumps(report(server, user_con(server, con, None), games) | extra, ensure_ascii=False))
+    for dono in owners(cf, con):
+        cf.kv_put("relatorio:" + dono, json.dumps(report(server, user_con(server, con, dono), games) | extra, ensure_ascii=False))
+    sent = send_alerts(cf, server, con, games, now)
     print(f"completo: {len(agenda['games'])} jogos · {changed} alterações na D1 · {sent} avisos")
 
 
@@ -137,7 +179,7 @@ def aovivo(cf):
     for g in games:  # minutos até ao início, como se a agenda tivesse sido calculada agora
         g["minutes_to_ko"] = round((datetime.fromisoformat(g["kickoff"]) - now).total_seconds() / 60)
     server._LAST["games"] = games
-    state = server.live_state(games, now)
+    state = live_payload(server, con, games, now)
     cf.kv_put("live", json.dumps(state, ensure_ascii=False))
     sent = send_alerts(cf, server, con, games, now)
     print(f"aovivo: {sum(1 for k in state if not k.startswith('_'))} jogos com estado · {sent} avisos")

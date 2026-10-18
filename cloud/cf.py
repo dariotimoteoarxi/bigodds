@@ -58,6 +58,10 @@ class CF:
         raw = self._req("GET", f"/accounts/{self.acc}/storage/kv/namespaces/{self.kv}/values/{urllib.parse.quote(key)}")
         return raw.decode() if raw is not None else None
 
+    def kv_keys(self, prefix):
+        res = self._json("GET", f"/accounts/{self.acc}/storage/kv/namespaces/{self.kv}/keys?prefix={urllib.parse.quote(prefix)}&limit=1000")
+        return [k["name"] for k in res or []]
+
     def kv_put(self, key, value):
         self._req("PUT", f"/accounts/{self.acc}/storage/kv/namespaces/{self.kv}/values/{urllib.parse.quote(key)}",
                   raw=value.encode(), ctype="text/plain; charset=utf-8")

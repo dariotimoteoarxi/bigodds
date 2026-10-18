@@ -17,7 +17,7 @@ const kvMap = new Map();
 const KV = { get: async (k, t) => (kvMap.has(k) ? (t === 'json' ? JSON.parse(kvMap.get(k)) : kvMap.get(k)) : null), put: async (k, v) => kvMap.set(k, v) };
 const DB = fakeD1();
 for (const q of SCHEMA) DB.raw.exec(q);
-const env = { DB, KV, APP_KEY: 'segredo-de-teste' };
+const env = { DB, KV, APP_USERS: 'Dário:segredo-de-teste; Ana:outra:chave' };  // a palavra-passe pode ter ':'
 const call = (method, path, body, key = 'segredo-de-teste') => handle(new Request('https://x.pages.dev/api/' + path, {
   method, headers: { 'x-bigodds-chave': key, ...(body ? { 'content-type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined }), env);
 
@@ -58,7 +58,26 @@ assert.equal((await call('POST', 'apostas', '{nope')).status, 400);
 
 let sent = null;
 const { avisos } = await import('./worker-core.js');
-const c = await avisos(KV, { ativo: true, teste: true }, async (u, o) => { sent = JSON.parse(o.body); });
+const c = await avisos(KV, 'Dário', { ativo: true, teste: true }, async (u, o) => { sent = JSON.parse(o.body); });
 assert.ok(c.ativo && /^bigodds-[a-z2-7]{16}$/.test(c.topic) && sent.topic === c.topic);
 assert.deepEqual(await (await call('GET', 'avisos')).json(), c);
+
+// --- duas contas: a Ana não vê, não muda nem apaga as apostas do Dário; cada uma tem o seu canal ---
+const ana = 'outra:chave';
+assert.deepEqual(await (await call('GET', 'eu', null, ana)).json(), { dono: 'Ana' });
+assert.deepEqual(await (await call('GET', 'eu')).json(), { dono: 'Dário' });
+assert.equal((await (await call('GET', 'apostas', null, ana)).json()).bets.length, 0);
+assert.equal((await call('POST', 'apostas', { action: 'apagar', id: single.id }, ana)).status, 400);
+assert.equal((await call('POST', 'apostas', { action: 'resultado', id: single.id, result: 'perdida' }, ana)).status, 400);
+assert.equal((await (await call('GET', 'apostas')).json()).summary.lucro, 9);
+assert.equal((await call('POST', 'apostas', { action: 'add', ...jogo, sel: '1x2:2', label: 'Gil Vicente ganha', book: 'Betclic', odd: '4', stake: '2' }, ana)).status, 200);
+assert.equal((await (await call('GET', 'apostas', null, ana)).json()).bets.length, 1);
+assert.equal((await (await call('GET', 'apostas')).json()).bets.length, 1);
+assert.ok(!(await (await call('GET', 'apostas.csv', null, ana)).text()).includes('Sp Braga ganha'));
+assert.equal((await (await call('GET', 'avisos', null, ana)).json()).ativo, false);
+kvMap.set('relatorio', JSON.stringify({ aviso: 'geral' }));
+kvMap.set('relatorio:Ana', JSON.stringify({ aviso: 'da Ana' }));
+assert.equal((await (await call('GET', 'apostas', null, ana)).json()).warning, 'da Ana');
+assert.equal((await (await call('GET', 'apostas')).json()).warning, 'geral');
+assert.equal((await call('GET', 'apostas', null, 'Ana')).status, 401);
 console.log('worker ok');
