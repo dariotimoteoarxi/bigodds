@@ -1,9 +1,10 @@
 # Corre o Bigodds: análise completa de 30 em 30 min; placar, avisos e onzes de 5 em 5 min à hora dos jogos (UTC).
+# Cada execução marca a seguinte (cloud/proxima.py): o horário automático do GitHub não estava a disparar.
+# O horário de 2 em 2 h fica só de reserva, para reiniciar a cadeia se ela parar.
 name: Bigodds
 on:
   schedule:
-    - cron: '0,30 * * * *'
-    - cron: '5,10,15,20,25,35,40,45,50,55 10-22 * * *'
+    - cron: '7 */2 * * *'
     - cron: '17 4 1 * *'
   workflow_dispatch:
     inputs:
@@ -12,11 +13,12 @@ on:
         default: 'completo'
 permissions:
   contents: write
+  actions: write
 concurrency: { group: bigodds-sync, cancel-in-progress: false }
 jobs:
   correr:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -49,5 +51,10 @@ jobs:
             git commit --allow-empty -m "Manter as tarefas agendadas ativas" && git push
             exit 0
           fi
-          if [ -n "$MODO" ]; then m="$MODO"; elif [ "$SCHED" = "0,30 * * * *" ]; then m=completo; else m=aovivo; fi
+          if [ -n "$MODO" ]; then m="$MODO"; else m=completo; fi
           python3 cloud/sync.py "$m"
+      - name: Marcar a próxima execução
+        if: ${{ !cancelled() && github.event.schedule != '17 4 1 * *' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 cloud/proxima.py
