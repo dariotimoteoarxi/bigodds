@@ -525,7 +525,7 @@ const STAKE = { Alta: 0.02, 'Média': 0.01, Baixa: 0.005 };  // fração da banc
 let data = null, bets = null, league = 'Todas', period = store.get('period', 'semana');
 const bank = () => parseFloat(store.get('bank', '100')) || 100;
 const espSels = g => (g.especialista || []).map(o => ({ sel: 'esp:' + o.key, label: o.label, market: o.family, short: o.family, p_est: o.p, conf: o.conf,
-  min_odd_est: o.min_odd, best_odd: null, hist: o.hist, texto: o.texto, titulo: o.titulo, risco: o.risco, name: o.name }));
+  min_odd_est: o.min_odd, best_odd: null, hist: o.hist, texto: o.texto, titulo: o.titulo, risco: o.risco, name: o.name, onde: o.onde }));
 const lineLabel = (k, ln) => { const lt = String(ln).replace('.', ','); return { 'c+': `Mais de ${lt} cantos`, 'c-': `Menos de ${lt} cantos`, 'y+': `Mais de ${lt} amarelos`, 'y-': `Menos de ${lt} amarelos` }[k]; };
 const confOf = p => p >= 0.80 ? 'Alta' : p >= 0.74 ? 'Média' : 'Baixa';
 // todas as linhas de cada mercado (cantos e amarelos têm várias), para comparar com as odds da casa
@@ -774,7 +774,7 @@ function tipCard(p, g, now) {
     <div class="match">${esc(g.home)} – ${esc(g.away)}</div>
     <div class="core"><div class="bet"><small>${esc(p.titulo)}</small><b>${esc(p.label)}</b>
       <div class="minodd"><span>entra com</span> ${fmt(Math.max(ODD_FLOOR, p.min_odd))}+</div>
-      <div class="fairodd">odd justa ${fmt(p.fair_odd || 1 / p.p)}</div></div>${ring(p.p)}</div>
+      <div class="fairodd">odd justa ${fmt(p.fair_odd || 1 / p.p)}</div>${p.onde ? `<div class="fairodd">${esc(p.onde)}</div>` : ''}</div>${ring(p.p)}</div>
     ${started ? '' : `<div class="valchk"><input class="oddchk" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="odd da casa" data-chk="${esc(g.id)}" data-sel="${esc(p.sel)}" data-p="${p.p}" data-label="${esc(p.label)}" data-market="${esc(p.market || '')}" aria-label="Odd que a tua casa dá em ${esc(p.label)}"><span class="meta chkout"></span></div>`}
     ${p.revisao ? `<div class="note" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Em revisão:</b> ${esc(p.revisao)}</div>` : ''}
     ${g.onzes && g.onzes.atencao ? onzesNote(g) : ''}
@@ -936,7 +936,7 @@ function espBlock(g) {
         <input class="oddchk" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="odd?" data-chk="${esc(g.id)}" data-sel="${esc(s.sel)}" aria-label="Odd que a tua casa dá em ${esc(s.label)}">
         <button class="btn ghost small" data-bet="${esc(g.id)}" data-sel="${esc(s.sel)}">Registar</button></span>
       <span class="meta chkout" data-out="${esc(g.id + '|' + s.sel)}"></span>
-      <span class="meta" style="color:#C9D2C8">${esc(s.texto)}</span>
+      <span class="meta" style="color:#C9D2C8">${esc(s.texto)}</span>${s.onde ? `<span class="meta">${esc(s.onde)}</span>` : ''}
     </div>`).join('')}</div>`;
 }
 function gameSheet(id) {
@@ -1220,7 +1220,7 @@ function clvPanel(C) {
       : '<p style="color:var(--faint)">Aparece quando tiveres apostas simples nestes mercados e os jogos fecharem.</p>'}</div>`;
 }
 const STEM = { 'esp:y-': 'Menos de X amarelos', 'esp:y+': 'Mais de X amarelos', 'esp:c-': 'Menos de X cantos', 'esp:c+': 'Mais de X cantos',
-  'esp:ht+': 'Golo na 1.ª parte', 'esp:g2+': 'Golo na 2.ª parte', 'esp:hs': 'Equipa da casa marca', 'esp:as': 'Equipa de fora marca',
+  'esp:ht+': '1.ª parte: mais de 0,5 golos', 'esp:g2+': '2.ª parte: mais de 0,5 golos', 'esp:hs': 'Equipa da casa marca', 'esp:as': 'Equipa de fora marca',
   'esp:fav': 'Favorito ganha', 'esp:dc': 'Dupla hipótese', 'esp:y1-': 'Menos amarelos 1.ª parte', 'esp:y1+': 'Mais amarelos 1.ª parte' };
 function precosPanel(P) {
   return `<div class="chart learn"><h3>Onde a casa paga acima do justo</h3>${howto(`Cada odd que escreves (no caça-valor, no cartão ou ao registar) é comparada com a odd justa. A partir de 40 odds num mercado, os mercados onde a casa paga mais de 2% acima do justo passam à frente na seleção do dia.`)}
@@ -1483,8 +1483,8 @@ function parseMarket(txt, g) {
     if (/canto|escante/.test(t) && half1) return null;  // cantos por parte: ainda não acompanho
     if (/cart/.test(t)) return { sel: `esp:y${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} amarelos`, market: 'Cartões', line };
     if (/canto|escante/.test(t)) return { sel: `esp:c${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} cantos`, market: 'Cantos', line };
-    if (/(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:ht+0.5', label: 'Há golo na 1.ª parte', market: 'Golos por parte' } : null;
-    if (/(^|\D)2\s*[.,]?\s*[ºªo°a]?\s*parte|segunda parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:g2+0.5', label: 'Há golo na 2.ª parte', market: 'Golos por parte' } : null;
+    if (/(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:ht+0.5', label: '1.ª parte: mais de 0,5 golos', market: 'Golos por parte' } : null;
+    if (/(^|\D)2\s*[.,]?\s*[ºªo°a]?\s*parte|segunda parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:g2+0.5', label: '2.ª parte: mais de 0,5 golos', market: 'Golos por parte' } : null;
     if (line === 2.5) return { sel: up ? 'ou:+2,5' : 'ou:-2,5', label: `${up ? 'Mais' : 'Menos'} de 2,5 golos`, market: 'Golos 2,5' };
   }
   return null;

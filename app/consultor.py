@@ -505,7 +505,7 @@ def especialista(game, rows, modelos, live=None):
     if ref and game.get("div") in REF_COEF:
         mu["y"] *= math.exp(REF_COEF[game["div"]] * ref["rel"])  # critério do árbitro (cartões por falta)
     cands = {"ht+": [(0.5, 1 - math.exp(-mu["ht"]))], "c+": [], "c-": [], "y+": [], "y-": []}
-    for key, fam in (("hs", "hg"), ("as", "ag")):  # golo na 2.ª parte: a 22bet e a Betclic não o têm antes do jogo (mu["g2"] fica para o ao vivo)
+    for key, fam in (("g2+", "g2"), ("hs", "hg"), ("as", "ag")):
         if fam in mu:
             cands[key] = [(0.5, 1 - math.exp(-mu[fam]))]
     for fam in ("c", "y"):
@@ -539,10 +539,11 @@ def especialista(game, rows, modelos, live=None):
             scored.append((line, p, p_raw))
         # a linha dentro da faixa-alvo; sem nenhuma lá dentro, a mais próxima dela
         line, p, p_raw = min(scored, key=lambda s: (max(PICK_MIN - s[1], s[1] - PICK_MAX, 0), -s[1]))
-        label = {"ht+": "Há golo na 1.ª parte", "c+": f"Mais de {_lt(line)} cantos" if line else "",
+        label = {"ht+": "1.ª parte: mais de 0,5 golos", "c+": f"Mais de {_lt(line)} cantos" if line else "",
                  "c-": f"Menos de {_lt(line)} cantos" if line else "", "y+": f"Mais de {_lt(line)} amarelos" if line else "",
                  "y-": f"Menos de {_lt(line)} amarelos" if line else "", "fav": f"{fav} ganha",
-                 "g2+": "Há golo na 2.ª parte", "hs": f"{h} marca", "as": f"{a} marca", "dc": f"{fav} ou empate"}[key]
+                 "g2+": "2.ª parte: mais de 0,5 golos", "hs": f"{h}: mais de 0,5 golos", "as": f"{a}: mais de 0,5 golos",
+                 "dc": f"{fav} ou empate"}[key]  # com os nomes que a Betclic e a 22bet usam
         band = None
         for lo, b in sorted(((float(k), v) for k, v in modelos.get("faixas", {}).get(key, {}).items()), reverse=True):
             if p >= lo:
@@ -552,7 +553,7 @@ def especialista(game, rows, modelos, live=None):
              "linhas": [[ln, round(q, 3)] for ln, q, _ in scored] if len(scored) > 1 else None,  # escada para o caça-valor
              "family": FAMILY[key], "line": line, "p": round(p, 3), "p_raw": round(p_raw, 3),
              "conf": "Alta" if p >= CONF_ALTA else "Média" if p >= CONF_MEDIA else "Baixa",
-             "fair_odd": round(1 / p, 2), "min_odd": round(1.02 / p, 2), "hist": band}
+             "onde": ONDE[key], "fair_odd": round(1 / p, 2), "min_odd": round(1.02 / p, 2), "hist": band}
         o.update(_texto_especialista(o, key, game, ctx))
         if ref and ((key == "y+" and ref["tipo"] == "brando") or (key == "y-" and ref["tipo"] == "rigoroso")):
             o["veto"] = f"Árbitro {ref['tipo']} ({ref['nome']}): não aconselho esta aposta."
@@ -560,10 +561,24 @@ def especialista(game, rows, modelos, live=None):
     return sorted(out, key=lambda o: -o["p"])
 
 
+# onde está cada mercado (Betclic visto no site em 18/10/2026; 22bet pelos nomes dos boletins dela)
+ONDE = {"ht+": "Betclic: Golos › Total de golos – Primeira Parte › Acima de 0,5",
+        "g2+": "Betclic: Golos › Total de golos – Segunda parte › Acima de 0,5",
+        "hs": "Betclic: Golos › Golos por equipa · 22bet: Total individual 1", "as": "Betclic: Golos › Golos por equipa · 22bet: Total individual 2",
+        "c+": "Betclic: Estatísticas › Cantos › Total de Cantos (só 3 a 5 linhas)", "c-": "Betclic: Estatísticas › Cantos › Total de Cantos (só 3 a 5 linhas)",
+        "y+": "Só na 22bet: a Betclic não tem cartões", "y-": "Só na 22bet: a Betclic não tem cartões",
+        "fav": "Betclic: Resultado (Tempo Regulamentar) · 22bet: 1X2", "dc": "Betclic: Resultado duplo · 22bet: Hipótese dupla"}
+
+
 def _texto_especialista(o, key, g, c):
     h, a = g["home"], g["away"]
     hist = o["hist"]
     track = (f" No histórico, apostas destas acertaram {pct(hist['acerto'])} em {hist['n']} casos." if hist else "")
+    if key == "g2+":
+        return {"titulo": "Golo depois do intervalo",
+                "texto": f"A 2.ª parte é onde caem mais golos. O mercado espera {_n(c['lam_tot'])} golos no jogo e "
+                         f"para a 2.ª parte conto com {_n(c['mu']['g2'])}." + track,
+                "risco": "Um jogo já resolvido ao intervalo pode adormecer na 2.ª parte."}
     if key in ("hs", "as"):
         t, lam = (h, c["mu"]["hg"]) if key == "hs" else (a, c["mu"]["ag"])
         return {"titulo": f"{t} marca",
