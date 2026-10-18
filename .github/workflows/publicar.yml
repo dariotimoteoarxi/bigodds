@@ -1,0 +1,31 @@
+# Publica a app na Cloudflare Pages (e prepara a D1 e a KV da primeira vez).
+name: Publicar
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['app/web/**', 'functions/**', 'cloud/worker-core.js', 'cloud/instalar.py', '.github/workflows/publicar.yml']
+concurrency: { group: publicar }
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Base de dados e KV
+        run: python3 cloud/instalar.py
+      - name: Projeto Pages (só cria da primeira vez)
+        run: npx --yes wrangler@4 pages project create bigodds --production-branch main || true
+      - name: Palavra-passe da app
+        env:
+          APP_KEY: ${{ secrets.BIGODDS_PALAVRA_PASSE }}
+        run: |
+          test -n "$APP_KEY" || { echo "Falta o segredo BIGODDS_PALAVRA_PASSE no GitHub"; exit 1; }
+          printf '%s' "$APP_KEY" | npx --yes wrangler@4 pages secret put APP_KEY --project-name bigodds
+      - name: Publicar
+        run: npx --yes wrangler@4 pages deploy --project-name bigodds --branch main --commit-dirty=true

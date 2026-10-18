@@ -1,0 +1,38 @@
+# Corre o Bigodds: análise completa de 30 em 30 min; placar, avisos e onzes de 5 em 5 min à hora dos jogos (UTC).
+name: Bigodds
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+    - cron: '5,10,15,20,25,35,40,45,50,55 10-22 * * *'
+    - cron: '17 4 1 * *'
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: 'completo ou aovivo'
+        default: 'completo'
+permissions:
+  contents: write
+concurrency: { group: bigodds-sync, cancel-in-progress: false }
+jobs:
+  correr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Correr
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SCHED: ${{ github.event.schedule }}
+          MODO: ${{ inputs.modo }}
+        run: |
+          if [ "$SCHED" = "17 4 1 * *" ]; then
+            # o GitHub desliga tarefas agendadas de repositórios sem atividade há 60 dias
+            git config user.name "bigodds"; git config user.email "bigodds@users.noreply.github.com"
+            git commit --allow-empty -m "Manter as tarefas agendadas ativas" && git push
+            exit 0
+          fi
+          if [ -n "$MODO" ]; then m="$MODO"; elif [ "$SCHED" = "*/30 * * * *" ]; then m=completo; else m=aovivo; fi
+          python3 cloud/sync.py "$m"

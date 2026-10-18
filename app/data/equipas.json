@@ -1,0 +1,3414 @@
+{
+"fonte": "teste 2025/26–2026/27, apostas do modelo ≥72%",
+"equipas": {
+"AVS": {
+"Cantos": {
+"n": 38,
+"hit": 26,
+"previsto": 0.771,
+"real": 0.684
+},
+"Cartões": {
+"n": 58,
+"hit": 42,
+"previsto": 0.814,
+"real": 0.724
+},
+"Equipa marca": {
+"n": 34,
+"hit": 29,
+"previsto": 0.838,
+"real": 0.853
+},
+"Golos por parte": {
+"n": 45,
+"hit": 33,
+"previsto": 0.786,
+"real": 0.733
+}
+},
+"Academico Viseu": {
+"Cantos": {
+"n": 2,
+"hit": 2,
+"previsto": 0.794,
+"real": 1.0
+},
+"Cartões": {
+"n": 2,
+"hit": 2,
+"previsto": 0.835,
+"real": 1.0
+},
+"Equipa marca": {
+"n": 3,
+"hit": 2,
+"previsto": 0.763,
+"real": 0.667
+},
+"Golos por parte": {
+"n": 2,
+"hit": 1,
+"previsto": 0.79,
+"real": 0.5
+}
+},
+"Alaves": {
+"Cantos": {
+"n": 49,
+"hit": 31,
+"previsto": 0.749,
+"real": 0.633
+},
+"Cartões": {
+"n": 68,
+"hit": 56,
+"previsto": 0.81,
+"real": 0.824
+},
+"Equipa marca": {
+"n": 38,
+"hit": 31,
+"previsto": 0.787,
+"real": 0.816
+},
+"Golos por parte": {
+"n": 37,
+"hit": 29,
+"previsto": 0.77,
+"real": 0.784
+}
+},
+"Alverca": {
+"Cantos": {
+"n": 44,
+"hit": 32,
+"previsto": 0.766,
+"real": 0.727
+},
+"Cartões": {
+"n": 59,
+"hit": 48,
+"previsto": 0.818,
+"real": 0.814
+},
+"Equipa marca": {
+"n": 37,
+"hit": 32,
+"previsto": 0.813,
+"real": 0.865
+},
+"Golos por parte": {
+"n": 45,
+"hit": 38,
+"previsto": 0.782,
+"real": 0.844
+}
+},
+"Angers": {
+"Cantos": {
+"n": 43,
+"hit": 34,
+"previsto": 0.764,
+"real": 0.791
+},
+"Cartões": {
+"n": 68,
+"hit": 60,
+"previsto": 0.818,
+"real": 0.882
+},
+"Equipa marca": {
+"n": 39,
+"hit": 30,
+"previsto": 0.814,
+"real": 0.769
+},
+"Golos por parte": {
+"n": 47,
+"hit": 31,
+"previsto": 0.774,
+"real": 0.66
+}
+},
+"Arouca": {
+"Cantos": {
+"n": 43,
+"hit": 37,
+"previsto": 0.762,
+"real": 0.86
+},
+"Cartões": {
+"n": 70,
+"hit": 56,
+"previsto": 0.824,
+"real": 0.8
+},
+"Equipa marca": {
+"n": 51,
+"hit": 40,
+"previsto": 0.801,
+"real": 0.784
+},
+"Golos por parte": {
+"n": 56,
+"hit": 45,
+"previsto": 0.78,
+"real": 0.804
+}
+},
+"Arsenal": {
+"Cantos": {
+"n": 45,
+"hit": 28,
+"previsto": 0.749,
+"real": 0.622
+},
+"Cartões": {
+"n": 78,
+"hit": 71,
+"previsto": 0.824,
+"real": 0.91
+},
+"Equipa marca": {
+"n": 44,
+"hit": 40,
+"previsto": 0.879,
+"real": 0.909
+},
+"Golos por parte": {
+"n": 70,
+"hit": 55,
+"previsto": 0.783,
+"real": 0.786
+}
+},
+"Aston Villa": {
+"Cantos": {
+"n": 46,
+"hit": 37,
+"previsto": 0.748,
+"real": 0.804
+},
+"Cartões": {
+"n": 77,
+"hit": 64,
+"previsto": 0.781,
+"real": 0.831
+},
+"Equipa marca": {
+"n": 60,
+"hit": 45,
+"previsto": 0.802,
+"real": 0.75
+},
+"Golos por parte": {
+"n": 70,
+"hit": 56,
+"previsto": 0.78,
+"real": 0.8
+}
+},
+"Atalanta": {
+"Cantos": {
+"n": 50,
+"hit": 35,
+"previsto": 0.746,
+"real": 0.7
+},
+"Cartões": {
+"n": 78,
+"hit": 74,
+"previsto": 0.829,
+"real": 0.949
+},
+"Equipa marca": {
+"n": 48,
+"hit": 41,
+"previsto": 0.815,
+"real": 0.854
+},
+"Golos por parte": {
+"n": 51,
+"hit": 39,
+"previsto": 0.776,
+"real": 0.765
+}
+},
+"Ath Bilbao": {
+"Cantos": {
+"n": 47,
+"hit": 35,
+"previsto": 0.753,
+"real": 0.745
+},
+"Cartões": {
+"n": 69,
+"hit": 49,
+"previsto": 0.798,
+"real": 0.71
+},
+"Equipa marca": {
+"n": 43,
+"hit": 31,
+"previsto": 0.796,
+"real": 0.721
+},
+"Golos por parte": {
+"n": 47,
+"hit": 39,
+"previsto": 0.773,
+"real": 0.83
+}
+},
+"Ath Madrid": {
+"Cantos": {
+"n": 48,
+"hit": 39,
+"previsto": 0.756,
+"real": 0.812
+},
+"Cartões": {
+"n": 69,
+"hit": 53,
+"previsto": 0.793,
+"real": 0.768
+},
+"Equipa marca": {
+"n": 55,
+"hit": 47,
+"previsto": 0.825,
+"real": 0.855
+},
+"Golos por parte": {
+"n": 64,
+"hit": 51,
+"previsto": 0.782,
+"real": 0.797
+}
+},
+"Augsburg": {
+"Cantos": {
+"n": 43,
+"hit": 30,
+"previsto": 0.765,
+"real": 0.698
+},
+"Cartões": {
+"n": 67,
+"hit": 53,
+"previsto": 0.795,
+"real": 0.791
+},
+"Equipa marca": {
+"n": 63,
+"hit": 54,
+"previsto": 0.814,
+"real": 0.857
+},
+"Golos por parte": {
+"n": 74,
+"hit": 62,
+"previsto": 0.809,
+"real": 0.838
+}
+},
+"Auxerre": {
+"Cantos": {
+"n": 42,
+"hit": 31,
+"previsto": 0.758,
+"real": 0.738
+},
+"Cartões": {
+"n": 68,
+"hit": 55,
+"previsto": 0.788,
+"real": 0.809
+},
+"Equipa marca": {
+"n": 39,
+"hit": 30,
+"previsto": 0.817,
+"real": 0.769
+},
+"Golos por parte": {
+"n": 50,
+"hit": 37,
+"previsto": 0.777,
+"real": 0.74
+}
+},
+"Barcelona": {
+"Cantos": {
+"n": 57,
+"hit": 47,
+"previsto": 0.793,
+"real": 0.825
+},
+"Cartões": {
+"n": 74,
+"hit": 53,
+"previsto": 0.801,
+"real": 0.716
+},
+"Equipa marca": {
+"n": 52,
+"hit": 49,
+"previsto": 0.911,
+"real": 0.942
+},
+"Golos por parte": {
+"n": 87,
+"hit": 75,
+"previsto": 0.838,
+"real": 0.862
+}
+},
+"Bayern Munich": {
+"Cantos": {
+"n": 43,
+"hit": 31,
+"previsto": 0.761,
+"real": 0.721
+},
+"Cartões": {
+"n": 71,
+"hit": 57,
+"previsto": 0.851,
+"real": 0.803
+},
+"Equipa marca": {
+"n": 39,
+"hit": 37,
+"previsto": 0.959,
+"real": 0.949
+},
+"Golos por parte": {
+"n": 74,
+"hit": 68,
+"previsto": 0.902,
+"real": 0.919
+}
+},
+"Benfica": {
+"Cantos": {
+"n": 41,
+"hit": 35,
+"previsto": 0.761,
+"real": 0.854
+},
+"Cartões": {
+"n": 64,
+"hit": 47,
+"previsto": 0.796,
+"real": 0.734
+},
+"Equipa marca": {
+"n": 43,
+"hit": 41,
+"previsto": 0.902,
+"real": 0.953
+},
+"Golos por parte": {
+"n": 73,
+"hit": 58,
+"previsto": 0.801,
+"real": 0.795
+}
+},
+"Betis": {
+"Cantos": {
+"n": 52,
+"hit": 39,
+"previsto": 0.753,
+"real": 0.75
+},
+"Cartões": {
+"n": 73,
+"hit": 51,
+"previsto": 0.791,
+"real": 0.699
+},
+"Equipa marca": {
+"n": 53,
+"hit": 47,
+"previsto": 0.804,
+"real": 0.887
+},
+"Golos por parte": {
+"n": 60,
+"hit": 47,
+"previsto": 0.783,
+"real": 0.783
+}
+},
+"Bologna": {
+"Cantos": {
+"n": 46,
+"hit": 36,
+"previsto": 0.778,
+"real": 0.783
+},
+"Cartões": {
+"n": 70,
+"hit": 56,
+"previsto": 0.807,
+"real": 0.8
+},
+"Equipa marca": {
+"n": 41,
+"hit": 34,
+"previsto": 0.785,
+"real": 0.829
+},
+"Golos por parte": {
+"n": 43,
+"hit": 38,
+"previsto": 0.757,
+"real": 0.884
+}
+},
+"Bournemouth": {
+"Cantos": {
+"n": 50,
+"hit": 39,
+"previsto": 0.765,
+"real": 0.78
+},
+"Cartões": {
+"n": 78,
+"hit": 60,
+"previsto": 0.783,
+"real": 0.769
+},
+"Equipa marca": {
+"n": 67,
+"hit": 52,
+"previsto": 0.81,
+"real": 0.776
+},
+"Golos por parte": {
+"n": 82,
+"hit": 63,
+"previsto": 0.79,
+"real": 0.768
+}
+},
+"Brentford": {
+"Cantos": {
+"n": 45,
+"hit": 34,
+"previsto": 0.754,
+"real": 0.756
+},
+"Cartões": {
+"n": 73,
+"hit": 56,
+"previsto": 0.793,
+"real": 0.767
+},
+"Equipa marca": {
+"n": 64,
+"hit": 48,
+"previsto": 0.8,
+"real": 0.75
+},
+"Golos por parte": {
+"n": 71,
+"hit": 56,
+"previsto": 0.782,
+"real": 0.789
+}
+},
+"Brest": {
+"Cantos": {
+"n": 42,
+"hit": 30,
+"previsto": 0.748,
+"real": 0.714
+},
+"Cartões": {
+"n": 71,
+"hit": 59,
+"previsto": 0.791,
+"real": 0.831
+},
+"Equipa marca": {
+"n": 41,
+"hit": 36,
+"previsto": 0.802,
+"real": 0.878
+},
+"Golos por parte": {
+"n": 48,
+"hit": 39,
+"previsto": 0.781,
+"real": 0.812
+}
+},
+"Brighton": {
+"Cantos": {
+"n": 46,
+"hit": 36,
+"previsto": 0.749,
+"real": 0.783
+},
+"Cartões": {
+"n": 75,
+"hit": 57,
+"previsto": 0.784,
+"real": 0.76
+},
+"Equipa marca": {
+"n": 62,
+"hit": 50,
+"previsto": 0.808,
+"real": 0.806
+},
+"Golos por parte": {
+"n": 78,
+"hit": 65,
+"previsto": 0.783,
+"real": 0.833
+}
+},
+"Burnley": {
+"Cantos": {
+"n": 38,
+"hit": 31,
+"previsto": 0.755,
+"real": 0.816
+},
+"Cartões": {
+"n": 64,
+"hit": 58,
+"previsto": 0.834,
+"real": 0.906
+},
+"Equipa marca": {
+"n": 38,
+"hit": 35,
+"previsto": 0.87,
+"real": 0.921
+},
+"Golos por parte": {
+"n": 60,
+"hit": 46,
+"previsto": 0.784,
+"real": 0.767
+}
+},
+"Cagliari": {
+"Cantos": {
+"n": 49,
+"hit": 39,
+"previsto": 0.775,
+"real": 0.796
+},
+"Cartões": {
+"n": 77,
+"hit": 66,
+"previsto": 0.804,
+"real": 0.857
+},
+"Equipa marca": {
+"n": 31,
+"hit": 25,
+"previsto": 0.821,
+"real": 0.806
+},
+"Golos por parte": {
+"n": 36,
+"hit": 29,
+"previsto": 0.758,
+"real": 0.806
+}
+},
+"Casa Pia": {
+"Cantos": {
+"n": 47,
+"hit": 33,
+"previsto": 0.755,
+"real": 0.702
+},
+"Cartões": {
+"n": 72,
+"hit": 62,
+"previsto": 0.828,
+"real": 0.861
+},
+"Equipa marca": {
+"n": 42,
+"hit": 32,
+"previsto": 0.816,
+"real": 0.762
+},
+"Golos por parte": {
+"n": 50,
+"hit": 39,
+"previsto": 0.772,
+"real": 0.78
+}
+},
+"Celta": {
+"Cantos": {
+"n": 47,
+"hit": 36,
+"previsto": 0.766,
+"real": 0.766
+},
+"Cartões": {
+"n": 68,
+"hit": 51,
+"previsto": 0.797,
+"real": 0.75
+},
+"Equipa marca": {
+"n": 48,
+"hit": 37,
+"previsto": 0.783,
+"real": 0.771
+},
+"Golos por parte": {
+"n": 51,
+"hit": 42,
+"previsto": 0.775,
+"real": 0.824
+}
+},
+"Chelsea": {
+"Cantos": {
+"n": 43,
+"hit": 34,
+"previsto": 0.76,
+"real": 0.791
+},
+"Cartões": {
+"n": 74,
+"hit": 54,
+"previsto": 0.786,
+"real": 0.73
+},
+"Equipa marca": {
+"n": 56,
+"hit": 46,
+"previsto": 0.837,
+"real": 0.821
+},
+"Golos por parte": {
+"n": 84,
+"hit": 69,
+"previsto": 0.786,
+"real": 0.821
+}
+},
+"Como": {
+"Cantos": {
+"n": 57,
+"hit": 50,
+"previsto": 0.786,
+"real": 0.877
+},
+"Cartões": {
+"n": 72,
+"hit": 57,
+"previsto": 0.799,
+"real": 0.792
+},
+"Equipa marca": {
+"n": 45,
+"hit": 32,
+"previsto": 0.809,
+"real": 0.711
+},
+"Golos por parte": {
+"n": 50,
+"hit": 35,
+"previsto": 0.767,
+"real": 0.7
+}
+},
+"Cremonese": {
+"Cantos": {
+"n": 39,
+"hit": 32,
+"previsto": 0.763,
+"real": 0.821
+},
+"Cartões": {
+"n": 66,
+"hit": 52,
+"previsto": 0.806,
+"real": 0.788
+},
+"Equipa marca": {
+"n": 32,
+"hit": 27,
+"previsto": 0.819,
+"real": 0.844
+},
+"Golos por parte": {
+"n": 38,
+"hit": 29,
+"previsto": 0.762,
+"real": 0.763
+}
+},
+"Crystal Palace": {
+"Cantos": {
+"n": 49,
+"hit": 32,
+"previsto": 0.746,
+"real": 0.653
+},
+"Cartões": {
+"n": 71,
+"hit": 63,
+"previsto": 0.797,
+"real": 0.887
+},
+"Equipa marca": {
+"n": 55,
+"hit": 43,
+"previsto": 0.797,
+"real": 0.782
+},
+"Golos por parte": {
+"n": 64,
+"hit": 47,
+"previsto": 0.777,
+"real": 0.734
+}
+},
+"Dortmund": {
+"Cantos": {
+"n": 45,
+"hit": 33,
+"previsto": 0.743,
+"real": 0.733
+},
+"Cartões": {
+"n": 61,
+"hit": 50,
+"previsto": 0.81,
+"real": 0.82
+},
+"Equipa marca": {
+"n": 52,
+"hit": 46,
+"previsto": 0.862,
+"real": 0.885
+},
+"Golos por parte": {
+"n": 75,
+"hit": 61,
+"previsto": 0.828,
+"real": 0.813
+}
+},
+"Ein Frankfurt": {
+"Cantos": {
+"n": 42,
+"hit": 34,
+"previsto": 0.759,
+"real": 0.81
+},
+"Cartões": {
+"n": 67,
+"hit": 55,
+"previsto": 0.792,
+"real": 0.821
+},
+"Equipa marca": {
+"n": 68,
+"hit": 62,
+"previsto": 0.819,
+"real": 0.912
+},
+"Golos por parte": {
+"n": 76,
+"hit": 67,
+"previsto": 0.821,
+"real": 0.882
+}
+},
+"Elche": {
+"Cantos": {
+"n": 49,
+"hit": 32,
+"previsto": 0.759,
+"real": 0.653
+},
+"Cartões": {
+"n": 65,
+"hit": 53,
+"previsto": 0.799,
+"real": 0.815
+},
+"Equipa marca": {
+"n": 45,
+"hit": 40,
+"previsto": 0.806,
+"real": 0.889
+},
+"Golos por parte": {
+"n": 54,
+"hit": 48,
+"previsto": 0.783,
+"real": 0.889
+}
+},
+"Espanol": {
+"Cantos": {
+"n": 52,
+"hit": 39,
+"previsto": 0.751,
+"real": 0.75
+},
+"Cartões": {
+"n": 77,
+"hit": 57,
+"previsto": 0.805,
+"real": 0.74
+},
+"Equipa marca": {
+"n": 47,
+"hit": 38,
+"previsto": 0.79,
+"real": 0.809
+},
+"Golos por parte": {
+"n": 48,
+"hit": 40,
+"previsto": 0.777,
+"real": 0.833
+}
+},
+"Estoril": {
+"Cantos": {
+"n": 47,
+"hit": 36,
+"previsto": 0.763,
+"real": 0.766
+},
+"Cartões": {
+"n": 67,
+"hit": 54,
+"previsto": 0.816,
+"real": 0.806
+},
+"Equipa marca": {
+"n": 55,
+"hit": 43,
+"previsto": 0.806,
+"real": 0.782
+},
+"Golos por parte": {
+"n": 63,
+"hit": 50,
+"previsto": 0.784,
+"real": 0.794
+}
+},
+"Estrela": {
+"Cantos": {
+"n": 47,
+"hit": 34,
+"previsto": 0.765,
+"real": 0.723
+},
+"Cartões": {
+"n": 69,
+"hit": 61,
+"previsto": 0.831,
+"real": 0.884
+},
+"Equipa marca": {
+"n": 48,
+"hit": 38,
+"previsto": 0.798,
+"real": 0.792
+},
+"Golos por parte": {
+"n": 49,
+"hit": 37,
+"previsto": 0.783,
+"real": 0.755
+}
+},
+"Everton": {
+"Cantos": {
+"n": 46,
+"hit": 33,
+"previsto": 0.742,
+"real": 0.717
+},
+"Cartões": {
+"n": 78,
+"hit": 54,
+"previsto": 0.788,
+"real": 0.692
+},
+"Equipa marca": {
+"n": 53,
+"hit": 41,
+"previsto": 0.794,
+"real": 0.774
+},
+"Golos por parte": {
+"n": 54,
+"hit": 43,
+"previsto": 0.778,
+"real": 0.796
+}
+},
+"FC Koln": {
+"Cantos": {
+"n": 40,
+"hit": 29,
+"previsto": 0.758,
+"real": 0.725
+},
+"Cartões": {
+"n": 70,
+"hit": 58,
+"previsto": 0.787,
+"real": 0.829
+},
+"Equipa marca": {
+"n": 66,
+"hit": 61,
+"previsto": 0.813,
+"real": 0.924
+},
+"Golos por parte": {
+"n": 74,
+"hit": 62,
+"previsto": 0.812,
+"real": 0.838
+}
+},
+"Famalicao": {
+"Cantos": {
+"n": 44,
+"hit": 32,
+"previsto": 0.744,
+"real": 0.727
+},
+"Cartões": {
+"n": 75,
+"hit": 52,
+"previsto": 0.833,
+"real": 0.693
+},
+"Equipa marca": {
+"n": 44,
+"hit": 36,
+"previsto": 0.818,
+"real": 0.818
+},
+"Golos por parte": {
+"n": 52,
+"hit": 37,
+"previsto": 0.778,
+"real": 0.712
+}
+},
+"Fiorentina": {
+"Cantos": {
+"n": 47,
+"hit": 41,
+"previsto": 0.77,
+"real": 0.872
+},
+"Cartões": {
+"n": 71,
+"hit": 56,
+"previsto": 0.792,
+"real": 0.789
+},
+"Equipa marca": {
+"n": 42,
+"hit": 33,
+"previsto": 0.799,
+"real": 0.786
+},
+"Golos por parte": {
+"n": 46,
+"hit": 37,
+"previsto": 0.765,
+"real": 0.804
+}
+},
+"Freiburg": {
+"Cantos": {
+"n": 46,
+"hit": 37,
+"previsto": 0.766,
+"real": 0.804
+},
+"Cartões": {
+"n": 64,
+"hit": 51,
+"previsto": 0.79,
+"real": 0.797
+},
+"Equipa marca": {
+"n": 55,
+"hit": 47,
+"previsto": 0.813,
+"real": 0.855
+},
+"Golos por parte": {
+"n": 68,
+"hit": 55,
+"previsto": 0.791,
+"real": 0.809
+}
+},
+"Frosinone": {
+"Cantos": {
+"n": 7,
+"hit": 4,
+"previsto": 0.746,
+"real": 0.571
+},
+"Cartões": {
+"n": 11,
+"hit": 7,
+"previsto": 0.826,
+"real": 0.636
+},
+"Equipa marca": {
+"n": 7,
+"hit": 5,
+"previsto": 0.844,
+"real": 0.714
+},
+"Golos por parte": {
+"n": 8,
+"hit": 6,
+"previsto": 0.805,
+"real": 0.75
+}
+},
+"Fulham": {
+"Cantos": {
+"n": 47,
+"hit": 36,
+"previsto": 0.752,
+"real": 0.766
+},
+"Cartões": {
+"n": 73,
+"hit": 56,
+"previsto": 0.797,
+"real": 0.767
+},
+"Equipa marca": {
+"n": 61,
+"hit": 49,
+"previsto": 0.796,
+"real": 0.803
+},
+"Golos por parte": {
+"n": 68,
+"hit": 48,
+"previsto": 0.779,
+"real": 0.706
+}
+},
+"Genoa": {
+"Cantos": {
+"n": 48,
+"hit": 42,
+"previsto": 0.786,
+"real": 0.875
+},
+"Cartões": {
+"n": 73,
+"hit": 60,
+"previsto": 0.793,
+"real": 0.822
+},
+"Equipa marca": {
+"n": 32,
+"hit": 27,
+"previsto": 0.791,
+"real": 0.844
+},
+"Golos por parte": {
+"n": 25,
+"hit": 18,
+"previsto": 0.751,
+"real": 0.72
+}
+},
+"Getafe": {
+"Cantos": {
+"n": 47,
+"hit": 35,
+"previsto": 0.773,
+"real": 0.745
+},
+"Cartões": {
+"n": 69,
+"hit": 54,
+"previsto": 0.817,
+"real": 0.783
+},
+"Equipa marca": {
+"n": 17,
+"hit": 13,
+"previsto": 0.813,
+"real": 0.765
+},
+"Golos por parte": {
+"n": 12,
+"hit": 9,
+"previsto": 0.782,
+"real": 0.75
+}
+},
+"Gil Vicente": {
+"Cantos": {
+"n": 47,
+"hit": 29,
+"previsto": 0.766,
+"real": 0.617
+},
+"Cartões": {
+"n": 63,
+"hit": 51,
+"previsto": 0.824,
+"real": 0.81
+},
+"Equipa marca": {
+"n": 39,
+"hit": 30,
+"previsto": 0.812,
+"real": 0.769
+},
+"Golos por parte": {
+"n": 43,
+"hit": 32,
+"previsto": 0.772,
+"real": 0.744
+}
+},
+"Girona": {
+"Cantos": {
+"n": 42,
+"hit": 26,
+"previsto": 0.757,
+"real": 0.619
+},
+"Cartões": {
+"n": 57,
+"hit": 41,
+"previsto": 0.804,
+"real": 0.719
+},
+"Equipa marca": {
+"n": 45,
+"hit": 36,
+"previsto": 0.799,
+"real": 0.8
+},
+"Golos por parte": {
+"n": 49,
+"hit": 41,
+"previsto": 0.788,
+"real": 0.837
+}
+},
+"Guimaraes": {
+"Cantos": {
+"n": 49,
+"hit": 38,
+"previsto": 0.771,
+"real": 0.776
+},
+"Cartões": {
+"n": 71,
+"hit": 54,
+"previsto": 0.829,
+"real": 0.761
+},
+"Equipa marca": {
+"n": 43,
+"hit": 33,
+"previsto": 0.813,
+"real": 0.767
+},
+"Golos por parte": {
+"n": 48,
+"hit": 37,
+"previsto": 0.782,
+"real": 0.771
+}
+},
+"Hamburg": {
+"Cantos": {
+"n": 35,
+"hit": 29,
+"previsto": 0.758,
+"real": 0.829
+},
+"Cartões": {
+"n": 49,
+"hit": 35,
+"previsto": 0.794,
+"real": 0.714
+},
+"Equipa marca": {
+"n": 52,
+"hit": 45,
+"previsto": 0.82,
+"real": 0.865
+},
+"Golos por parte": {
+"n": 64,
+"hit": 50,
+"previsto": 0.803,
+"real": 0.781
+}
+},
+"Heidenheim": {
+"Cantos": {
+"n": 34,
+"hit": 20,
+"previsto": 0.759,
+"real": 0.588
+},
+"Cartões": {
+"n": 55,
+"hit": 38,
+"previsto": 0.808,
+"real": 0.691
+},
+"Equipa marca": {
+"n": 43,
+"hit": 39,
+"previsto": 0.855,
+"real": 0.907
+},
+"Golos por parte": {
+"n": 63,
+"hit": 53,
+"previsto": 0.812,
+"real": 0.841
+}
+},
+"Hoffenheim": {
+"Cantos": {
+"n": 42,
+"hit": 29,
+"previsto": 0.753,
+"real": 0.69
+},
+"Cartões": {
+"n": 69,
+"hit": 58,
+"previsto": 0.79,
+"real": 0.841
+},
+"Equipa marca": {
+"n": 60,
+"hit": 52,
+"previsto": 0.837,
+"real": 0.867
+},
+"Golos por parte": {
+"n": 76,
+"hit": 63,
+"previsto": 0.822,
+"real": 0.829
+}
+},
+"Inter": {
+"Cantos": {
+"n": 47,
+"hit": 31,
+"previsto": 0.752,
+"real": 0.66
+},
+"Cartões": {
+"n": 75,
+"hit": 65,
+"previsto": 0.838,
+"real": 0.867
+},
+"Equipa marca": {
+"n": 46,
+"hit": 44,
+"previsto": 0.864,
+"real": 0.957
+},
+"Golos por parte": {
+"n": 65,
+"hit": 54,
+"previsto": 0.781,
+"real": 0.831
+}
+},
+"Ipswich": {
+"Cantos": {
+"n": 7,
+"hit": 5,
+"previsto": 0.744,
+"real": 0.714
+},
+"Cartões": {
+"n": 9,
+"hit": 8,
+"previsto": 0.808,
+"real": 0.889
+},
+"Equipa marca": {
+"n": 8,
+"hit": 8,
+"previsto": 0.814,
+"real": 1.0
+},
+"Golos por parte": {
+"n": 11,
+"hit": 8,
+"previsto": 0.782,
+"real": 0.727
+}
+},
+"Juventus": {
+"Cantos": {
+"n": 51,
+"hit": 39,
+"previsto": 0.754,
+"real": 0.765
+},
+"Cartões": {
+"n": 75,
+"hit": 63,
+"previsto": 0.826,
+"real": 0.84
+},
+"Equipa marca": {
+"n": 42,
+"hit": 34,
+"previsto": 0.835,
+"real": 0.81
+},
+"Golos por parte": {
+"n": 52,
+"hit": 39,
+"previsto": 0.767,
+"real": 0.75
+}
+},
+"La Coruna": {
+"Cantos": {
+"n": 3,
+"hit": 2,
+"previsto": 0.738,
+"real": 0.667
+},
+"Cartões": {
+"n": 4,
+"hit": 3,
+"previsto": 0.775,
+"real": 0.75
+},
+"Equipa marca": {
+"n": 2,
+"hit": 2,
+"previsto": 0.845,
+"real": 1.0
+},
+"Golos por parte": {
+"n": 2,
+"hit": 2,
+"previsto": 0.791,
+"real": 1.0
+}
+},
+"Lazio": {
+"Cantos": {
+"n": 54,
+"hit": 45,
+"previsto": 0.783,
+"real": 0.833
+},
+"Cartões": {
+"n": 73,
+"hit": 58,
+"previsto": 0.787,
+"real": 0.795
+},
+"Equipa marca": {
+"n": 40,
+"hit": 28,
+"previsto": 0.785,
+"real": 0.7
+},
+"Golos por parte": {
+"n": 40,
+"hit": 30,
+"previsto": 0.757,
+"real": 0.75
+}
+},
+"Le Havre": {
+"Cantos": {
+"n": 44,
+"hit": 33,
+"previsto": 0.759,
+"real": 0.75
+},
+"Cartões": {
+"n": 69,
+"hit": 58,
+"previsto": 0.791,
+"real": 0.841
+},
+"Equipa marca": {
+"n": 42,
+"hit": 32,
+"previsto": 0.807,
+"real": 0.762
+},
+"Golos por parte": {
+"n": 51,
+"hit": 32,
+"previsto": 0.774,
+"real": 0.627
+}
+},
+"Lecce": {
+"Cantos": {
+"n": 45,
+"hit": 34,
+"previsto": 0.768,
+"real": 0.756
+},
+"Cartões": {
+"n": 81,
+"hit": 70,
+"previsto": 0.803,
+"real": 0.864
+},
+"Equipa marca": {
+"n": 33,
+"hit": 27,
+"previsto": 0.816,
+"real": 0.818
+},
+"Golos por parte": {
+"n": 32,
+"hit": 24,
+"previsto": 0.762,
+"real": 0.75
+}
+},
+"Leeds": {
+"Cantos": {
+"n": 46,
+"hit": 33,
+"previsto": 0.753,
+"real": 0.717
+},
+"Cartões": {
+"n": 79,
+"hit": 58,
+"previsto": 0.793,
+"real": 0.734
+},
+"Equipa marca": {
+"n": 56,
+"hit": 44,
+"previsto": 0.798,
+"real": 0.786
+},
+"Golos por parte": {
+"n": 63,
+"hit": 47,
+"previsto": 0.778,
+"real": 0.746
+}
+},
+"Lens": {
+"Cantos": {
+"n": 42,
+"hit": 28,
+"previsto": 0.753,
+"real": 0.667
+},
+"Cartões": {
+"n": 69,
+"hit": 60,
+"previsto": 0.794,
+"real": 0.87
+},
+"Equipa marca": {
+"n": 52,
+"hit": 41,
+"previsto": 0.822,
+"real": 0.788
+},
+"Golos por parte": {
+"n": 68,
+"hit": 58,
+"previsto": 0.782,
+"real": 0.853
+}
+},
+"Levante": {
+"Cantos": {
+"n": 50,
+"hit": 31,
+"previsto": 0.752,
+"real": 0.62
+},
+"Cartões": {
+"n": 64,
+"hit": 51,
+"previsto": 0.81,
+"real": 0.797
+},
+"Equipa marca": {
+"n": 48,
+"hit": 39,
+"previsto": 0.805,
+"real": 0.812
+},
+"Golos por parte": {
+"n": 53,
+"hit": 46,
+"previsto": 0.79,
+"real": 0.868
+}
+},
+"Leverkusen": {
+"Cantos": {
+"n": 41,
+"hit": 32,
+"previsto": 0.747,
+"real": 0.78
+},
+"Cartões": {
+"n": 67,
+"hit": 51,
+"previsto": 0.789,
+"real": 0.761
+},
+"Equipa marca": {
+"n": 56,
+"hit": 51,
+"previsto": 0.843,
+"real": 0.911
+},
+"Golos por parte": {
+"n": 74,
+"hit": 62,
+"previsto": 0.818,
+"real": 0.838
+}
+},
+"Lille": {
+"Cantos": {
+"n": 42,
+"hit": 31,
+"previsto": 0.752,
+"real": 0.738
+},
+"Cartões": {
+"n": 73,
+"hit": 59,
+"previsto": 0.796,
+"real": 0.808
+},
+"Equipa marca": {
+"n": 49,
+"hit": 37,
+"previsto": 0.816,
+"real": 0.755
+},
+"Golos por parte": {
+"n": 55,
+"hit": 40,
+"previsto": 0.781,
+"real": 0.727
+}
+},
+"Liverpool": {
+"Cantos": {
+"n": 44,
+"hit": 35,
+"previsto": 0.768,
+"real": 0.795
+},
+"Cartões": {
+"n": 72,
+"hit": 56,
+"previsto": 0.815,
+"real": 0.778
+},
+"Equipa marca": {
+"n": 57,
+"hit": 49,
+"previsto": 0.853,
+"real": 0.86
+},
+"Golos por parte": {
+"n": 87,
+"hit": 65,
+"previsto": 0.803,
+"real": 0.747
+}
+},
+"Lorient": {
+"Cantos": {
+"n": 43,
+"hit": 34,
+"previsto": 0.763,
+"real": 0.791
+},
+"Cartões": {
+"n": 63,
+"hit": 51,
+"previsto": 0.802,
+"real": 0.81
+},
+"Equipa marca": {
+"n": 46,
+"hit": 35,
+"previsto": 0.797,
+"real": 0.761
+},
+"Golos por parte": {
+"n": 50,
+"hit": 42,
+"previsto": 0.78,
+"real": 0.84
+}
+},
+"Lyon": {
+"Cantos": {
+"n": 44,
+"hit": 32,
+"previsto": 0.751,
+"real": 0.727
+},
+"Cartões": {
+"n": 72,
+"hit": 57,
+"previsto": 0.785,
+"real": 0.792
+},
+"Equipa marca": {
+"n": 55,
+"hit": 42,
+"previsto": 0.806,
+"real": 0.764
+},
+"Golos por parte": {
+"n": 60,
+"hit": 45,
+"previsto": 0.782,
+"real": 0.75
+}
+},
+"M'gladbach": {
+"Cantos": {
+"n": 37,
+"hit": 31,
+"previsto": 0.765,
+"real": 0.838
+},
+"Cartões": {
+"n": 66,
+"hit": 52,
+"previsto": 0.791,
+"real": 0.788
+},
+"Equipa marca": {
+"n": 60,
+"hit": 43,
+"previsto": 0.816,
+"real": 0.717
+},
+"Golos por parte": {
+"n": 71,
+"hit": 54,
+"previsto": 0.807,
+"real": 0.761
+}
+},
+"Mainz": {
+"Cantos": {
+"n": 38,
+"hit": 28,
+"previsto": 0.753,
+"real": 0.737
+},
+"Cartões": {
+"n": 61,
+"hit": 49,
+"previsto": 0.788,
+"real": 0.803
+},
+"Equipa marca": {
+"n": 60,
+"hit": 49,
+"previsto": 0.809,
+"real": 0.817
+},
+"Golos por parte": {
+"n": 68,
+"hit": 60,
+"previsto": 0.798,
+"real": 0.882
+}
+},
+"Malaga": {
+"Cantos": {
+"n": 2,
+"hit": 1,
+"previsto": 0.757,
+"real": 0.5
+},
+"Cartões": {
+"n": 2,
+"hit": 2,
+"previsto": 0.826,
+"real": 1.0
+},
+"Equipa marca": {
+"n": 1,
+"hit": 1,
+"previsto": 0.747,
+"real": 1.0
+},
+"Golos por parte": {
+"n": 1,
+"hit": 1,
+"previsto": 0.761,
+"real": 1.0
+}
+},
+"Mallorca": {
+"Cantos": {
+"n": 44,
+"hit": 38,
+"previsto": 0.75,
+"real": 0.864
+},
+"Cartões": {
+"n": 55,
+"hit": 41,
+"previsto": 0.807,
+"real": 0.745
+},
+"Equipa marca": {
+"n": 32,
+"hit": 31,
+"previsto": 0.806,
+"real": 0.969
+},
+"Golos por parte": {
+"n": 38,
+"hit": 32,
+"previsto": 0.767,
+"real": 0.842
+}
+},
+"Man City": {
+"Cantos": {
+"n": 46,
+"hit": 37,
+"previsto": 0.763,
+"real": 0.804
+},
+"Cartões": {
+"n": 68,
+"hit": 54,
+"previsto": 0.821,
+"real": 0.794
+},
+"Equipa marca": {
+"n": 50,
+"hit": 41,
+"previsto": 0.879,
+"real": 0.82
+},
+"Golos por parte": {
+"n": 85,
+"hit": 65,
+"previsto": 0.806,
+"real": 0.765
+}
+},
+"Man United": {
+"Cantos": {
+"n": 44,
+"hit": 32,
+"previsto": 0.756,
+"real": 0.727
+},
+"Cartões": {
+"n": 75,
+"hit": 62,
+"previsto": 0.798,
+"real": 0.827
+},
+"Equipa marca": {
+"n": 64,
+"hit": 56,
+"previsto": 0.826,
+"real": 0.875
+},
+"Golos por parte": {
+"n": 86,
+"hit": 66,
+"previsto": 0.791,
+"real": 0.767
+}
+},
+"Maritimo": {
+"Cantos": {
+"n": 8,
+"hit": 7,
+"previsto": 0.756,
+"real": 0.875
+},
+"Cartões": {
+"n": 13,
+"hit": 10,
+"previsto": 0.814,
+"real": 0.769
+},
+"Equipa marca": {
+"n": 7,
+"hit": 6,
+"previsto": 0.822,
+"real": 0.857
+},
+"Golos por parte": {
+"n": 8,
+"hit": 8,
+"previsto": 0.783,
+"real": 1.0
+}
+},
+"Marseille": {
+"Cantos": {
+"n": 43,
+"hit": 36,
+"previsto": 0.754,
+"real": 0.837
+},
+"Cartões": {
+"n": 70,
+"hit": 62,
+"previsto": 0.803,
+"real": 0.886
+},
+"Equipa marca": {
+"n": 48,
+"hit": 37,
+"previsto": 0.839,
+"real": 0.771
+},
+"Golos por parte": {
+"n": 71,
+"hit": 53,
+"previsto": 0.786,
+"real": 0.746
+}
+},
+"Metz": {
+"Cantos": {
+"n": 38,
+"hit": 32,
+"previsto": 0.755,
+"real": 0.842
+},
+"Cartões": {
+"n": 57,
+"hit": 52,
+"previsto": 0.817,
+"real": 0.912
+},
+"Equipa marca": {
+"n": 33,
+"hit": 26,
+"previsto": 0.848,
+"real": 0.788
+},
+"Golos por parte": {
+"n": 49,
+"hit": 36,
+"previsto": 0.786,
+"real": 0.735
+}
+},
+"Milan": {
+"Cantos": {
+"n": 47,
+"hit": 38,
+"previsto": 0.771,
+"real": 0.809
+},
+"Cartões": {
+"n": 72,
+"hit": 62,
+"previsto": 0.819,
+"real": 0.861
+},
+"Equipa marca": {
+"n": 44,
+"hit": 36,
+"previsto": 0.825,
+"real": 0.818
+},
+"Golos por parte": {
+"n": 50,
+"hit": 41,
+"previsto": 0.772,
+"real": 0.82
+}
+},
+"Monaco": {
+"Cantos": {
+"n": 46,
+"hit": 35,
+"previsto": 0.742,
+"real": 0.761
+},
+"Cartões": {
+"n": 73,
+"hit": 65,
+"previsto": 0.799,
+"real": 0.89
+},
+"Equipa marca": {
+"n": 55,
+"hit": 44,
+"previsto": 0.834,
+"real": 0.8
+},
+"Golos por parte": {
+"n": 79,
+"hit": 60,
+"previsto": 0.79,
+"real": 0.759
+}
+},
+"Monza": {
+"Cantos": {
+"n": 6,
+"hit": 4,
+"previsto": 0.789,
+"real": 0.667
+},
+"Cartões": {
+"n": 10,
+"hit": 8,
+"previsto": 0.805,
+"real": 0.8
+},
+"Equipa marca": {
+"n": 5,
+"hit": 5,
+"previsto": 0.813,
+"real": 1.0
+},
+"Golos por parte": {
+"n": 8,
+"hit": 7,
+"previsto": 0.759,
+"real": 0.875
+}
+},
+"Moreirense": {
+"Cantos": {
+"n": 51,
+"hit": 46,
+"previsto": 0.78,
+"real": 0.902
+},
+"Cartões": {
+"n": 74,
+"hit": 59,
+"previsto": 0.822,
+"real": 0.797
+},
+"Equipa marca": {
+"n": 41,
+"hit": 33,
+"previsto": 0.807,
+"real": 0.805
+},
+"Golos por parte": {
+"n": 47,
+"hit": 39,
+"previsto": 0.777,
+"real": 0.83
+}
+},
+"Nacional": {
+"Cantos": {
+"n": 44,
+"hit": 36,
+"previsto": 0.751,
+"real": 0.818
+},
+"Cartões": {
+"n": 73,
+"hit": 60,
+"previsto": 0.82,
+"real": 0.822
+},
+"Equipa marca": {
+"n": 56,
+"hit": 45,
+"previsto": 0.798,
+"real": 0.804
+},
+"Golos por parte": {
+"n": 56,
+"hit": 39,
+"previsto": 0.788,
+"real": 0.696
+}
+},
+"Nantes": {
+"Cantos": {
+"n": 40,
+"hit": 29,
+"previsto": 0.754,
+"real": 0.725
+},
+"Cartões": {
+"n": 60,
+"hit": 47,
+"previsto": 0.789,
+"real": 0.783
+},
+"Equipa marca": {
+"n": 35,
+"hit": 26,
+"previsto": 0.82,
+"real": 0.743
+},
+"Golos por parte": {
+"n": 44,
+"hit": 31,
+"previsto": 0.779,
+"real": 0.705
+}
+},
+"Napoli": {
+"Cantos": {
+"n": 51,
+"hit": 38,
+"previsto": 0.785,
+"real": 0.745
+},
+"Cartões": {
+"n": 73,
+"hit": 64,
+"previsto": 0.824,
+"real": 0.877
+},
+"Equipa marca": {
+"n": 37,
+"hit": 31,
+"previsto": 0.812,
+"real": 0.838
+},
+"Golos por parte": {
+"n": 33,
+"hit": 25,
+"previsto": 0.759,
+"real": 0.758
+}
+},
+"Newcastle": {
+"Cantos": {
+"n": 43,
+"hit": 34,
+"previsto": 0.775,
+"real": 0.791
+},
+"Cartões": {
+"n": 67,
+"hit": 53,
+"previsto": 0.801,
+"real": 0.791
+},
+"Equipa marca": {
+"n": 64,
+"hit": 52,
+"previsto": 0.81,
+"real": 0.812
+},
+"Golos por parte": {
+"n": 79,
+"hit": 60,
+"previsto": 0.782,
+"real": 0.759
+}
+},
+"Nice": {
+"Cantos": {
+"n": 41,
+"hit": 28,
+"previsto": 0.744,
+"real": 0.683
+},
+"Cartões": {
+"n": 67,
+"hit": 55,
+"previsto": 0.791,
+"real": 0.821
+},
+"Equipa marca": {
+"n": 51,
+"hit": 40,
+"previsto": 0.798,
+"real": 0.784
+},
+"Golos por parte": {
+"n": 55,
+"hit": 44,
+"previsto": 0.782,
+"real": 0.8
+}
+},
+"Nott'm Forest": {
+"Cantos": {
+"n": 44,
+"hit": 31,
+"previsto": 0.75,
+"real": 0.705
+},
+"Cartões": {
+"n": 71,
+"hit": 58,
+"previsto": 0.789,
+"real": 0.817
+},
+"Equipa marca": {
+"n": 56,
+"hit": 41,
+"previsto": 0.796,
+"real": 0.732
+},
+"Golos por parte": {
+"n": 59,
+"hit": 44,
+"previsto": 0.78,
+"real": 0.746
+}
+},
+"Osasuna": {
+"Cantos": {
+"n": 52,
+"hit": 45,
+"previsto": 0.76,
+"real": 0.865
+},
+"Cartões": {
+"n": 69,
+"hit": 60,
+"previsto": 0.808,
+"real": 0.87
+},
+"Equipa marca": {
+"n": 41,
+"hit": 37,
+"previsto": 0.79,
+"real": 0.902
+},
+"Golos por parte": {
+"n": 46,
+"hit": 34,
+"previsto": 0.769,
+"real": 0.739
+}
+},
+"Oviedo": {
+"Cantos": {
+"n": 35,
+"hit": 28,
+"previsto": 0.756,
+"real": 0.8
+},
+"Cartões": {
+"n": 48,
+"hit": 39,
+"previsto": 0.796,
+"real": 0.812
+},
+"Equipa marca": {
+"n": 27,
+"hit": 22,
+"previsto": 0.816,
+"real": 0.815
+},
+"Golos por parte": {
+"n": 31,
+"hit": 21,
+"previsto": 0.775,
+"real": 0.677
+}
+},
+"Paris FC": {
+"Cantos": {
+"n": 35,
+"hit": 23,
+"previsto": 0.758,
+"real": 0.657
+},
+"Cartões": {
+"n": 59,
+"hit": 47,
+"previsto": 0.802,
+"real": 0.797
+},
+"Equipa marca": {
+"n": 40,
+"hit": 28,
+"previsto": 0.805,
+"real": 0.7
+},
+"Golos por parte": {
+"n": 48,
+"hit": 32,
+"previsto": 0.78,
+"real": 0.667
+}
+},
+"Paris SG": {
+"Cantos": {
+"n": 41,
+"hit": 30,
+"previsto": 0.747,
+"real": 0.732
+},
+"Cartões": {
+"n": 80,
+"hit": 77,
+"previsto": 0.864,
+"real": 0.963
+},
+"Equipa marca": {
+"n": 40,
+"hit": 37,
+"previsto": 0.93,
+"real": 0.925
+},
+"Golos por parte": {
+"n": 78,
+"hit": 65,
+"previsto": 0.823,
+"real": 0.833
+}
+},
+"Parma": {
+"Cantos": {
+"n": 54,
+"hit": 42,
+"previsto": 0.772,
+"real": 0.778
+},
+"Cartões": {
+"n": 74,
+"hit": 62,
+"previsto": 0.814,
+"real": 0.838
+},
+"Equipa marca": {
+"n": 35,
+"hit": 24,
+"previsto": 0.825,
+"real": 0.686
+},
+"Golos por parte": {
+"n": 44,
+"hit": 33,
+"previsto": 0.766,
+"real": 0.75
+}
+},
+"Pisa": {
+"Cantos": {
+"n": 35,
+"hit": 33,
+"previsto": 0.784,
+"real": 0.943
+},
+"Cartões": {
+"n": 58,
+"hit": 50,
+"previsto": 0.802,
+"real": 0.862
+},
+"Equipa marca": {
+"n": 27,
+"hit": 26,
+"previsto": 0.815,
+"real": 0.963
+},
+"Golos por parte": {
+"n": 26,
+"hit": 20,
+"previsto": 0.767,
+"real": 0.769
+}
+},
+"Porto": {
+"Cantos": {
+"n": 47,
+"hit": 39,
+"previsto": 0.754,
+"real": 0.83
+},
+"Cartões": {
+"n": 59,
+"hit": 51,
+"previsto": 0.81,
+"real": 0.864
+},
+"Equipa marca": {
+"n": 42,
+"hit": 41,
+"previsto": 0.895,
+"real": 0.976
+},
+"Golos por parte": {
+"n": 70,
+"hit": 56,
+"previsto": 0.786,
+"real": 0.8
+}
+},
+"RB Leipzig": {
+"Cantos": {
+"n": 42,
+"hit": 31,
+"previsto": 0.757,
+"real": 0.738
+},
+"Cartões": {
+"n": 65,
+"hit": 58,
+"previsto": 0.813,
+"real": 0.892
+},
+"Equipa marca": {
+"n": 59,
+"hit": 49,
+"previsto": 0.858,
+"real": 0.831
+},
+"Golos por parte": {
+"n": 77,
+"hit": 63,
+"previsto": 0.838,
+"real": 0.818
+}
+},
+"Real Madrid": {
+"Cantos": {
+"n": 47,
+"hit": 38,
+"previsto": 0.78,
+"real": 0.809
+},
+"Cartões": {
+"n": 78,
+"hit": 55,
+"previsto": 0.791,
+"real": 0.705
+},
+"Equipa marca": {
+"n": 50,
+"hit": 44,
+"previsto": 0.895,
+"real": 0.88
+},
+"Golos por parte": {
+"n": 85,
+"hit": 66,
+"previsto": 0.814,
+"real": 0.776
+}
+},
+"Rennes": {
+"Cantos": {
+"n": 46,
+"hit": 36,
+"previsto": 0.75,
+"real": 0.783
+},
+"Cartões": {
+"n": 69,
+"hit": 57,
+"previsto": 0.796,
+"real": 0.826
+},
+"Equipa marca": {
+"n": 54,
+"hit": 41,
+"previsto": 0.803,
+"real": 0.759
+},
+"Golos por parte": {
+"n": 62,
+"hit": 51,
+"previsto": 0.784,
+"real": 0.823
+}
+},
+"Rio Ave": {
+"Cantos": {
+"n": 48,
+"hit": 33,
+"previsto": 0.743,
+"real": 0.688
+},
+"Cartões": {
+"n": 72,
+"hit": 54,
+"previsto": 0.817,
+"real": 0.75
+},
+"Equipa marca": {
+"n": 51,
+"hit": 40,
+"previsto": 0.807,
+"real": 0.784
+},
+"Golos por parte": {
+"n": 55,
+"hit": 45,
+"previsto": 0.788,
+"real": 0.818
+}
+},
+"Roma": {
+"Cantos": {
+"n": 48,
+"hit": 38,
+"previsto": 0.781,
+"real": 0.792
+},
+"Cartões": {
+"n": 77,
+"hit": 61,
+"previsto": 0.797,
+"real": 0.792
+},
+"Equipa marca": {
+"n": 43,
+"hit": 38,
+"previsto": 0.805,
+"real": 0.884
+},
+"Golos por parte": {
+"n": 41,
+"hit": 31,
+"previsto": 0.763,
+"real": 0.756
+}
+},
+"Santa Clara": {
+"Cantos": {
+"n": 47,
+"hit": 35,
+"previsto": 0.779,
+"real": 0.745
+},
+"Cartões": {
+"n": 77,
+"hit": 66,
+"previsto": 0.836,
+"real": 0.857
+},
+"Equipa marca": {
+"n": 33,
+"hit": 26,
+"previsto": 0.788,
+"real": 0.788
+},
+"Golos por parte": {
+"n": 33,
+"hit": 24,
+"previsto": 0.753,
+"real": 0.727
+}
+},
+"Santander": {
+"Cantos": {
+"n": 2,
+"hit": 1,
+"previsto": 0.803,
+"real": 0.5
+},
+"Cartões": {
+"n": 3,
+"hit": 2,
+"previsto": 0.786,
+"real": 0.667
+},
+"Equipa marca": {
+"n": 3,
+"hit": 3,
+"previsto": 0.782,
+"real": 1.0
+},
+"Golos por parte": {
+"n": 4,
+"hit": 4,
+"previsto": 0.768,
+"real": 1.0
+}
+},
+"Sassuolo": {
+"Cantos": {
+"n": 47,
+"hit": 34,
+"previsto": 0.774,
+"real": 0.723
+},
+"Cartões": {
+"n": 77,
+"hit": 68,
+"previsto": 0.796,
+"real": 0.883
+},
+"Equipa marca": {
+"n": 45,
+"hit": 38,
+"previsto": 0.796,
+"real": 0.844
+},
+"Golos por parte": {
+"n": 48,
+"hit": 38,
+"previsto": 0.766,
+"real": 0.792
+}
+},
+"Schalke 04": {
+"Cantos": {
+"n": 6,
+"hit": 6,
+"previsto": 0.769,
+"real": 1.0
+},
+"Cartões": {
+"n": 7,
+"hit": 6,
+"previsto": 0.804,
+"real": 0.857
+},
+"Equipa marca": {
+"n": 6,
+"hit": 4,
+"previsto": 0.828,
+"real": 0.667
+},
+"Golos por parte": {
+"n": 8,
+"hit": 6,
+"previsto": 0.812,
+"real": 0.75
+}
+},
+"Sevilla": {
+"Cantos": {
+"n": 47,
+"hit": 31,
+"previsto": 0.762,
+"real": 0.66
+},
+"Cartões": {
+"n": 70,
+"hit": 57,
+"previsto": 0.812,
+"real": 0.814
+},
+"Equipa marca": {
+"n": 42,
+"hit": 35,
+"previsto": 0.787,
+"real": 0.833
+},
+"Golos por parte": {
+"n": 46,
+"hit": 41,
+"previsto": 0.774,
+"real": 0.891
+}
+},
+"Sociedad": {
+"Cantos": {
+"n": 50,
+"hit": 36,
+"previsto": 0.752,
+"real": 0.72
+},
+"Cartões": {
+"n": 67,
+"hit": 56,
+"previsto": 0.808,
+"real": 0.836
+},
+"Equipa marca": {
+"n": 47,
+"hit": 43,
+"previsto": 0.799,
+"real": 0.915
+},
+"Golos por parte": {
+"n": 51,
+"hit": 47,
+"previsto": 0.782,
+"real": 0.922
+}
+},
+"Sp Braga": {
+"Cantos": {
+"n": 45,
+"hit": 34,
+"previsto": 0.769,
+"real": 0.756
+},
+"Cartões": {
+"n": 53,
+"hit": 48,
+"previsto": 0.812,
+"real": 0.906
+},
+"Equipa marca": {
+"n": 40,
+"hit": 36,
+"previsto": 0.856,
+"real": 0.9
+},
+"Golos por parte": {
+"n": 58,
+"hit": 47,
+"previsto": 0.774,
+"real": 0.81
+}
+},
+"Sp Lisbon": {
+"Cantos": {
+"n": 44,
+"hit": 32,
+"previsto": 0.757,
+"real": 0.727
+},
+"Cartões": {
+"n": 65,
+"hit": 50,
+"previsto": 0.801,
+"real": 0.769
+},
+"Equipa marca": {
+"n": 44,
+"hit": 44,
+"previsto": 0.914,
+"real": 1.0
+},
+"Golos por parte": {
+"n": 79,
+"hit": 65,
+"previsto": 0.811,
+"real": 0.823
+}
+},
+"St Pauli": {
+"Cantos": {
+"n": 36,
+"hit": 24,
+"previsto": 0.764,
+"real": 0.667
+},
+"Cartões": {
+"n": 55,
+"hit": 45,
+"previsto": 0.804,
+"real": 0.818
+},
+"Equipa marca": {
+"n": 43,
+"hit": 33,
+"previsto": 0.802,
+"real": 0.767
+},
+"Golos por parte": {
+"n": 50,
+"hit": 42,
+"previsto": 0.786,
+"real": 0.84
+}
+},
+"Strasbourg": {
+"Cantos": {
+"n": 40,
+"hit": 29,
+"previsto": 0.769,
+"real": 0.725
+},
+"Cartões": {
+"n": 69,
+"hit": 56,
+"previsto": 0.798,
+"real": 0.812
+},
+"Equipa marca": {
+"n": 55,
+"hit": 48,
+"previsto": 0.795,
+"real": 0.873
+},
+"Golos por parte": {
+"n": 60,
+"hit": 49,
+"previsto": 0.781,
+"real": 0.817
+}
+},
+"Stuttgart": {
+"Cantos": {
+"n": 39,
+"hit": 28,
+"previsto": 0.756,
+"real": 0.718
+},
+"Cartões": {
+"n": 66,
+"hit": 48,
+"previsto": 0.793,
+"real": 0.727
+},
+"Equipa marca": {
+"n": 60,
+"hit": 51,
+"previsto": 0.847,
+"real": 0.85
+},
+"Golos por parte": {
+"n": 75,
+"hit": 66,
+"previsto": 0.831,
+"real": 0.88
+}
+},
+"Sunderland": {
+"Cantos": {
+"n": 39,
+"hit": 31,
+"previsto": 0.757,
+"real": 0.795
+},
+"Cartões": {
+"n": 65,
+"hit": 50,
+"previsto": 0.797,
+"real": 0.769
+},
+"Equipa marca": {
+"n": 42,
+"hit": 35,
+"previsto": 0.81,
+"real": 0.833
+},
+"Golos por parte": {
+"n": 50,
+"hit": 41,
+"previsto": 0.78,
+"real": 0.82
+}
+},
+"Tondela": {
+"Cantos": {
+"n": 33,
+"hit": 26,
+"previsto": 0.763,
+"real": 0.788
+},
+"Cartões": {
+"n": 58,
+"hit": 45,
+"previsto": 0.822,
+"real": 0.776
+},
+"Equipa marca": {
+"n": 35,
+"hit": 27,
+"previsto": 0.811,
+"real": 0.771
+},
+"Golos por parte": {
+"n": 42,
+"hit": 32,
+"previsto": 0.778,
+"real": 0.762
+}
+},
+"Torino": {
+"Cantos": {
+"n": 51,
+"hit": 41,
+"previsto": 0.787,
+"real": 0.804
+},
+"Cartões": {
+"n": 77,
+"hit": 66,
+"previsto": 0.807,
+"real": 0.857
+},
+"Equipa marca": {
+"n": 38,
+"hit": 32,
+"previsto": 0.792,
+"real": 0.842
+},
+"Golos por parte": {
+"n": 35,
+"hit": 26,
+"previsto": 0.756,
+"real": 0.743
+}
+},
+"Tottenham": {
+"Cantos": {
+"n": 44,
+"hit": 32,
+"previsto": 0.754,
+"real": 0.727
+},
+"Cartões": {
+"n": 74,
+"hit": 55,
+"previsto": 0.789,
+"real": 0.743
+},
+"Equipa marca": {
+"n": 65,
+"hit": 50,
+"previsto": 0.798,
+"real": 0.769
+},
+"Golos por parte": {
+"n": 76,
+"hit": 58,
+"previsto": 0.781,
+"real": 0.763
+}
+},
+"Toulouse": {
+"Cantos": {
+"n": 41,
+"hit": 28,
+"previsto": 0.76,
+"real": 0.683
+},
+"Cartões": {
+"n": 67,
+"hit": 59,
+"previsto": 0.792,
+"real": 0.881
+},
+"Equipa marca": {
+"n": 47,
+"hit": 35,
+"previsto": 0.788,
+"real": 0.745
+},
+"Golos por parte": {
+"n": 46,
+"hit": 35,
+"previsto": 0.774,
+"real": 0.761
+}
+},
+"Troyes": {
+"Cantos": {
+"n": 7,
+"hit": 5,
+"previsto": 0.738,
+"real": 0.714
+},
+"Cartões": {
+"n": 12,
+"hit": 10,
+"previsto": 0.863,
+"real": 0.833
+},
+"Equipa marca": {
+"n": 7,
+"hit": 5,
+"previsto": 0.805,
+"real": 0.714
+},
+"Golos por parte": {
+"n": 9,
+"hit": 6,
+"previsto": 0.773,
+"real": 0.667
+}
+},
+"Udinese": {
+"Cantos": {
+"n": 45,
+"hit": 36,
+"previsto": 0.771,
+"real": 0.8
+},
+"Cartões": {
+"n": 75,
+"hit": 61,
+"previsto": 0.798,
+"real": 0.813
+},
+"Equipa marca": {
+"n": 36,
+"hit": 27,
+"previsto": 0.795,
+"real": 0.75
+},
+"Golos por parte": {
+"n": 38,
+"hit": 30,
+"previsto": 0.756,
+"real": 0.789
+}
+},
+"Union Berlin": {
+"Cantos": {
+"n": 41,
+"hit": 33,
+"previsto": 0.761,
+"real": 0.805
+},
+"Cartões": {
+"n": 66,
+"hit": 47,
+"previsto": 0.791,
+"real": 0.712
+},
+"Equipa marca": {
+"n": 55,
+"hit": 46,
+"previsto": 0.801,
+"real": 0.836
+},
+"Golos por parte": {
+"n": 58,
+"hit": 52,
+"previsto": 0.798,
+"real": 0.897
+}
+},
+"Valencia": {
+"Cantos": {
+"n": 49,
+"hit": 30,
+"previsto": 0.754,
+"real": 0.612
+},
+"Cartões": {
+"n": 68,
+"hit": 54,
+"previsto": 0.8,
+"real": 0.794
+},
+"Equipa marca": {
+"n": 46,
+"hit": 37,
+"previsto": 0.788,
+"real": 0.804
+},
+"Golos por parte": {
+"n": 49,
+"hit": 41,
+"previsto": 0.782,
+"real": 0.837
+}
+},
+"Vallecano": {
+"Cantos": {
+"n": 52,
+"hit": 44,
+"previsto": 0.755,
+"real": 0.846
+},
+"Cartões": {
+"n": 70,
+"hit": 52,
+"previsto": 0.807,
+"real": 0.743
+},
+"Equipa marca": {
+"n": 44,
+"hit": 34,
+"previsto": 0.796,
+"real": 0.773
+},
+"Golos por parte": {
+"n": 45,
+"hit": 37,
+"previsto": 0.785,
+"real": 0.822
+}
+},
+"Venezia": {
+"Cantos": {
+"n": 7,
+"hit": 5,
+"previsto": 0.776,
+"real": 0.714
+},
+"Cartões": {
+"n": 12,
+"hit": 10,
+"previsto": 0.792,
+"real": 0.833
+},
+"Equipa marca": {
+"n": 8,
+"hit": 7,
+"previsto": 0.81,
+"real": 0.875
+},
+"Golos por parte": {
+"n": 9,
+"hit": 7,
+"previsto": 0.777,
+"real": 0.778
+}
+},
+"Verona": {
+"Cantos": {
+"n": 43,
+"hit": 33,
+"previsto": 0.779,
+"real": 0.767
+},
+"Cartões": {
+"n": 63,
+"hit": 50,
+"previsto": 0.804,
+"real": 0.794
+},
+"Equipa marca": {
+"n": 23,
+"hit": 23,
+"previsto": 0.839,
+"real": 1.0
+},
+"Golos por parte": {
+"n": 24,
+"hit": 18,
+"previsto": 0.763,
+"real": 0.75
+}
+},
+"Villarreal": {
+"Cantos": {
+"n": 45,
+"hit": 32,
+"previsto": 0.761,
+"real": 0.711
+},
+"Cartões": {
+"n": 61,
+"hit": 40,
+"previsto": 0.801,
+"real": 0.656
+},
+"Equipa marca": {
+"n": 54,
+"hit": 47,
+"previsto": 0.814,
+"real": 0.87
+},
+"Golos por parte": {
+"n": 66,
+"hit": 55,
+"previsto": 0.786,
+"real": 0.833
+}
+},
+"Werder Bremen": {
+"Cantos": {
+"n": 41,
+"hit": 28,
+"previsto": 0.755,
+"real": 0.683
+},
+"Cartões": {
+"n": 63,
+"hit": 53,
+"previsto": 0.798,
+"real": 0.841
+},
+"Equipa marca": {
+"n": 64,
+"hit": 54,
+"previsto": 0.823,
+"real": 0.844
+},
+"Golos por parte": {
+"n": 76,
+"hit": 62,
+"previsto": 0.813,
+"real": 0.816
+}
+},
+"West Ham": {
+"Cantos": {
+"n": 38,
+"hit": 29,
+"previsto": 0.763,
+"real": 0.763
+},
+"Cartões": {
+"n": 68,
+"hit": 50,
+"previsto": 0.795,
+"real": 0.735
+},
+"Equipa marca": {
+"n": 46,
+"hit": 36,
+"previsto": 0.826,
+"real": 0.783
+},
+"Golos por parte": {
+"n": 61,
+"hit": 46,
+"previsto": 0.791,
+"real": 0.754
+}
+},
+"Wolfsburg": {
+"Cantos": {
+"n": 37,
+"hit": 33,
+"previsto": 0.756,
+"real": 0.892
+},
+"Cartões": {
+"n": 61,
+"hit": 48,
+"previsto": 0.797,
+"real": 0.787
+},
+"Equipa marca": {
+"n": 59,
+"hit": 51,
+"previsto": 0.814,
+"real": 0.864
+},
+"Golos por parte": {
+"n": 67,
+"hit": 54,
+"previsto": 0.809,
+"real": 0.806
+}
+},
+"Wolves": {
+"Cantos": {
+"n": 42,
+"hit": 35,
+"previsto": 0.743,
+"real": 0.833
+},
+"Cartões": {
+"n": 65,
+"hit": 49,
+"previsto": 0.8,
+"real": 0.754
+},
+"Equipa marca": {
+"n": 42,
+"hit": 37,
+"previsto": 0.839,
+"real": 0.881
+},
+"Golos por parte": {
+"n": 60,
+"hit": 44,
+"previsto": 0.782,
+"real": 0.733
+}
+}
+},
+"ligas": {
+"Casa Pia": "P1",
+"Arouca": "P1",
+"Nacional": "P1",
+"Sp Braga": "P1",
+"Famalicao": "P1",
+"Estoril": "P1",
+"Porto": "P1",
+"Liverpool": "E0",
+"Girona": "SP1",
+"AVS": "P1",
+"Rennes": "F1",
+"Mallorca": "SP1",
+"Alaves": "SP1",
+"Valencia": "SP1",
+"Nice": "F1",
+"Monaco": "F1",
+"Lens": "F1",
+"Tondela": "P1",
+"Aston Villa": "E0",
+"Wolves": "E0",
+"Tottenham": "E0",
+"Brighton": "E0",
+"Estrela": "P1",
+"Guimaraes": "P1",
+"Metz": "F1",
+"Nantes": "F1",
+"Brest": "F1",
+"Nott'm Forest": "E0",
+"Espanol": "SP1",
+"Ath Bilbao": "SP1",
+"Celta": "SP1",
+"Rio Ave": "P1",
+"Santa Clara": "P1",
+"Sp Lisbon": "P1",
+"Chelsea": "E0",
+"Auxerre": "F1",
+"Man United": "E0",
+"Elche": "SP1",
+"Leeds": "E0",
+"Gil Vicente": "P1",
+"Real Madrid": "SP1",
+"West Ham": "E0",
+"Bayern Munich": "D1",
+"Betis": "SP1",
+"Paris SG": "F1",
+"Leverkusen": "D1",
+"Heidenheim": "D1",
+"Freiburg": "D1",
+"Levante": "SP1",
+"Ath Madrid": "SP1",
+"Union Berlin": "D1",
+"Ein Frankfurt": "D1",
+"St Pauli": "D1",
+"Milan": "I1",
+"Roma": "I1",
+"Lyon": "F1",
+"Sassuolo": "I1",
+"Genoa": "I1",
+"Arsenal": "E0",
+"Bournemouth": "E0",
+"Man City": "E0",
+"Moreirense": "P1",
+"Brentford": "E0",
+"Benfica": "P1",
+"Como": "I1",
+"Cagliari": "I1",
+"Villarreal": "SP1",
+"Mainz": "D1",
+"Sociedad": "SP1",
+"Lille": "F1",
+"Toulouse": "F1",
+"Fulham": "E0",
+"Everton": "E0",
+"Crystal Palace": "E0",
+"Osasuna": "SP1",
+"Juventus": "I1",
+"Lorient": "F1",
+"Le Havre": "F1",
+"Strasbourg": "F1",
+"Sevilla": "SP1",
+"Udinese": "I1",
+"Inter": "I1",
+"Newcastle": "E0",
+"Cremonese": "I1",
+"Lecce": "I1",
+"Werder Bremen": "D1",
+"Stuttgart": "D1",
+"Bologna": "I1",
+"Parma": "I1",
+"Napoli": "I1",
+"Hoffenheim": "D1",
+"RB Leipzig": "D1",
+"Augsburg": "D1",
+"Wolfsburg": "D1",
+"Dortmund": "D1",
+"FC Koln": "D1",
+"Vallecano": "SP1",
+"Lazio": "I1",
+"Torino": "I1",
+"Angers": "F1",
+"Marseille": "F1",
+"Fiorentina": "I1",
+"Barcelona": "SP1",
+"Atalanta": "I1",
+"Burnley": "E0",
+"M'gladbach": "D1",
+"Verona": "I1",
+"Getafe": "SP1",
+"Alverca": "P1",
+"Paris FC": "F1",
+"Oviedo": "SP1",
+"Pisa": "I1",
+"Sunderland": "E0",
+"Hamburg": "D1",
+"Maritimo": "P1",
+"Troyes": "F1",
+"Ipswich": "E0",
+"Frosinone": "I1",
+"Venezia": "I1",
+"Monza": "I1",
+"Schalke 04": "D1",
+"La Coruna": "SP1",
+"Malaga": "SP1",
+"Academico Viseu": "P1",
+"Santander": "SP1"
+},
+"calibracao": [
+{
+"faixa": "72–76%",
+"n": 3735,
+"previsto": 0.738,
+"real": 0.746
+},
+{
+"faixa": "76–80%",
+"n": 3696,
+"previsto": 0.779,
+"real": 0.777
+},
+{
+"faixa": "80–84%",
+"n": 2560,
+"previsto": 0.813,
+"real": 0.807
+},
+{
+"faixa": "84–88%",
+"n": 1249,
+"previsto": 0.859,
+"real": 0.857
+},
+{
+"faixa": "88–100%",
+"n": 1257,
+"previsto": 0.912,
+"real": 0.925
+}
+]
+}

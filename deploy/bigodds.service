@@ -1,0 +1,15 @@
+[Unit]
+Description=Bigodds (consultor de apostas)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=bigodds
+WorkingDirectory=/opt/bigodds/app
+ExecStart=/usr/bin/python3 server.py
+Environment=PORT=8765
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

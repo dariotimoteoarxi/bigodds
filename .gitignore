@@ -1,0 +1,15 @@
+# Dados privados e caches (não vão para o GitHub)
+__pycache__/
+app/data/apostas.sqlite
+app/data/ntfy*.json
+app/data/espn/*
+!app/data/espn/uefa2_*
+app/fixtures.csv
+data/arbitros/*
+!data/arbitros/*.csv
+data/odds.sqlite
+results/
+deploy/bigodds.tar.gz
+wrangler.toml
+.wrangler/
+node_modules/
