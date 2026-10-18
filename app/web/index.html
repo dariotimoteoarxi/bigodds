@@ -740,7 +740,7 @@ function marketBlock(g, m) {
       <span class="track ${s.conf}"><i style="width:${s.p_est * 100}%"></i></span>
       <span class="meta">${confDots(s.conf)}<span>odd justa <b>${fmt(1 / s.p_est)}</b></span><span>entra a ≥ <b>${fmt(s.min_odd_est)}</b></span>
         ${s.best_odd ? `<span>${esc(s.best_book)} ${fmt(s.best_odd)}</span>` : ''}<span class="grow"></span>
-        <button class="btn ghost small" data-add="${esc(g.id)}" data-sel="${esc(s.sel)}" aria-label="Juntar ao boletim">+</button>
+        <button class="btn ghost small" data-add="${esc(g.id)}" data-sel="${esc(s.sel)}" aria-label="Juntar ao boletim">+ Boletim</button>
         <input class="oddchk" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="odd?" data-chk="${esc(g.id)}" data-sel="${esc(s.sel)}" aria-label="Odd que a tua casa dá em ${esc(s.label)}">
         <button class="btn ghost small" data-bet="${esc(g.id)}" data-sel="${esc(s.sel)}">Registar</button></span>
       <span class="meta chkout" data-out="${esc(g.id + '|' + s.sel)}"></span>
@@ -769,7 +769,7 @@ function espBlock(g) {
       <span class="track ${s.conf}"><i style="width:${s.p_est * 100}%"></i></span>
       <span class="meta">${confDots(s.conf)}<span>odd mínima <b>${fmt(s.min_odd_est)}</b></span>
         ${s.hist ? `<span>histórico ${pc(s.hist.acerto)} em ${s.hist.n} jogos</span>` : ''}<span class="grow"></span>
-        <button class="btn ghost small" data-add="${esc(g.id)}" data-sel="${esc(s.sel)}" aria-label="Juntar ao boletim">+</button>
+        <button class="btn ghost small" data-add="${esc(g.id)}" data-sel="${esc(s.sel)}" aria-label="Juntar ao boletim">+ Boletim</button>
         <input class="oddchk" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="odd?" data-chk="${esc(g.id)}" data-sel="${esc(s.sel)}" aria-label="Odd que a tua casa dá em ${esc(s.label)}">
         <button class="btn ghost small" data-bet="${esc(g.id)}" data-sel="${esc(s.sel)}">Registar</button></span>
       <span class="meta chkout" data-out="${esc(g.id + '|' + s.sel)}"></span>
@@ -816,7 +816,8 @@ function betSheet(id, selId) {
     <div class="field"><label for="odd">Odd a que apostaste</label><input id="odd" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="ex. ${fmt(s.min_odd_est)}"></div>
     <div class="field"><label for="stk">Valor apostado (€)</label><input id="stk" type="number" inputmode="decimal" step="0.5" min="0.5" value="${st}"></div>
     <div class="preview" id="pv">Escreve a odd para ver o ganho potencial.</div>
-    <button class="btn primary" id="save" style="width:100%">Guardar aposta</button>
+    <button class="btn primary" id="save" style="width:100%">Guardar aposta simples</button>
+    <button class="btn ghost" id="toSlip" style="width:100%;margin-top:8px">+ Juntar a um boletim (várias seleções)</button>
     <p class="sub" style="margin-top:12px;font-size:13px">O resultado fica marcado sozinho no dia seguinte ao jogo. Também o podes marcar à mão em Desempenho.</p>`);
   const update = () => {
     const o = parseFloat($('#odd').value), v = parseFloat($('#stk').value);
@@ -826,6 +827,11 @@ function betSheet(id, selId) {
       ${todayBets.reduce((a, b) => a + b.stake, 0) + v > bank() * DAY_LIMIT ? `<div class="warn">Passa o teu limite de hoje (${eur(bank() * DAY_LIMIT)}). O meu conselho: reduz o valor.</div>` : ''}`;
   };
   $('#odd').oninput = update; $('#stk').oninput = update;
+  $('#toSlip').onclick = () => {
+    const n = slip.length; addLeg(g.id, s.sel);
+    if (slip.length > n && parseFloat($('#odd').value) > 1) { slip[slip.length - 1].odd = $('#odd').value; saveSlip(); }  // leva a odd já escrita
+    if (slip.length > n) closeSheet();
+  };
   $('#book').onclick = e => { if (e.target.tagName === 'BUTTON') $('#book').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === e.target)); };
   $('#save').onclick = async () => {
     const o = parseFloat($('#odd').value), v = parseFloat($('#stk').value);
@@ -861,6 +867,7 @@ function renderBoletins() {
     <label class="btn primary" style="display:flex;justify-content:center;gap:8px;margin:0 0 14px;cursor:pointer">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
       Importar boletim por foto<input type="file" accept="image/*" multiple hidden id="photo"></label>
+    <button class="btn ghost" data-newslip style="width:100%;margin:0 0 14px">+ Criar boletim (escolher jogos e odds)</button>
     <div class="kpis">
       <div class="kpi"><span>Taxa de acerto</span><b>${hit != null ? pc(hit) : '–'}</b><small>${won.length} ganhas · ${lost.length} perdidas${multi.length ? ` · múltiplas ${pc(multiHit)}` : ''}</small></div>
       <div class="kpi"><span>Lucro</span><b class="${profit > 0 ? 'pos' : profit < 0 ? 'neg' : ''}">${signed(profit)}</b><small>investido ${eur(staked)} · ROI ${staked ? (profit / staked > 0 ? '+' : '') + fmt(profit / staked * 100, 1) + '%' : '–'}</small></div>
@@ -1168,7 +1175,8 @@ function saveSlip() { store.set('slip', JSON.stringify(slip)); renderTray(); }
 function renderTray() {
   const t = $('#tray'); t.hidden = !slip.length;
   const p = slip.every(l => l.p) ? slip.reduce((a, l) => a * l.p, 1) : null;
-  if (slip.length) t.innerHTML = `<span class="n">${slip.length}</span> Rascunho por guardar${p ? ` · <b>${pc(p)}</b>` : ''} · abrir`;
+  const odds = slip.map(l => parseFloat(String(l.odd).replace(',', '.'))), tot = odds.every(o => o > 1) ? odds.reduce((a, o) => a * o, 1) : null;
+  if (slip.length) t.innerHTML = `<span class="n">${slip.length}</span> Boletim em construção${tot ? ` · odd <b>${fmt(tot)}</b>` : p ? ` · <b>${pc(p)}</b>` : ''} · abrir e guardar`;
   t.setAttribute('aria-label', `Rascunho de boletim com ${slip.length} ${slip.length === 1 ? 'seleção' : 'seleções'}, ainda não guardado`);
 }
 // terminado: a ESPN diz que acabou, ou já passaram 2,5 h do início
@@ -1178,13 +1186,20 @@ function addLeg(gid, sel) {
   const l = legFrom(gid, sel); if (!l) return toast('Não encontrei esta seleção');
   const g = data.games.find(x => x.id === gid);
   if (finished(g || l)) return toast('Este jogo já terminou');
-  slip.push(l); saveSlip(); toast(new Date(l.kickoff) <= Date.now() ? 'Juntado (jogo a decorrer: confirma a odd ao vivo)' : `Juntado ao boletim · ${slip.length} ${slip.length === 1 ? 'jogo' : 'jogos'}`);
+  slip.push(l); saveSlip();
+  toast(`Juntado ao boletim · ${slip.length} ${slip.length === 1 ? 'seleção' : 'seleções'}${new Date(l.kickoff) <= Date.now() ? ' (jogo a decorrer)' : ''}. Continua a escolher; guarda na barra em baixo.`);
 }
 function slipSheet() {
-  if (!slip.length) return;
+  if (!slip.length) {
+    openSheet(`<div class="grab"></div><p class="eyebrow">Boletim novo</p><h2>Escolhe as seleções</h2>
+      <p class="sub">Junta seleções com <b>+ Boletim</b> nas apostas do dia, no Maior risco ou na ficha de qualquer jogo (também a decorrer). Elas ficam na barra em baixo; quando acabares, abres a barra, escreves a odd de cada jogo e o valor, e guardas.</p>
+      <button class="btn primary" data-goto="hoje" style="width:100%">Ver as apostas do dia</button>
+      <button class="btn ghost" data-goto="jogos" style="width:100%;margin-top:8px">Ver todos os jogos</button>`);
+    return;
+  }
   const sameGame = slip.length !== new Set(slip.map(l => l.game_id)).size;
   const imp = importNote; importNote = null;
-  openSheet(`<div class="grab"></div><p class="eyebrow">${imp ? 'Lido da foto: confirma antes de guardar' : 'Rascunho: ainda não está guardado'}</p><h2>${slip.length} ${slip.length === 1 ? 'seleção' : 'seleções'}</h2>
+  openSheet(`<div class="grab"></div><p class="eyebrow">${imp ? 'Lido da foto: confirma antes de guardar' : 'Boletim em construção · ainda não guardado'}</p><h2>${slip.length} ${slip.length === 1 ? 'seleção' : 'seleções'}</h2>
     <p class="sub">${imp ? 'Verifica jogos, mercados e odds. O valor apostado não vem na foto: escreve-o em baixo.' : 'Escreve a odd que a tua casa dá a cada seleção. A odd total calcula-se sozinha; corrige-a se a casa der outra.'}</p>
     ${imp && imp.falhas.length ? `<div class="note" style="border-left-color:var(--amber)">${imp.falhas.map(esc).join('<br>')}</div>` : ''}
     ${slip.map((l, i) => `<div class="legedit"><div><b>${esc(l.label)}</b><small>${esc(l.home)} – ${esc(l.away)} · ${hm(l.kickoff)}${l.p ? ` · ${pc(l.p)} · mín. ${fmt(l.min_odd)}` : ''}</small></div>
@@ -1229,6 +1244,10 @@ function slipSheet() {
   update();
 }
 $('#tray').onclick = slipSheet;
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-newslip]')) return slipSheet();
+  const go = e.target.closest('[data-goto]'); if (go) { closeSheet(); show(go.dataset.goto); }
+});
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-add],[data-use],[data-rm]'); if (!a) return;
   if (a.dataset.add) return addLeg(a.dataset.add, a.dataset.sel);
