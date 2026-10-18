@@ -11,8 +11,8 @@ NAME = "bigodds"
 
 class CF:
     def __init__(self, token=None, account=None, create=False):
-        self.token = token or os.environ["CLOUDFLARE_API_TOKEN"]
-        self.acc = account or os.environ["CLOUDFLARE_ACCOUNT_ID"]
+        self.token = "".join((token or os.environ["CLOUDFLARE_API_TOKEN"]).split())  # espaços ou linhas a mais ao colar
+        self.acc = "".join((account or os.environ["CLOUDFLARE_ACCOUNT_ID"]).split())
         self.db = self._find_db(create)
         self.kv = self._find_kv(create)
 
