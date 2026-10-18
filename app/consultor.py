@@ -505,7 +505,7 @@ def especialista(game, rows, modelos, live=None):
     if ref and game.get("div") in REF_COEF:
         mu["y"] *= math.exp(REF_COEF[game["div"]] * ref["rel"])  # critério do árbitro (cartões por falta)
     cands = {"ht+": [(0.5, 1 - math.exp(-mu["ht"]))], "c+": [], "c-": [], "y+": [], "y-": []}
-    for key, fam in (("g2+", "g2"), ("hs", "hg"), ("as", "ag")):
+    for key, fam in (("hs", "hg"), ("as", "ag")):  # golo na 2.ª parte: a 22bet e a Betclic não o têm antes do jogo (mu["g2"] fica para o ao vivo)
         if fam in mu:
             cands[key] = [(0.5, 1 - math.exp(-mu[fam]))]
     for fam in ("c", "y"):
@@ -564,11 +564,6 @@ def _texto_especialista(o, key, g, c):
     h, a = g["home"], g["away"]
     hist = o["hist"]
     track = (f" No histórico, apostas destas acertaram {pct(hist['acerto'])} em {hist['n']} casos." if hist else "")
-    if key == "g2+":
-        return {"titulo": "Golo depois do intervalo",
-                "texto": f"A 2.ª parte é onde caem mais golos. O mercado espera {_n(c['lam_tot'])} golos no jogo e "
-                         f"para a 2.ª parte conto com {_n(c['mu']['g2'])}." + track,
-                "risco": "Um jogo já resolvido ao intervalo pode adormecer na 2.ª parte."}
     if key in ("hs", "as"):
         t, lam = (h, c["mu"]["hg"]) if key == "hs" else (a, c["mu"]["ag"])
         return {"titulo": f"{t} marca",

@@ -96,7 +96,8 @@ def leituras(g, s, modelo):
     x = {"log_mu": math.log(mu0), "ht_tot": s["hg"] + s["ag"], "ht_gd": abs(s["hg"] - s["ag"]), "fav_losing": fav_losing}
     mu = math.exp(modelo["intercept"] + sum(c * x[k] for k, c in zip(modelo["cols"], modelo["coef"])))
     tot = s["hg"] + s["ag"]
-    cands = [("Há golo na 2.ª parte", "Há golo na 2.ª parte", 1 - math.exp(-mu)),
+    # golo na 2.ª parte = mais de (golos ao intervalo + 0,5) no jogo: é assim que a 22bet e a Betclic o têm ao vivo
+    cands = [("Há golo na 2.ª parte", f"Mais de {tot},5 golos no jogo", 1 - math.exp(-mu)),
              ("Menos de (intervalo + 2,5) golos", f"Menos de {tot + 2},5 golos no jogo", 1 - poisson_over(mu, 2.5))]
     out = []
     for name, label, p_raw in cands:
@@ -104,7 +105,7 @@ def leituras(g, s, modelo):
         if p >= LIVE_MIN:
             mo = max(1.20, round(1.02 / p, 2))  # regra do utilizador: nunca abaixo de 1,20
             out.append({"key": name, "label": label, "p": round(p, 3), "min_odd": mo, "mu_2p": round(mu, 2),
-                        "texto": f"Ao intervalo está {s['hg']}-{s['ag']}. Antes do jogo contava com {mu0:.1f} golos na 2.ª parte; "
+                        "texto": ("É o mesmo que haver golo na 2.ª parte. " if name.startswith("Há golo") else "") + f"Ao intervalo está {s['hg']}-{s['ag']}. Antes do jogo contava com {mu0:.1f} golos na 2.ª parte; "
                                  f"com o resultado de agora espero {mu:.1f}. Em jogos parecidos isto bateu {round(p * 100)}% das vezes. "
                                  f"Só entra se a 22bet ou a Betclic pagarem pelo menos {max(1.20, 1.02 / p):.2f}."})
     return out
@@ -178,7 +179,7 @@ def _self_test():
     g = {"mu": {"g2": 2.2}, "mk": {"pH": 0.6, "pA": 0.2}}
     s = {"fase": "STATUS_HALFTIME", "hg": 1, "ag": 0, "vermelhos": [0, 0]}
     r = leituras(g, s, m)
-    assert r and r[0]["label"] == "Há golo na 2.ª parte" and abs(r[0]["p"] - (1 - math.exp(-2.2))) < 1e-3, r
+    assert r and r[0]["label"] == "Mais de 1,5 golos no jogo" and abs(r[0]["p"] - (1 - math.exp(-2.2))) < 1e-3, r
     assert leituras(g, dict(s, vermelhos=[1, 0]), m) == [] and leituras(g, dict(s, fase="STATUS_SECOND_HALF"), m) == []
     g2 = {"mu": {"ht": 1.0, "g2": 1.5, "hg": 1.5, "ag": 1.0}, "mk": {}}
     a = prob_golo(g2, {"estado": "in", "fase": "STATUS_FIRST_HALF", "parte": 1, "minuto": "0'"}, None)
