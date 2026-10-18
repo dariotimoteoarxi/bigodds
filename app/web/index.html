@@ -42,6 +42,7 @@
   .gear { flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-left: 4px; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--muted); }
   .gear[aria-current="page"], .gear:hover { color: var(--lime); border-color: var(--lime); }
   @media (max-width: 640px) { .gear { margin-left: auto; } }
+  @media (max-width: 640px) { header .wrap { position: relative; } .brand img.word { display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); height: 24px; pointer-events: none; } }
 
   .hero { padding: 34px 0 18px; }
   .eyebrow { color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 10px; }
@@ -528,6 +529,8 @@ function slideTabs(root, key) {
   const to = { left: a.offsetLeft, width: a.offsetWidth }, from = tabPos[key] || to;
   ind.style.transition = 'none'; ind.style.left = from.left + 'px'; ind.style.width = from.width + 'px'; void ind.offsetWidth;
   ind.style.transition = ''; ind.style.left = to.left + 'px'; ind.style.width = to.width + 'px';
+  const goal = Math.max(0, a.offsetLeft - (c.clientWidth - a.offsetWidth) / 2);  // a barra desliza: o separador escolhido fica à vista
+  c.scrollLeft = from.scroll || 0; c.scrollTo({ left: goal, behavior: 'smooth' }); to.scroll = goal;
   tabPos[key] = to;
 }
 function show(view) {
