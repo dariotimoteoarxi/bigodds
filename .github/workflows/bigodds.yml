@@ -2,7 +2,7 @@
 name: Bigodds
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '0,30 * * * *'
     - cron: '5,10,15,20,25,35,40,45,50,55 10-22 * * *'
     - cron: '17 4 1 * *'
   workflow_dispatch:
@@ -49,5 +49,5 @@ jobs:
             git commit --allow-empty -m "Manter as tarefas agendadas ativas" && git push
             exit 0
           fi
-          if [ -n "$MODO" ]; then m="$MODO"; elif [ "$SCHED" = "*/30 * * * *" ]; then m=completo; else m=aovivo; fi
+          if [ -n "$MODO" ]; then m="$MODO"; elif [ "$SCHED" = "0,30 * * * *" ]; then m=completo; else m=aovivo; fi
           python3 cloud/sync.py "$m"

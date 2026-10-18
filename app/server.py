@@ -530,6 +530,32 @@ def leg_return(b, row):
     return settle_return(b["sel"], b["line"], b["odd"], int(row["FTHG"]), int(row["FTAG"])), closing_p(b["sel"], b["line"], row)
 
 
+ESP_KEY = re.compile(r"^(ht\+|g2\+|y1[+-]|[cy][+-])(\d+(?:\.\d)?)$")
+
+
+def espn_return(b):
+    """Lucro por unidade pelo resultado final da ESPN (None se o jogo não acabou ou não o encontro)."""
+    if b["div"] not in aovivo.SLUG:
+        return None
+    try:
+        day = datetime.strptime(b["date"], "%d/%m/%Y").strftime("%Y%m%d")
+        evs = [aovivo._state(e) for e in aovivo.scoreboard(b["div"], day)]
+    except Exception:
+        return None
+    from difflib import SequenceMatcher
+    sim = lambda s: (SequenceMatcher(None, arbitros.norm(b["home"]), arbitros.norm(s["home_espn"])).ratio()
+                     + SequenceMatcher(None, arbitros.norm(b["away"]), arbitros.norm(s["away_espn"])).ratio())
+    s = max(evs, key=sim, default=None)
+    if not s or sim(s) < 1.1 or s["estado"] != "post":
+        return None
+    if not b["sel"].startswith("esp:"):
+        return settle_return(b["sel"], b["line"], b["odd"], s["hg"], s["ag"])
+    m = ESP_KEY.match(b["sel"][4:])
+    pick = {"key": m.group(1), "line": float(m.group(2)), "label": b["label"]} if m else {"key": b["sel"][4:], "label": b["label"]}
+    won = aovivo.decided(pick, {"home": b["home"], "away": b["away"]}, s)
+    return None if won is None else (b["odd"] - 1 if won else -1.0)
+
+
 def settle_pending(con, now):
     """Liquida apostas e pernas de boletins cujos jogos já acabaram e já estão publicados no football-data."""
     cutoff = (now - timedelta(hours=2, minutes=30)).isoformat()
@@ -550,6 +576,16 @@ def settle_pending(con, now):
         won = aovivo.decided({"key": b["sel"][4:7], "line": float(b["sel"][7:])}, g, g["live"]) if g else None
         return None if won is None else (b["odd"] - 1 if won else -1.0)
 
+    # resultado final da ESPN: fecha no próprio dia (o football-data só publica no dia seguinte)
+    espn_cut = (now - timedelta(hours=2)).isoformat()
+    for b in con.execute("select * from bets where result='pendente' and sel != 'multi' and kickoff < ?", (espn_cut,)).fetchall():
+        ret = espn_return(b)
+        if ret is not None:
+            con.execute("update bets set result=?, profit=? where id=?", (result_label(ret, b["odd"]), round(ret * b["stake"], 2), b["id"]))
+    for l in con.execute("select rowid, * from legs where result='pendente' and kickoff < ?", (espn_cut,)).fetchall():
+        ret = espn_return(l)
+        if ret is not None:
+            con.execute("update legs set result=? where rowid=?", (result_label(ret, l["odd"]), l["rowid"]))
     for b in con.execute("select * from bets where result='pendente' and sel like 'esp:y1%'").fetchall():
         ret = by_halves(b)
         if ret is not None:

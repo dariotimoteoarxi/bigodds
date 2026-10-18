@@ -226,3 +226,22 @@ con.commit()
 h = track_record(con)
 assert h["dias"][0]["dia"] == "2026-10-20" and h["dias"][0]["certas"] == 1 and h["app"][0]["n"] >= 1, h
 print("histórico ok")
+
+# --- fecho pelo resultado final da ESPN (no próprio dia) ---
+import live as _live
+from server import espn_return
+ev = {"id": "1", "status": {"type": {"state": "post", "name": "STATUS_FULL_TIME", "shortDetail": "FT"}, "displayClock": "90'", "period": 2},
+      "competitions": [{"competitors": [{"homeAway": "home", "score": "0", "team": {"id": "a", "displayName": "Málaga"}, "statistics": [{"name": "wonCorners", "displayValue": "4"}]},
+                                        {"homeAway": "away", "score": "2", "team": {"id": "b", "displayName": "Real Sociedad"}, "statistics": [{"name": "wonCorners", "displayValue": "3"}]}],
+                        "details": [{"scoringPlay": True, "team": {"id": "b"}, "clock": {"displayValue": "3'"}}, {"scoringPlay": True, "team": {"id": "b"}, "clock": {"displayValue": "26'"}},
+                                    {"yellowCard": True, "team": {"id": "b"}, "clock": {"displayValue": "37'"}}]}]}
+_live.scoreboard = lambda div, day: [ev]
+leg = lambda sel, label, line=None, odd=1.5: {"div": "SP1", "date": "18/10/2026", "home": "Malaga", "away": "Sociedad", "sel": sel, "label": label, "line": line, "odd": odd}
+assert abs(espn_return(leg("esp:ht+0.5", "Há golo na 1.ª parte", odd=1.275)) - 0.275) < 1e-9
+assert espn_return(leg("esp:hs", "Malaga marca")) == -1.0
+assert espn_return(leg("esp:y-5.5", "Menos de 5,5 amarelos", 5.5)) == 0.5
+assert espn_return(leg("1x2:2", "Sociedad ganha", odd=2.0)) == 1.0
+assert espn_return({**leg("esp:hs", "x"), "home": "Barcelona", "away": "Girona"}) is None  # outro jogo
+ev["status"]["type"]["state"] = "in"
+assert espn_return(leg("esp:ht+0.5", "Há golo na 1.ª parte")) is None  # ainda a decorrer
+print("fecho ESPN ok")
