@@ -14,7 +14,8 @@ def check_token():
     """Diz em português o que está mal no token, antes de tentar criar coisas."""
     import json, urllib.error, urllib.request
     tok, acc = "".join(os.environ["CLOUDFLARE_API_TOKEN"].split()), "".join(os.environ["CLOUDFLARE_ACCOUNT_ID"].split())
-    print(f"token com {len(tok)} caracteres")  # o tamanho não revela o token
+    print(f"token com {len(tok)} caracteres; começa por letra {'maiúscula' if tok[:1].isupper() else 'minúscula' if tok[:1].islower() else 'não-letra'}; "
+          f"caracteres fora de [A-Za-z0-9_-]: {sum(1 for c in tok if not (c.isascii() and (c.isalnum() or c in '_-')))}")  # nada disto revela o token
     for path in (f"/accounts/{acc}/tokens/verify", "/user/tokens/verify"):  # tokens de conta e de utilizador
         req = urllib.request.Request("https://api.cloudflare.com/client/v4" + path, headers={"Authorization": f"Bearer {tok}"})
         try:
@@ -24,7 +25,9 @@ def check_token():
             if st != "active":
                 sys.exit("O token existe mas não está ativo: cria um novo na Cloudflare.")
             return
-        except urllib.error.HTTPError:
+        except urllib.error.HTTPError as e:
+            body = e.read()[:300].decode(errors="replace")
+            print(f"verificação {path.split('/')[1]}: {e.code} {body}")  # a resposta da Cloudflare não contém o token
             continue
     sys.exit("A Cloudflare não reconhece o token: o segredo CLOUDFLARE_API_TOKEN não é um token válido (copiado incompleto, "
              "trocado com outro valor, ou o token foi apagado). Cria um token novo e volta a pô-lo no GitHub.")
