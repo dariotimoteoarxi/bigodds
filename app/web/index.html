@@ -566,7 +566,7 @@ function alertas(now) {
   const al = data.games.filter(g => g.alerta && new Date(g.kickoff) > now).slice(0, 3);
   if (!al.length) return '';
   return `<p class="lede" style="margin-top:4px">Onde o apostador comum costuma errar. Leitura em observação: os números vêm do histórico e vou confirmando com os resultados.</p>
-    ${al.map(g => `<div class="tip" style="border-color:rgba(242,182,50,.35)"><div class="when">${hm(g.kickoff)}<span class="dot"></span>${esc(g.league)}</div>
+    ${al.map(g => `<div class="tip" style="border-color:rgba(242,182,50,.35)"><div class="when"><b>${dayLabel(g.kickoff)}</b> ${hm(g.kickoff)}<span class="dot"></span>${esc(g.league)}</div>
       <div class="match">${esc(g.home)} – ${esc(g.away)}</div>
       <div class="vs" style="margin:0 0 10px"><div class="team"><span class="pos">Mercado</span><b style="font:600 24px var(--tech)">${pc(g.alerta.p_mercado)}</b></div>
         <div class="team"><span class="pos">Números da época</span><b style="font:600 24px var(--tech)">${pc(g.alerta.p_epoca)}</b></div></div>
@@ -639,10 +639,16 @@ function raspadinhas(sel, byId) {
         ${b.hist ? `<span class="conf" style="white-space:normal">histórico: certo em ${pc(b.hist)} dos dias</span>` : ''}
         <button class="btn primary small" data-use="${bi}">Usar este boletim</button></div></div>`).join('')}`;
 }
+const dayLabel = iso => {  // "Hoje", "Amanhã" ou "seg. 20/10"
+  const k = new Date(iso).toLocaleDateString('sv-SE'), t = new Date();
+  if (k === t.toLocaleDateString('sv-SE')) return 'Hoje';
+  if (k === new Date(t.getTime() + 864e5).toLocaleDateString('sv-SE')) return 'Amanhã';
+  return new Date(iso).toLocaleDateString('pt-PT', { weekday: 'short', day: '2-digit', month: '2-digit' });
+};
 function tipCard(p, g, now) {
   const started = new Date(g.kickoff) <= now;
   return `<article class="tip ${started ? 'live' : ''}">
-    <div class="when">${hm(g.kickoff)}<span class="dot"></span>${esc(g.league)}${started ? '<span class="dot"></span>' + (liveBadge(g) || 'já começou') : ''}</div>
+    <div class="when"><b>${dayLabel(g.kickoff)}</b> ${hm(g.kickoff)}<span class="dot"></span>${esc(g.league)}${started ? '<span class="dot"></span>' + (liveBadge(g) || 'já começou') : ''}</div>
     ${(() => { const L = started && liveLeg({ sel: p.sel, div: g.div, date: g.date, home: g.home, label: p.label }); return L ? `<div class="lvnote ${L.cls}" style="font-weight:600;margin:-2px 0 6px">${esc(L.note)}</div>` : ''; })()}
     <div class="match">${esc(g.home)} – ${esc(g.away)}</div>
     <div class="core"><div class="bet"><small>${esc(p.titulo)}</small><b>${esc(p.label)}</b>
