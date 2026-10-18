@@ -257,3 +257,4 @@ jogos = [esp("a", 0.79, "y-4.5"), esp("b", 0.75, "c+8.5"), esp("c", 0.83, "ht+0.
 assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19")["apostas"]] == ["a", "b"]  # 83% fica de fora
 assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19", precos={"esp:c+": (50, 0.06)})["apostas"]] == ["b", "a"]
 assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19", precos={"esp:c+": (10, 0.06)})["apostas"]] == ["a", "b"]
+assert selecao_especialista([esp("d", 0.77, "g2+0.5")], "2026-10-19")["apostas"] == []  # não existe sempre na 22bet

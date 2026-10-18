@@ -563,7 +563,7 @@ def especialista(game, rows, modelos, live=None):
 
 # onde está cada mercado (vistos em 18/10/2026: Betclic no site, 22bet nas capturas do telemóvel)
 ONDE = {"ht+": "22bet: 1.ª parte › Total › Acima de 0,5 · Betclic: Golos › Total de golos – Primeira Parte",
-        "g2+": "22bet: 2.ª parte › Total › Acima de 0,5 · Betclic: Golos › Total de golos – Segunda parte",
+        "g2+": "Nem sempre existe. 22bet: separador 2.ª parte › Total, quando há · Betclic: Golos › Total de golos – Segunda parte",
         "hs": "22bet: Total 1 › Acima de 0,5 · Betclic: Golos › Golos por equipa",
         "as": "22bet: Total 2 › Acima de 0,5 · Betclic: Golos › Golos por equipa",
         "c+": "22bet: Cantos › Total · Betclic: Estatísticas › Cantos (só 3 a 5 linhas)",
@@ -627,6 +627,7 @@ def stem(sel):
     return re.sub(r"[\d.]+$", "", sel)
 
 
+NOT_PICKED = {"g2+"}  # golo na 2.ª parte: nem sempre existe na 22bet (falta no Braga–Gil Vicente); fica só na ficha do jogo
 PRICE_MIN_N = 40  # odds registadas num mercado antes de o preço aprendido mexer na ordem
 
 
@@ -648,7 +649,7 @@ def selecao_especialista(games, today, n=4, precos=None):
     for g in games:
         if g["kickoff"][:10] != day or not g.get("especialista"):
             continue
-        ok = [o for o in g["especialista"] if not o.get("veto")]
+        ok = [o for o in g["especialista"] if not o.get("veto") and re.sub(r"[\d.]+$", "", o["key"]) not in NOT_PICKED]
         cands = [o for o in ok if PICK_MIN <= o["p"] <= PICK_MAX]
         if cands:
             top = min(cands, key=lambda o: (edge(o) < 0.02, -o["p"]))
