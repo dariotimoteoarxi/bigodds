@@ -1409,7 +1409,7 @@ function parseMarket(txt, g) {
     const k = { v1: '1', v2: '2', x: 'X' }[m[1]];
     return { sel: '1x2:' + k, label: k === 'X' ? 'Empate' : `${k === '1' ? g.home : g.away} ganha`, market: 'Resultado (1X2)' };
   }
-  if ((m = t.match(/dupla hip\w*\D*(1x|x2)/))) {
+  if ((m = t.match(/(?:dupla hip\w*|hip\w* dupla|double chance)\D*(1x|x2)\b/))) {  // 22bet: "Hipótese dupla. 1X"; Betclic: "Dupla hipótese"
     const team = m[1] === '1x' ? g.home : g.away;
     return { sel: 'esp:dc', label: `${team} ou empate`, market: 'Resultado' };
   }
