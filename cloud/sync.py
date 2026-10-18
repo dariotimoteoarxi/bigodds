@@ -143,7 +143,8 @@ def send_alerts(cf, server, con, games, now):
 
 def report(server, con, games):
     return {"aprendizagem": server.learning(con), "odds": server.odds_report(con), "equipas": server.teams_report(con),
-            "clv_mercados": server.clv_markets(con), "historico": server.track_record(con, games)}
+            "clv_mercados": server.clv_markets(con), "historico": server.track_record(con, games),
+            "precos": server.book_prices(con)}
 
 
 def live_payload(server, con, games, now):

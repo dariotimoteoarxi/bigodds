@@ -3,7 +3,7 @@
 Só Python de base. O modelo é de forças (ataque/defesa) com 70% xG + 30% golos da época atual,
 encolhido para a média da liga nos primeiros jogos.
 """
-import math
+import math, re
 from datetime import datetime
 
 SHRINK = 4          # jogos fictícios de média da liga somados a cada equipa
@@ -418,7 +418,7 @@ from features import entry, features, league_entry, negbin_over, num, poisson_ov
 
 MODELS_FILE = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "modelos.json")
 ODD_FLOOR, ODD_PREF = 1.20, 1.30      # regra do utilizador: nada abaixo de 1,20; de preferência 1,30 ou mais
-PICK_MIN, PICK_MAX = 0.72, round(1.02 / ODD_FLOOR, 3)  # 72%–85%: a odd mínima fica sempre ≥ 1,20 (antes ia até 88%)
+PICK_MIN, PICK_MAX = 0.74, 0.80  # linha-alvo: acerto calibrado 77–78% e odd mínima 1,28–1,38 (antes 72–85%, odds 1,20–1,25)
 BLIND_MIN, BLIND_HIST = 0.90, 0.818    # boletim blindado: backtest 2025/26–2026/27, 77 dias, certo em 81,8%
 CONF_ALTA, CONF_MEDIA = 0.80, 0.74
 NAMES = {"ht+": "Golo na 1.ª parte", "g2+": "Golo na 2.ª parte", "hs": "Equipa da casa marca", "as": "Equipa de fora marca",
@@ -537,7 +537,8 @@ def especialista(game, rows, modelos, live=None):
             if ref and ((key == "y+" and ref["tipo"] == "brando") or (key == "y-" and ref["tipo"] == "rigoroso")):
                 p = max(0.03, p - REF_PENALTY)  # filtro de risco: o árbitro joga contra esta aposta
             scored.append((line, p, p_raw))
-        line, p, p_raw = max([s for s in scored if s[1] <= PICK_MAX] or scored, key=lambda s: s[1])
+        # a linha dentro da faixa-alvo; sem nenhuma lá dentro, a mais próxima dela
+        line, p, p_raw = min(scored, key=lambda s: (max(PICK_MIN - s[1], s[1] - PICK_MAX, 0), -s[1]))
         label = {"ht+": "Há golo na 1.ª parte", "c+": f"Mais de {_lt(line)} cantos" if line else "",
                  "c-": f"Menos de {_lt(line)} cantos" if line else "", "y+": f"Mais de {_lt(line)} amarelos" if line else "",
                  "y-": f"Menos de {_lt(line)} amarelos" if line else "", "fav": f"{fav} ganha",
@@ -548,6 +549,7 @@ def especialista(game, rows, modelos, live=None):
                 band = b
                 break
         o = {"key": key + (format(line, "g") if line is not None and key not in ("hs", "as") else ""), "name": NAMES[key], "label": label,
+             "linhas": [[ln, round(q, 3)] for ln, q, _ in scored] if len(scored) > 1 else None,  # escada para o caça-valor
              "family": FAMILY[key], "line": line, "p": round(p, 3), "p_raw": round(p_raw, 3),
              "conf": "Alta" if p >= CONF_ALTA else "Média" if p >= CONF_MEDIA else "Baixa",
              "fair_odd": round(1 / p, 2), "min_odd": round(1.02 / p, 2), "hist": band}
@@ -606,8 +608,23 @@ def _texto_especialista(o, key, g, c):
             "risco": "A odd é baixa: só compensa a partir da odd mínima, e um empate estraga a aposta."}
 
 
-def selecao_especialista(games, today, n=4):
-    """Até n apostas por dia nos mercados de especialista (uma por jogo), mais as pernas do boletim blindado (>= 90%)."""
+def stem(sel):
+    """Mercado sem a linha: esp:y-4.5 -> esp:y-. É a unidade em que se aprende o preço das casas."""
+    return re.sub(r"[\d.]+$", "", sel)
+
+
+PRICE_MIN_N = 40  # odds registadas num mercado antes de o preço aprendido mexer na ordem
+
+
+def selecao_especialista(games, today, n=4, precos=None):
+    """Até n apostas por dia nos mercados de especialista (uma por jogo).
+
+    precos = {mercado sem linha: (n, margem média da casa sobre a odd justa)}: os mercados onde a casa costuma pagar
+    acima do justo vêm primeiro; sem odds suficientes, ordena só pelo acerto.
+    """
+    def edge(o):
+        k_n, m = (precos or {}).get(stem("esp:" + o["key"]), (0, 0.0))
+        return m if k_n >= PRICE_MIN_N else 0.0
     games = [g for g in games if g["minutes_to_ko"] > 0]  # só o que ainda se pode apostar
     days = sorted({g["kickoff"][:10] for g in games if g["kickoff"][:10] >= today})
     if not days:
@@ -618,11 +635,12 @@ def selecao_especialista(games, today, n=4):
         if g["kickoff"][:10] != day or not g.get("especialista"):
             continue
         ok = [o for o in g["especialista"] if not o.get("veto")]
-        top = next((o for o in ok if PICK_MIN <= o["p"] <= PICK_MAX), None)
-        if top:
-            best.append({**top, "game_id": g["id"], "sel": "esp:" + top["key"], "market": top["family"]})
+        cands = [o for o in ok if PICK_MIN <= o["p"] <= PICK_MAX]
+        if cands:
+            top = min(cands, key=lambda o: (edge(o) < 0.02, -o["p"]))
+            best.append({**top, "game_id": g["id"], "sel": "esp:" + top["key"], "market": top["family"], "valor_casa": edge(top) or None})
         # boletim blindado (≥90%) desligado: as odds dessas seleções ficam sempre abaixo de 1,20 (regra do utilizador)
-    best.sort(key=lambda o: -o["p"])
+    best.sort(key=lambda o: ((o["valor_casa"] or 0) < 0.02, -o["p"]))  # primeiro onde a casa paga ≥2% acima do justo
     blind.sort(key=lambda o: -o["p"])
     return {"dia": day, "apostas": best[:n], "blindado": blind[:3], "boletins": make_boletins(best[:n], blind[:3])}
 

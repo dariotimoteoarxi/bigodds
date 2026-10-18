@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 import threading
 
 import arbitros, avisos, live as aovivo, onzes
-from consultor import PICK_MIN, ah_ret, analysis, dec, especialista, load_cal, make_boletins, selecao, selecao_especialista
+from consultor import PICK_MIN, ah_ret, stem, analysis, dec, especialista, load_cal, make_boletins, selecao, selecao_especialista
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_URL = "https://www.football-data.co.uk/fixtures.csv"
@@ -223,7 +223,7 @@ def agenda(bank, force=False, now=None):
     _LAST["games"] = games
     live_state(games, now)
     selecao(games, now.date().isoformat())  # mantém acerto e confiança em todos os mercados de preço
-    sel = publish(con, selecao_especialista(games, now.date().isoformat()), games, now)
+    sel = publish(con, selecao_especialista(games, now.date().isoformat(), precos={x["mercado"]: (x["n"], x["margem"]) for x in book_prices(con)}), games, now)
     # todos os jogos da lista, mesmo os já começados: servem para ler boletins por foto
     todos = []
     for r in rows:
@@ -342,7 +342,7 @@ SEASON_URL = "https://www.football-data.co.uk/mmz4281/{season}/{div}.csv"
 SELS = {"1x2:1", "1x2:X", "1x2:2", "ou:+2,5", "ou:-2,5", "ah:casa", "ah:fora"}
 ESP_SEL = re.compile(r"^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|fav)$")  # y1: amarelos na 1.ª parte
 RESULTS = {"ganha": 1.0, "meio-ganha": 0.5, "anulada": 0.0, "meio-perdida": -0.5, "perdida": -1.0}
-MODEL_VERSION = "especialista v2.5 (18/10/2026) · odd mínima 1,20 · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
+MODEL_VERSION = "especialista v2.6 (18/10/2026) · linha-alvo 74–80% · preços aprendidos · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
 LEG_SCHEMA = """create table if not exists legs(bet_id integer, div text, date text, home text, away text, kickoff text,
   sel text, label text, market text, line real, odd real, p real, result text default 'pendente', dono text)"""
 PUB_SCHEMA = """create table if not exists published(day text, game_id text, ord integer, pick text, published_at text,
@@ -455,6 +455,19 @@ def odds_report(con):
         x["margem"] += r["odd"] * r["p"] - 1
     return sorted(({**x, "odd": round(x["odd"] / x["n"], 3), "valor": round(x["valor"] / x["n"], 3), "margem": round(x["margem"] / x["n"], 4)}
                    for x in out.values()), key=lambda x: -x["n"])
+
+
+def book_prices(con):
+    """Preço das casas por mercado sem linha (esp:y-, esp:c+...): odds registadas com probabilidade e margem média
+    sobre a odd justa (odd x prob. - 1). Positiva = a casa costuma pagar acima do justo nesse mercado."""
+    out = {}
+    for r in con.execute("select sel, label, market, odd, p from odds where p is not null and sel like 'esp:%'"):
+        x = out.setdefault(stem(r["sel"]), {"mercado": stem(r["sel"]), "familia": r["market"] or "", "exemplo": r["label"], "n": 0, "margem": 0.0, "valor": 0})
+        x["n"] += 1
+        x["margem"] += r["odd"] * r["p"] - 1
+        x["valor"] += r["odd"] * r["p"] >= VALUE_MIN
+    return sorted(({**x, "margem": round(x["margem"] / x["n"], 4), "valor": round(x["valor"] / x["n"], 3)} for x in out.values()),
+                  key=lambda x: -x["margem"])
 
 
 def db():
@@ -777,7 +790,7 @@ def bets_report(now=None):
         x["apostas"] += 1
         x["investido"] += b["stake"]
         x["lucro"] += b["profit"] or 0
-    return {"bets": bets, "warning": warning, "aprendizagem": learning(con), "odds": odds_report(con), "equipas": teams_report(con), "clv_mercados": clv_markets(con), "historico": track_record(con, _LAST["games"]), "summary": {
+    return {"bets": bets, "warning": warning, "aprendizagem": learning(con), "odds": odds_report(con), "precos": book_prices(con), "equipas": teams_report(con), "clv_mercados": clv_markets(con), "historico": track_record(con, _LAST["games"]), "summary": {
         "total": len(bets), "pendentes": len(bets) - len(done), "liquidadas": len(done), "investido": round(staked, 2),
         "lucro": round(profit, 2), "roi": round(profit / staked, 4) if staked else None,
         "clv_medio": round(sum(clvs) / len(clvs), 4) if clvs else None, "clv_n": len(clvs),

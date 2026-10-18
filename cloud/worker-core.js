@@ -112,7 +112,7 @@ export async function betsReport(db, kv, dono) {
   // calculado pela tarefa do GitHub: o teu (as tuas apostas por equipa, odds, CLV) ou, sem apostas fechadas, o geral
   const rel = (await kv.get('relatorio:' + dono, 'json')) || (await kv.get('relatorio', 'json')) || {};
   return {
-    dono, bets, warning: rel.aviso || null, aprendizagem: rel.aprendizagem || {}, odds: rel.odds || [], equipas: rel.equipas || { equipas: [] },
+    dono, bets, warning: rel.aviso || null, aprendizagem: rel.aprendizagem || {}, odds: rel.odds || [], precos: rel.precos || [], equipas: rel.equipas || { equipas: [] },
     clv_mercados: rel.clv_mercados || [], historico: rel.historico || null,
     summary: {
       total: bets.length, pendentes: bets.length - done.length, liquidadas: done.length, investido: Math.round(staked * 100) / 100,

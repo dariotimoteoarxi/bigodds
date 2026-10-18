@@ -248,3 +248,12 @@ assert abs(espn_return(leg("esp:ht+0.5", "Há golo na 1.ª parte", odd=1.275)) -
 assert espn_return(leg("esp:hs", "Malaga marca")) is None  # ainda pode marcar
 assert espn_return(leg("1x2:2", "Sociedad ganha", odd=2.0)) is None  # resultado só no fim
 print("fecho ESPN ok")
+
+# linha-alvo 74–80% e preço aprendido: com ≥40 odds e a casa a pagar acima do justo, esse mercado passa à frente
+from consultor import selecao_especialista
+esp = lambda gid, p, key: {"id": gid, "minutes_to_ko": 60, "kickoff": "2026-10-19T20:00",
+                           "especialista": [{"key": key, "p": p, "family": "X", "label": "L", "min_odd": round(1.02 / p, 2)}]}
+jogos = [esp("a", 0.79, "y-4.5"), esp("b", 0.75, "c+8.5"), esp("c", 0.83, "ht+0.5")]
+assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19")["apostas"]] == ["a", "b"]  # 83% fica de fora
+assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19", precos={"esp:c+": (50, 0.06)})["apostas"]] == ["b", "a"]
+assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19", precos={"esp:c+": (10, 0.06)})["apostas"]] == ["a", "b"]
