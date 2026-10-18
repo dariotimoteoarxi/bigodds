@@ -339,6 +339,7 @@
   .livebox .st span { text-align: center; color: var(--muted); }
   .livebox .st .bar { grid-column: 1 / -1; display: flex; gap: 3px; height: 4px; }
   .livebox .st .bar i { border-radius: 2px; background: var(--ink); opacity: .75; } .livebox .st .bar i + i { background: var(--red); opacity: .8; }
+  .livebox .st .bar i.zero, .livebox .st .bar i.zero + i.zero { background: var(--line); opacity: 1; }
   .livebox .pg { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
   .livebox .pg p { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
   .livebox .pg .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -1347,9 +1348,11 @@ function liveBox(g) {
   if (!l) return new Date(g.kickoff) <= Date.now() ? '<div class="note">Ainda não tenho o placar deste jogo.</div>' : '';
   const stat = (name, a, suf = '') => {
     if (!a || a[0] == null) return '';
-    const x = +a[0], y = +a[1], t = x + y || 1, v = n => Math.round(n) + suf;
+    const x = +a[0] || 0, y = +a[1] || 0, t = x + y, v = n => Math.round(n) + suf;
+    // 0–0: barra neutra a meio (sem isto as duas metades encolhiam a tracinhos)
+    const bar = t ? `<i style="flex:${x / t || .001}"></i><i style="flex:${y / t || .001}"></i>` : '<i class="zero" style="flex:1"></i><i class="zero" style="flex:1"></i>';
     return `<div class="st"><b>${v(x)}</b><span>${name}</span><b class="r">${v(y)}</b>
-      <div class="bar"><i style="flex:${x / t || .001}"></i><i style="flex:${y / t || .001}"></i></div></div>`;
+      <div class="bar">${bar}</div></div>`;
   };
   const head = l.estado === 'post' ? '<span class="live-badge fim"><i></i>TERMINADO</span>' : `<span class="live-badge" role="status"><i></i>AO VIVO · ${esc(l.detalhe || l.minuto || '')}</span>`;
   return `<div class="livebox">${head}
