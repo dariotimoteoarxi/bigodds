@@ -3,7 +3,7 @@
 Precisa de CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID no ambiente. A base de dados e o espaço KV chamam-se
 "bigodds" e são encontrados pelo nome, por isso não há identificadores a copiar à mão.
 """
-import json, os, urllib.error, urllib.parse, urllib.request
+import json, os, re, urllib.error, urllib.parse, urllib.request
 
 API = "https://api.cloudflare.com/client/v4"
 NAME = "bigodds"
@@ -12,9 +12,18 @@ NAME = "bigodds"
 class CF:
     def __init__(self, token=None, account=None, create=False):
         self.token = "".join((token or os.environ["CLOUDFLARE_API_TOKEN"]).split())  # espaços ou linhas a mais ao colar
-        self.acc = "".join((account or os.environ["CLOUDFLARE_ACCOUNT_ID"]).split())
+        acc = "".join((account or os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")).split()).lower()
+        self.acc = acc if re.fullmatch(r"[0-9a-f]{32}", acc) else self._only_account()
         self.db = self._find_db(create)
         self.kv = self._find_kv(create)
+
+    def _only_account(self):
+        """Sem Account ID (ou mal escrito): usa a conta a que o token dá acesso."""
+        self.acc = None
+        accs = self._json("GET", "/accounts?per_page=50") or []
+        if len(accs) != 1:
+            raise RuntimeError(f"O token dá acesso a {len(accs)} contas: indica o Account ID em CLOUDFLARE_ACCOUNT_ID.")
+        return accs[0]["id"]
 
     def _req(self, method, path, body=None, raw=None, ctype="application/json"):
         data = raw if raw is not None else (json.dumps(body).encode() if body is not None else None)

@@ -1,7 +1,8 @@
 """Leva as tuas apostas do PC para a Cloudflare (uma vez, depois da primeira tarefa Publicar).
 
-  export CLOUDFLARE_API_TOKEN=...   (o mesmo token que puseste no GitHub)
-  export CLOUDFLARE_ACCOUNT_ID=...
+  read -r -p "Cola o token: " T; clear        (o mesmo token que puseste no GitHub)
+  CLOUDFLARE_API_TOKEN="$T" python3 cloud/migrar.py "Dário"; unset T
+O Account ID descobre-se sozinho a partir do token.
   python3 cloud/migrar.py "Dário"      (o nome da tua conta, igual ao que puseste em BIGODDS_UTILIZADORES)
 """
 import json, os, sqlite3, sys
