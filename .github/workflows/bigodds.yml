@@ -27,9 +27,14 @@ jobs:
           A: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           t=$(printf '%s' "$T" | tr -d '[:space:]')
-          a=$(printf '%s' "$A" | grep -oiE '[0-9a-f]{32}' | head -1 | tr 'A-F' 'a-f')
+          # o LibreOffice/Word podem colar hífenes invisíveis ou "…": fica só com letras e números
+          clean=$(printf '%s' "$A" | LC_ALL=C tr -cd '0-9A-Za-z')
+          a=$(printf '%s' "$clean" | grep -oiE '[0-9a-f]{32}' | head -1 | tr 'A-F' 'a-f')
           test -n "$t" || { echo "O segredo CLOUDFLARE_API_TOKEN está vazio"; exit 1; }
-          test -n "$a" || { echo "O segredo CLOUDFLARE_ACCOUNT_ID não tem um Account ID (32 letras e números)"; exit 1; }
+          if [ -z "$a" ]; then
+            echo "O segredo CLOUDFLARE_ACCOUNT_ID não tem um Account ID completo: recebi ${#clean} letras e números (devem ser 32, de 0-9 e a-f)."
+            exit 1
+          fi
           echo "::add-mask::$t"; echo "::add-mask::$a"
           echo "CLOUDFLARE_API_TOKEN=$t" >> "$GITHUB_ENV"
           echo "CLOUDFLARE_ACCOUNT_ID=$a" >> "$GITHUB_ENV"
