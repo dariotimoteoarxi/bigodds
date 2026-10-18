@@ -1473,7 +1473,7 @@ function parseMarket(txt, g) {
     const team = m[1] === '1x' ? g.home : g.away;
     return { sel: 'esp:dc', label: `${team} ou empate`, market: 'Resultado' };
   }
-  if ((m = t.match(/total\s*individual\s*(1|2)?\D*(acima|mais)\D*\(?0[.,]5/))) {
+  if (!/cart|canto|parte/.test(t) && (m = t.match(/total\s*(?:individual\s*)?(1|2)\b\D*(acima|mais)\D*\(?0[.,]5/) || t.match(/total\s*individual\D*(acima|mais)\D*\(?0[.,]5/))) {  // 22bet: "Total 1" / "Total individual 1"
     return m[1] === '2' ? { sel: 'esp:as', label: `${g.away} marca`, market: 'Equipa marca' } : { sel: 'esp:hs', label: `${g.home} marca`, market: 'Equipa marca' };
   }
   if ((m = t.match(/(acima|mais|abaixo|menos)\s*de\s*\(?\s*(\d+)[.,](\d)/))) {

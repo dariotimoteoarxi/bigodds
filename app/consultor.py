@@ -561,13 +561,17 @@ def especialista(game, rows, modelos, live=None):
     return sorted(out, key=lambda o: -o["p"])
 
 
-# onde está cada mercado (Betclic visto no site em 18/10/2026; 22bet pelos nomes dos boletins dela)
-ONDE = {"ht+": "Betclic: Golos › Total de golos – Primeira Parte › Acima de 0,5",
-        "g2+": "Betclic: Golos › Total de golos – Segunda parte › Acima de 0,5",
-        "hs": "Betclic: Golos › Golos por equipa · 22bet: Total individual 1", "as": "Betclic: Golos › Golos por equipa · 22bet: Total individual 2",
-        "c+": "Betclic: Estatísticas › Cantos › Total de Cantos (só 3 a 5 linhas)", "c-": "Betclic: Estatísticas › Cantos › Total de Cantos (só 3 a 5 linhas)",
-        "y+": "Só na 22bet: a Betclic não tem cartões", "y-": "Só na 22bet: a Betclic não tem cartões",
-        "fav": "Betclic: Resultado (Tempo Regulamentar) · 22bet: 1X2", "dc": "Betclic: Resultado duplo · 22bet: Hipótese dupla"}
+# onde está cada mercado (vistos em 18/10/2026: Betclic no site, 22bet nas capturas do telemóvel)
+ONDE = {"ht+": "22bet: 1.ª parte › Total › Acima de 0,5 · Betclic: Golos › Total de golos – Primeira Parte",
+        "g2+": "22bet: 2.ª parte › Total › Acima de 0,5 · Betclic: Golos › Total de golos – Segunda parte",
+        "hs": "22bet: Total 1 › Acima de 0,5 · Betclic: Golos › Golos por equipa",
+        "as": "22bet: Total 2 › Acima de 0,5 · Betclic: Golos › Golos por equipa",
+        "c+": "22bet: Cantos › Total · Betclic: Estatísticas › Cantos (só 3 a 5 linhas)",
+        "c-": "22bet: Cantos › Total · Betclic: Estatísticas › Cantos (só 3 a 5 linhas)",
+        "y+": "Só na 22bet: Cartões amarelos › Total (a Betclic não tem cartões)",
+        "y-": "Só na 22bet: Cartões amarelos › Total (a Betclic não tem cartões)",
+        "fav": "22bet: 1X2 (V1/V2) · Betclic: Resultado (Tempo Regulamentar)",
+        "dc": "22bet: Hipótese dupla (1X/2X) · Betclic: Resultado duplo"}
 
 
 def _texto_especialista(o, key, g, c):
