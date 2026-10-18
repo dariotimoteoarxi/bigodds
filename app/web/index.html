@@ -348,6 +348,11 @@
   .livebox .pg .row3 .m { height: 4px; border-radius: 2px; background: var(--line-soft); overflow: hidden; margin-top: 4px; } .livebox .pg .row3 .m i { display: block; height: 100%; background: var(--lime); }
   .oddchk { width: 72px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); color: var(--ink); font: 600 13px var(--tech); }
   .chkout:empty { display: none; }
+  .hero-meta { margin: 10px 0 0; color: var(--muted); font-size: 14px; } .hero-meta b { color: var(--ink); font-weight: 600; }
+  .limitline { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 10px; margin: 10px 0 4px; font-size: 13px; color: var(--muted); }
+  .limitline b { color: var(--ink); font: 600 14px var(--tech); } .limitline small { color: var(--faint); font-weight: 500; }
+  .limitline i { display: block; height: 5px; border-radius: 3px; background: var(--line-soft); overflow: hidden; } .limitline em { display: block; height: 100%; }
+  @media (max-width: 640px) { #hoje .orb-wrap { display: none; } #hoje .hero h1 { font-size: 34px; } #hoje .daybar b { font-size: 18px; } }
   .hojetabs { margin: 18px 0 14px; position: sticky; top: 60px; z-index: 5; backdrop-filter: blur(12px); background: rgba(4, 13, 9, .72);
     border-radius: 0; padding: 0; gap: 0; border-bottom: 1px solid var(--line); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .hojetabs button { border-radius: 0; padding: 12px 10px; border-bottom: 2px solid transparent; white-space: nowrap; }
@@ -541,10 +546,9 @@ function disciplina() {
   const chaseNote = chase ? `<div class="note" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Atenção:</b> subiste o valor logo a seguir a uma aposta perdida. É o padrão de "perseguir perdas". Mantém o valor sugerido.</div>` : '';
   if (lost >= STOP_LOSSES) return `<div class="note" style="border-left-color:var(--red)"><b style="color:var(--red)">Pausa por hoje.</b> Já perdeste ${lost} apostas hoje. A regra é parar: os dias maus acontecem e perseguir perdas é o erro mais caro.</div>`;
   const pctUsed = Math.min(1, used / limit);
-  return `<div class="kpi" style="margin:4px 0 8px"><span>Limite de hoje (5% da banca)</span>
-    <b>${eur(Math.max(0, limit - used))} <small style="font-size:13px;color:var(--muted)">disponível de ${eur(limit)}</small></b>
-    <div class="track" style="height:6px;border-radius:3px;background:var(--line-soft);overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:${pctUsed * 100}%;background:${pctUsed >= 1 ? 'var(--red)' : 'var(--lime)'}"></i></div>
-    <small>${used ? `Já apostaste ${eur(used)} hoje.` : 'Ainda não apostaste hoje.'} Regras: para depois de ${STOP_LOSSES} apostas perdidas no mesmo dia, ou quando perderes 15% da banca numa semana.</small></div>${chaseNote}`;
+  return `<div class="limitline" title="Regras: 5% da banca por dia; pausa depois de ${STOP_LOSSES} apostas perdidas no dia ou de perder 15% da banca numa semana.">
+    <span>Limite de hoje</span><b class="${pctUsed >= 1 ? 'neg' : ''}">${eur(Math.max(0, limit - used))} <small>de ${eur(limit)}</small></b>
+    <i><em style="width:${pctUsed * 100}%;background:${pctUsed >= 1 ? 'var(--red)' : 'var(--lime)'}"></em></i></div>${chaseNote}`;
 }
 function riscoBlock() {
   const R = data.risco || [];
@@ -599,21 +603,20 @@ function renderHoje() {
   const tips = sel.apostas.map(p => ({ p, g: byId[p.game_id] || p.jogo })), n = tips.length;
   const upcoming = tips.filter(t => new Date(t.g.kickoff) > now).sort((x, y) => new Date(x.g.kickoff) - new Date(y.g.kickoff));
   const nGames = data.games.filter(g => g.kickoff.startsWith(sel.dia)).length;
+  const dayWord = isToday ? 'hoje' : dayName.split(',')[0].split('-')[0];  // "segunda"
   const head = !n
-    ? `<h1>Hoje o melhor conselho é <em>não apostar</em>.</h1><p class="lede">Analisei ${data.games.length} jogos e nenhum passa o meu critério de confiança. As odds mudam: volta mais logo.</p>`
-    : `<h1>${isToday ? 'Hoje' : dayName.split(',')[0].replace(/^./, c => c.toUpperCase())} há <em>${n} ${n === 1 ? 'aposta' : 'apostas'}</em> que valem a tua atenção.</h1>
-       <p class="lede">${upcoming.length ? `A próxima começa às ${hm(upcoming[0].g.kickoff)}.` : 'Os jogos já começaram.'} Escolhi-as entre ${nGames} jogos. Antes de entrar, confirma que a tua casa paga pelo menos a odd indicada.</p>`;
+    ? `<h1>Sem apostas <em>${dayWord === 'hoje' ? 'hoje' : 'para ' + dayWord}</em>.</h1><p class="lede">Nenhum dos ${data.games.length} jogos passa o meu critério. Vê o Maior risco ou volta mais logo.</p>`
+    : `<h1><em>${n} ${n === 1 ? 'aposta' : 'apostas'}</em> para ${dayWord}</h1>`;
   const stakeSum = tips.reduce((s, t) => s + bank() * STAKE[t.p.confianca], 0);
   const potential = tips.reduce((s, t) => s + bank() * STAKE[t.p.confianca] * (t.p.min_odd - 1), 0);
   const expectedHits = tips.reduce((s, t) => s + t.p.p, 0);
   const next = upcoming[0];
-  $('#hoje').innerHTML = `<div class="hero"><div class="hero-grid"><div><p class="eyebrow">${hello} · ${esc(dayName)}</p>${head}
-      ${next ? `<span class="chip-live" data-kickoff="${next.g.kickoff}"><i></i><span class="cd">${countdown(next.g.kickoff)}</span></span>` : ''}
-      ${sel.publicado ? `<p class="lede" style="font-size:13px;margin-top:12px">Boletim publicado às ${hm(sel.publicado)} · ${esc(sel.versao)}. Não muda quando atualizas: se eu rever uma aposta, aparece marcada e digo porquê.</p>` : ''}</div>
+  $('#hoje').innerHTML = `<div class="hero"><div class="hero-grid"><div><p class="eyebrow">${hello}</p>${head}
+      ${n ? `<p class="hero-meta">${next ? `Próxima: <b>${dayLabel(next.g.kickoff).toLowerCase()} às ${hm(next.g.kickoff)}</b>` : 'Os jogos já começaram'}${sel.publicado ? ` · <span title="${esc(sel.versao)}. Não muda quando atualizas: se eu rever uma aposta, aparece marcada e digo porquê.">publicado às ${hm(sel.publicado)}, fixo</span>` : ''}</p>` : ''}</div>
       ${n ? dayRings(tips) : ''}</div>
-    ${n ? `<div class="daybar"><div><b>${eur(stakeSum)}</b><span>a apostar (sugerido)</span></div>
-      <div><b>${eur(potential)}</b><span>ganho se acertares tudo</span></div>
-      <div><b>${fmt(expectedHits, 1)} de ${n}</b><span>acertos esperados</span></div></div>` : ''}</div>
+    ${n ? `<div class="daybar"><div><b>${pc(expectedHits / n)}</b><span>acerto médio</span></div>
+      <div><b>${eur(stakeSum)}</b><span>a apostar</span></div>
+      <div><b>+${eur(potential)}</b><span>se acertares tudo</span></div></div>` : ''}</div>
     ${disciplina()}
     ${hojeTabs(tips, now)}
     ${sel.boletins && sel.boletins.length ? `<button class="btn ghost" data-view-link="raspadinhas" style="width:100%;margin:8px 0">Ver as múltiplas do dia →</button>` : ''}`;
@@ -1355,18 +1358,33 @@ async function shrink(file) {
 }
 async function importPhotos(files) {
   if (!files.length) return;
-  toast('A ler a foto…');
+  // ecrã de progresso: da 1.ª vez o leitor descarrega ~10–15 MB (programa + português) e no telemóvel demora
+  const STEP = { 'loading tesseract core': 'A preparar o leitor de texto', 'initializing tesseract': 'A preparar o leitor de texto',
+    'loading language traineddata': 'A descarregar o português (só da 1.ª vez)', 'initializing api': 'A preparar o leitor de texto',
+    'recognizing text': 'A ler o texto da foto' };
+  openSheet(`<div class="grab"></div><p class="eyebrow">Importar boletim</p><h2>A ler a foto…</h2>
+    <p class="sub" id="ocrStep">A carregar o leitor de texto</p>
+    <div class="track" style="height:8px;border-radius:4px;background:var(--line-soft);overflow:hidden"><i id="ocrBar" style="display:block;height:100%;width:3%;background:var(--lime);transition:width .3s"></i></div>
+    <p class="sub" style="margin-top:12px;font-size:13px">Da primeira vez pode demorar 1 a 2 minutos com dados móveis. Não feches esta janela.</p>`);
+  const fail = (title, msg) => openSheet(`<div class="grab"></div><p class="eyebrow">Importar boletim</p><h2>${esc(title)}</h2>
+    <p class="sub">${esc(msg)}</p>
+    <p class="sub" style="font-size:13px">Dica: usa uma <b>captura de ecrã</b> do boletim na app da casa (não uma fotografia do ecrã), com a data, o jogo, o mercado e a odd visíveis.</p>
+    <button class="btn primary" data-newslip style="width:100%">Fazer o boletim à mão</button>`);
+  let step = 'carregar o leitor de texto';
   try {
-    if (!window.Tesseract) await new Promise((ok, ko) => { const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload = ok; s.onerror = () => ko(new Error('sem ligação para o leitor de texto')); document.head.appendChild(s); });
-    const w = await Tesseract.createWorker('por');
+    if (!window.Tesseract) await new Promise((ok, ko) => { const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; sc.onload = ok; sc.onerror = () => ko(new Error('sem ligação à internet para descarregar o leitor de texto')); document.head.appendChild(sc); });
+    const w = await Tesseract.createWorker('por', 1, { logger: m => {
+      const t = STEP[m.status]; if (t && $('#ocrStep')) { step = t.toLowerCase(); $('#ocrStep').textContent = t + (m.progress ? ` · ${Math.round(m.progress * 100)}%` : ''); }
+      if ($('#ocrBar') && m.progress) $('#ocrBar').style.width = Math.max(3, Math.round((m.status === 'recognizing text' ? 0.5 + m.progress / 2 : m.progress / 2) * 100)) + '%';
+    } });
     let text = '';
-    for (const f of files) text += (await w.recognize(await shrink(f))).data.text + '\n';
+    for (const f of files) { step = 'preparar a imagem'; text += (await w.recognize(await shrink(f))).data.text + '\n'; }
     await w.terminate();
     const r = parseSlipText(text);
-    if (!r.legs.length) return toast(r.falhas[0] || 'Não consegui ler apostas nesta foto');
+    if (!r.legs.length) return fail('Não encontrei apostas nesta foto', r.falhas[0] || 'Li o texto, mas não encontrei a data, o jogo, o mercado e a odd no formato da 22bet ou da Betclic.');
     slip = r.legs; importNote = r; saveSlip(); slipSheet();
-  } catch (e) { toast('Não consegui ler a foto' + (e && e.message ? ': ' + e.message : '. Tenta uma captura de ecrã do boletim em vez de uma fotografia.')); }
+  } catch (e) { fail('Não consegui ler a foto', `Falhou ao ${step}${e && e.message ? ': ' + e.message : ''}.`); }
 }
 
 /* ---------- AO VIVO (placar ESPN, sugestões ao intervalo ≥85%) ---------- */
