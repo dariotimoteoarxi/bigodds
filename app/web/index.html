@@ -106,13 +106,19 @@
   .day .rel { font: 700 11px var(--tech); letter-spacing: .12em; text-transform: uppercase; color: var(--lime); }
   .day.today .rel { color: var(--red); }
   .day .n { margin-left: auto; font: 500 12px var(--tech); color: var(--muted); }
-  .cal-head, .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-head, .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }  /* minmax(0): as colunas encolhem no telemóvel */
   .cal-head span { text-align: center; font: 600 11px var(--tech); letter-spacing: .1em; color: var(--faint); padding: 14px 0 4px; }
   .cal button { aspect-ratio: 1 / 1.05; border-radius: 14px; border: 1px solid var(--line-soft); background: rgba(255, 255, 255, .02); color: var(--ink);
     display: grid; align-content: center; justify-items: center; gap: 2px; padding: 4px; font: 600 20px var(--tech); }
   .cal button small { font: 500 10px var(--tech); color: var(--muted); }
   .cal button .dots { display: flex; gap: 3px; height: 6px; } .cal button .dots i { width: 6px; height: 6px; border-radius: 50%; }
   .cal button:disabled { opacity: .3; }
+  .cal button { min-width: 0; overflow: hidden; }
+  @media (max-width: 640px) {
+    .cal-head, .cal { gap: 4px; } .cal button { border-radius: 10px; font-size: 16px; padding: 2px; aspect-ratio: 1 / 1.15; }
+    .cal button .w { display: none; }  /* no telemóvel: só o número de jogos */
+    .cal-key { gap: 8px 12px; font-size: 11px; }
+  }
   .cal button.today { border-color: rgba(232, 111, 94, .6); }
   .cal button[aria-pressed="true"] { background: var(--lime); color: var(--bg); border-color: var(--lime); }
   .cal button[aria-pressed="true"] small { color: var(--bg); }
@@ -708,7 +714,7 @@ function renderCalendario() {
     const dots = [gs.some(g => pickOf(g.id)) && 'var(--lime)', gs.some(g => g.live && g.live.estado === 'in') && 'var(--red)', gs.some(g => g.taca) && 'var(--blue)'].filter(Boolean);
     cells += `<button data-calday="${k}" ${gs.length ? '' : 'disabled'} class="${k === today ? 'today' : ''}" aria-pressed="${k === calDay}"
       aria-label="${d.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' })}: ${gs.length} jogos">${d.getDate()}
-      <small>${gs.length ? gs.length + (gs.length === 1 ? ' jogo' : ' jogos') : k === today ? 'hoje' : ''}</small><span class="dots">${dots.map(c => `<i style="background:${c}"></i>`).join('')}</span></button>`;
+      <small>${gs.length ? gs.length + `<span class="w">${gs.length === 1 ? ' jogo' : ' jogos'}</span>` : k === today ? 'hoje' : ''}</small><span class="dots">${dots.map(c => `<i style="background:${c}"></i>`).join('')}</span></button>`;
   }
   const gs = byDay[calDay];
   $('#calendario').innerHTML = `<h2 class="section-title">Calendário</h2>
