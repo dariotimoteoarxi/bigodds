@@ -58,11 +58,11 @@
   .when { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
   .when .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--faint); }
   .tip .match { font: 600 22px/1.2 var(--serif); margin: 6px 0 14px; }
-  .tip .core { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+  .tip .core { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
   .tip .bet small { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
   .tip .bet b { display: block; font-size: 19px; font-weight: 700; margin-top: 2px; }
   .minodd { margin-top: 10px; display: inline-flex; align-items: baseline; gap: 6px; background: var(--lime-soft); color: var(--lime); border-radius: 999px; padding: 6px 12px; font-weight: 600; }
-  .minodd { white-space: nowrap; }
+  .minodd { white-space: nowrap; flex-wrap: wrap; } .tip .bet { min-width: 0; }
   .minodd span { font-weight: 500; font-size: 13px; color: var(--muted); }
   .slip { background: var(--surface); border: 1px dashed rgba(198, 244, 50, .35); border-radius: var(--r); padding: 18px; margin: 12px 0; }
   .slip-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
@@ -102,6 +102,12 @@
   .chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
   /* ligas: uma linha que desliza, botões finos com a cor da liga e o número de jogos */
   .howto { margin: 2px 0 12px; }
+  @media (max-width: 640px) {
+    .tip .ring svg { width: 76px; height: 76px; } .tip .ring { width: 76px; height: 76px; }
+    .tip .foot { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; } .tip .foot > .conf { grid-column: 1 / -1; } .tip .foot > .grow { display: none; }
+    .tip .foot .btn { width: 100%; padding: 9px 6px; text-align: center; justify-content: center; }
+    .minodd { padding: 5px 10px; font-size: 14px; } .pref { margin-left: 0; }
+  }
   .opt.low { opacity: .5; } .opt.low .name::after { content: " · abaixo de 1,20"; font: 500 11px var(--tech); color: var(--faint); }
   .pref { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font: 700 10px var(--tech); color: var(--bg); background: var(--lime); vertical-align: 2px; }
   .bactions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 14px; } .bactions .btn { display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; margin: 0; padding: 12px 10px; }
@@ -426,8 +432,10 @@
   .btn:active, .row:active, .livecard:active, .cal button:active, .tabs button:active, .seg button:active, .chips button:active, .miniseg button:active, .gear:active, .tray:active { transform: scale(.97); }
   .tip:active { transform: scale(.99); }
   /* barra de baixo: destaque que desliza e ícone que dá um pequeno salto */
-  nav.bottom { position: fixed; } nav.bottom .navpill { position: absolute; top: 6px; bottom: 6px; left: 0; width: 0; border-radius: 16px; background: rgba(198, 244, 50, .1);
-    border: 1px solid rgba(198, 244, 50, .18); transition: left .5s var(--spring), width .5s var(--spring); pointer-events: none; }
+  /* destaque desenhado no próprio botão: fica sempre alinhado (a medição em JS falhava com as letras a carregar) */
+  nav.bottom button::before { content: ""; position: absolute; inset: 0 3px; border-radius: 16px; background: rgba(198, 244, 50, .1);
+    border: 1px solid rgba(198, 244, 50, .18); opacity: 0; transform: scale(.8); transition: opacity .3s var(--ease), transform .5s var(--spring); z-index: -1; }
+  nav.bottom button[aria-current="page"]::before { opacity: 1; transform: none; }
   nav.bottom button { position: relative; z-index: 1; }
   nav.bottom button[aria-current="page"] svg { animation: navpop .5s var(--spring); }
   @keyframes navpop { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-3px) scale(1.12); } 100% { transform: none; } }
@@ -479,7 +487,7 @@
   <footer>Bigodds analisa odds públicas (football-data.co.uk), a época de cada equipa e as notícias dos jogos. As probabilidades são estimativas, não certezas. Aposta só o que podes perder.</footer>
 </main>
 
-<nav class="bottom"><span class="navpill" aria-hidden="true"></span>
+<nav class="bottom">
   <button data-view="hoje" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>Hoje</button>
   <button data-view="aovivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/></svg>Ao vivo</button>
   <button data-view="jogos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Jogos</button>
@@ -512,13 +520,6 @@ const pickOf = id => data.selecao.apostas.find(p => p.game_id === id);
 const confDots = c => `<span class="conf ${c}">${[0, 1, 2].map(i => `<i class="${i < { Alta: 3, 'Média': 2, Baixa: 1 }[c] ? 'on' : ''}"></i>`).join('')} ${c === 'Média' ? 'Média' : c}</span>`;
 
 /* navegação */
-function placePill() {  // destaque da barra de baixo atrás do separador ativo
-  const nav = document.querySelector('nav.bottom'), a = nav && nav.querySelector('button[aria-current="page"]'), p = nav && nav.querySelector('.navpill');
-  if (!a || !p) return;
-  p.style.left = a.offsetLeft + 4 + 'px'; p.style.width = a.offsetWidth - 8 + 'px';
-}
-addEventListener('resize', placePill);
-if (document.fonts) document.fonts.ready.then(() => requestAnimationFrame(placePill));
 const tabPos = {};  // última posição do sublinhado de cada grupo de separadores, para deslizar a partir dela
 function slideTabs(root, key) {
   const c = root && root.querySelector('.hojetabs'), a = c && c.querySelector('[aria-pressed="true"]');
@@ -538,7 +539,7 @@ function show(view) {
   store.set('view', view); window.scrollTo(0, 0);
   const sec = $('#' + view); sec.style.setProperty('--dx', (order.indexOf(view) - order.indexOf(prev)) * 6 + 'px');
   sec.classList.remove('enter'); void sec.offsetWidth; sec.classList.add('enter');
-  placePill(); if (view === 'hoje' || view === 'desempenho') slideTabs(sec, view);
+  if (view === 'hoje' || view === 'desempenho') slideTabs(sec, view);
   if (view === 'desempenho' || view === 'boletins') loadBets();
   if (view === 'definicoes') renderDefinicoes();
 }
@@ -1047,13 +1048,13 @@ function equipasPanel(E) {
     .sort((a, b) => eqSort === 'melhor' ? rate(b) - rate(a) : rate(a) - rate(b)).slice(0, eqLeague === 'Todas' ? 15 : 30);
   const live = x => `${pc(x.previsoes.certas / x.previsoes.n)} em ${x.previsoes.n}`;
   return `<div class="chart learn"><h3>As tuas apostas por equipa</h3>${howto(`Uma linha por equipa em que apostaste. Nas apostas sobre o jogo inteiro (cantos, cartões, golos) aparece o jogo. Conta simples e pernas de boletins já fechadas.`)}
-      ${mine.length ? `<table><thead><tr><th>Equipa ou jogo</th><th>Apostas</th><th>Ganhas</th><th>Acerto</th><th>Lucro (simples)</th></tr></thead><tbody>
+      ${mine.length ? `<table><thead><tr><th>Equipa ou jogo</th><th>Apostas</th><th>Ganhas</th><th>Acerto</th><th>Lucro</th></tr></thead><tbody>
         ${mine.map(x => `<tr><td>${esc(x.equipa)}</td><td>${x.apostas.n}</td><td>${x.apostas.ganhas}</td>
-          <td class="${x.apostas.ganhas / x.apostas.n >= 0.7 ? 'good' : 'bad'}">${pc(x.apostas.ganhas / x.apostas.n)}</td><td>${signed(x.apostas.lucro)}</td></tr>`).join('')}</tbody></table>`
+          <td class="${x.apostas.ganhas / x.apostas.n >= 0.7 ? 'good' : 'bad'}">${pc(x.apostas.ganhas / x.apostas.n)}</td><td>${x.apostas.simples ? signed(x.apostas.lucro) : '<span title="Só pernas de múltiplas: o lucro conta no boletim" style="color:var(--faint)">—</span>'}</td></tr>`).join('')}</tbody></table>`
         : '<p style="color:var(--faint)">Aparece quando as tuas apostas fecharem.</p>'}</div>
     <div class="chart learn"><h3>Em que equipas as minhas previsões acertam</h3>${howto(`Percentagem de acerto das apostas que eu sugeriria (confiança ≥72%) em jogos de cada equipa, nas épocas 2025/26 e 2026/27. A verde: acertei mais do que previa; a vermelho: menos.
       Testei usar isto para mudar a confiança e piorou a previsão, por isso é só contexto.`)}
-      <div class="chips">${leagues.map(l => `<button aria-pressed="${l === eqLeague}" data-eql="${esc(l)}">${esc(l)}</button>`).join('')}</div>
+      <div class="chips lchips">${leagues.map(l => `<button aria-pressed="${l === eqLeague}" data-eql="${esc(l)}">${l === 'Todas' ? '' : flag(l, 16)}${esc(LEAGUE_SHORT[l] || l)}</button>`).join('')}</div>
       <div class="miniseg">Ordenar<button data-eqs="melhor" aria-pressed="${eqSort === 'melhor'}">mais acerto</button><button data-eqs="pior" aria-pressed="${eqSort === 'pior'}">menos acerto</button></div>
       ${list.map(x => { const h = x.hist, good = h.real >= h.previsto;
         return `<div class="eqrow"><div><b>${esc(x.equipa)}</b><small>${esc(x.liga)} · ${h.n} previsões</small></div>

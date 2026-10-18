@@ -561,6 +561,12 @@ def espn_return(b):
     return None if won is None else (b["odd"] - 1 if won else -1.0)
 
 
+def espn_pick_outcome(div, date, home, away, key, label):
+    """1/0 de uma previsão do especialista pelo placar da ESPN (logo que é certo), None se ainda em aberto."""
+    ret = espn_return({"div": div, "date": date, "home": home, "away": away, "sel": "esp:" + key, "label": label, "line": None, "odd": 2.0})
+    return None if ret is None else int(ret > 0)
+
+
 def settle_pending(con, now, official=True):
     """Liquida apostas e pernas de boletins cujos jogos já acabaram e já estão publicados no football-data."""
     cutoff = (now - timedelta(hours=2, minutes=30)).isoformat()
@@ -633,18 +639,22 @@ def settle_pending(con, now, official=True):
 
 def settle_preds(con, now):
     """Confronta as previsões publicadas com o que aconteceu."""
-    pend = con.execute("select * from preds where outcome is null and kickoff < ?",
-                       ((now - timedelta(hours=2, minutes=30)).isoformat(),)).fetchall()
+    pend = con.execute("select * from preds where outcome is null and kickoff < ?", (now.isoformat(),)).fetchall()
+    old = (now - timedelta(hours=2, minutes=30)).isoformat()
     cache = {}
     for p in pend:
-        key = (p["div"], season_of(p["date"]))
-        if key not in cache:
-            cache[key] = season_rows(*key)
-        row = next((r for r in cache[key] if r.get("Date") == p["date"] and r.get("HomeTeam") == p["home"]), None)
-        if row and row.get("FTHG"):
-            o = esp_outcome(p["key"], row, p["label"], p["home"])
-            if o is not None:
-                con.execute("update preds set outcome=? where game_id=? and name=?", (o, p["game_id"], p["name"]))
+        o = None
+        if p["kickoff"] < old:  # o football-data só tem o jogo depois de acabar
+            key = (p["div"], season_of(p["date"]))
+            if key not in cache:
+                cache[key] = season_rows(*key)
+            row = next((r for r in cache[key] if r.get("Date") == p["date"] and r.get("HomeTeam") == p["home"]), None)
+            if row and row.get("FTHG"):
+                o = esp_outcome(p["key"], row, p["label"], p["home"])
+        if o is None:  # sem resultado oficial ainda: a ESPN diz se já está decidido
+            o = espn_pick_outcome(p["div"], p["date"], p["home"], p["away"], p["key"], p["label"])
+        if o is not None:
+            con.execute("update preds set outcome=? where game_id=? and name=?", (o, p["game_id"], p["name"]))
     con.commit()
 
 
@@ -678,7 +688,7 @@ def teams_report(con):
         hist = {"equipas": {}, "ligas": {}}
     out = {}
     row = lambda t: out.setdefault(t, {"equipa": t, "liga": LEAGUES.get(hist["ligas"].get(t), ""), "hist": None,
-                                       "previsoes": {"n": 0, "p": 0.0, "certas": 0}, "apostas": {"n": 0, "ganhas": 0, "lucro": 0.0}})
+                                       "previsoes": {"n": 0, "p": 0.0, "certas": 0}, "apostas": {"n": 0, "ganhas": 0, "lucro": 0.0, "simples": 0}})
     for t, fams in hist["equipas"].items():
         n = sum(x["n"] for x in fams.values())
         best = max((x for x in fams.items() if x[1]["n"] >= 20), key=lambda x: x[1]["real"], default=None)
@@ -702,6 +712,7 @@ def teams_report(con):
         x["apostas"]["n"] += 1
         x["apostas"]["ganhas"] += r["result"] in WON
         x["apostas"]["lucro"] += r["profit"] or 0
+        x["apostas"]["simples"] += r["profit"] is not None  # as pernas de múltiplas não têm lucro próprio
     for x in out.values():
         pv = x["previsoes"]
         p_sum = pv.pop("p")
@@ -734,6 +745,9 @@ def track_record(con, games=()):
         g = live_by_id.get(p["game_id"])
         if o is None and g:
             o = aovivo.decided(p, g, g["live"])  # já decidido no placar ao vivo; o oficial chega no dia seguinte
+        if o is None and p.get("jogo") and p.get("key"):
+            j = p["jogo"]  # o jogo já saiu da lista: resultado final da ESPN
+            o = espn_pick_outcome(j.get("div") or p["game_id"].split("-")[0], j.get("date") or p["game_id"].split("-")[1], j["home"], j["away"], p["key"], p.get("label", ""))
         d["apostas"] += 1
         d["certas"] += o == 1
         d["falhadas"] += o == 0
