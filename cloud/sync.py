@@ -165,7 +165,8 @@ def completo(cf):
     for dono in owners(cf, con):
         cf.kv_put("relatorio:" + dono, json.dumps(report(server, user_con(server, con, dono), games) | extra, ensure_ascii=False))
     sent = send_alerts(cf, server, con, games, now)
-    print(f"completo: {len(agenda['games'])} jogos · {changed} alterações na D1 · {sent} avisos")
+    n_bets = con.execute("select count(*) from bets").fetchone()[0]
+    print(f"completo: {len(agenda['games'])} jogos · {n_bets} apostas em {len(owners(cf, con))} contas · {changed} alterações na D1 · {sent} avisos")
 
 
 def aovivo(cf):
