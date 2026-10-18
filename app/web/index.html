@@ -660,8 +660,8 @@ function tipCard(p, g, now) {
       ${g.nota ? `<div class="note"><b>Notícias:</b> ${esc(g.nota)}</div>` : ''}${g.onzes && !g.onzes.atencao ? onzesNote(g) : ''}</details>
     <div class="foot">${confDots(p.confianca)}<span class="grow"></span>
       <button class="btn ghost small" data-game="${esc(g.id)}">Ver jogo</button>
-      <button class="btn ghost small" data-add="${esc(g.id)}" data-sel="${esc(p.sel)}" ${started ? 'disabled' : ''}>+ Boletim</button>
-      <button class="btn primary small" data-bet="${esc(g.id)}" data-sel="${esc(p.sel)}" ${started ? 'disabled' : ''}>Registar</button></div>
+      <button class="btn ghost small" data-add="${esc(g.id)}" data-sel="${esc(p.sel)}" ${finished(g) ? 'disabled' : ''}>+ Boletim</button>
+      <button class="btn primary small" data-bet="${esc(g.id)}" data-sel="${esc(p.sel)}" ${finished(g) ? 'disabled' : ''}>Registar</button></div>
   </article>`;
 }
 
@@ -1171,11 +1171,14 @@ function renderTray() {
   if (slip.length) t.innerHTML = `<span class="n">${slip.length}</span> Rascunho por guardar${p ? ` · <b>${pc(p)}</b>` : ''} · abrir`;
   t.setAttribute('aria-label', `Rascunho de boletim com ${slip.length} ${slip.length === 1 ? 'seleção' : 'seleções'}, ainda não guardado`);
 }
+// terminado: a ESPN diz que acabou, ou já passaram 2,5 h do início
+const finished = g => !!g && ((g.live && g.live.estado === 'post') || Date.now() - new Date(g.kickoff) > 150 * 60000);
 function addLeg(gid, sel) {
   if (slip.some(l => l.game_id === gid && l.sel === sel)) return toast('Já está no boletim');
   const l = legFrom(gid, sel); if (!l) return toast('Não encontrei esta seleção');
-  if (new Date(l.kickoff) <= Date.now()) return toast('Este jogo já começou');
-  slip.push(l); saveSlip(); toast('Juntado ao boletim');
+  const g = data.games.find(x => x.id === gid);
+  if (finished(g || l)) return toast('Este jogo já terminou');
+  slip.push(l); saveSlip(); toast(new Date(l.kickoff) <= Date.now() ? 'Juntado (jogo a decorrer: confirma a odd ao vivo)' : `Juntado ao boletim · ${slip.length} ${slip.length === 1 ? 'jogo' : 'jogos'}`);
 }
 function slipSheet() {
   if (!slip.length) return;
@@ -1194,7 +1197,9 @@ function slipSheet() {
     <div class="field"><label for="stk">Valor apostado (€)</label><input id="stk" type="number" inputmode="decimal" step="0.5" min="0.5" value="${(bank() * 0.01).toFixed(2)}"></div>
     <div class="preview" id="pv"></div>
     <button class="btn primary" id="saveSlip" style="width:100%">${slip.length === 1 ? 'Guardar aposta' : 'Guardar boletim'}</button>
+    <button class="btn ghost" id="moreSlip" style="width:100%;margin-top:8px">+ Juntar outro jogo</button>
     <button class="btn ghost" id="clearSlip" style="width:100%;margin-top:8px">Limpar boletim</button>`);
+  $('#moreSlip').onclick = () => { closeSheet(); show('jogos'); toast('Escolhe o jogo e o mercado: o boletim fica guardado em baixo'); };
   const known = slip.every(l => l.p), p = known ? slip.reduce((a, l) => a * l.p, 1) : null, minTot = known ? slip.reduce((a, l) => a * l.min_odd, 1) : 0;
   const update = () => {
     const odds = slip.map(l => parseFloat(String(l.odd).replace(',', '.')));
@@ -1261,6 +1266,9 @@ function parseMarket(txt, g) {
   }
   if ((m = t.match(/(acima|mais|abaixo|menos)\s*de\s*\(?\s*(\d+)[.,](\d)/))) {
     const up = /acima|mais/.test(m[1]), line = parseFloat(m[2] + '.' + m[3]), lt = String(line).replace('.', ',');
+    const half1 = /(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t);
+    if (/cart/.test(t) && half1) return line < 10 ? { sel: `esp:y1${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} amarelos na 1.ª parte`, market: 'Cartões 1.ª parte', line } : null;
+    if (/canto|escante/.test(t) && half1) return null;  // cantos por parte: ainda não acompanho
     if (/cart/.test(t)) return { sel: `esp:y${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} amarelos`, market: 'Cartões', line };
     if (/canto|escante/.test(t)) return { sel: `esp:c${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} cantos`, market: 'Cantos', line };
     if (/(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:ht+0.5', label: 'Há golo na 1.ª parte', market: 'Golos por parte' } : null;
@@ -1298,6 +1306,13 @@ function parseSlipText(text) {
   return { legs, falhas, book: /betclic/i.test(text) ? 'Betclic' : '22bet' };
 }
 let importNote = null;
+// fotos de telemóvel têm 12+ megapíxeis: o leitor fica sem memória. Reduz para 1600 px de largura, em cinzento.
+async function shrink(file) {
+  const img = await createImageBitmap(file), k = Math.min(1, 1600 / img.width);
+  const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  const x = c.getContext('2d'); x.filter = 'grayscale(1) contrast(1.2)'; x.drawImage(img, 0, 0, c.width, c.height);
+  return c;
+}
 async function importPhotos(files) {
   if (!files.length) return;
   toast('A ler a foto…');
@@ -1306,12 +1321,12 @@ async function importPhotos(files) {
       s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload = ok; s.onerror = () => ko(new Error('sem ligação para o leitor de texto')); document.head.appendChild(s); });
     const w = await Tesseract.createWorker('por');
     let text = '';
-    for (const f of files) text += (await w.recognize(f)).data.text + '\n';
+    for (const f of files) text += (await w.recognize(await shrink(f))).data.text + '\n';
     await w.terminate();
     const r = parseSlipText(text);
     if (!r.legs.length) return toast(r.falhas[0] || 'Não consegui ler apostas nesta foto');
     slip = r.legs; importNote = r; saveSlip(); slipSheet();
-  } catch (e) { toast('Não consegui ler a foto: ' + e.message); }
+  } catch (e) { toast('Não consegui ler a foto' + (e && e.message ? ': ' + e.message : '. Tenta uma captura de ecrã do boletim em vez de uma fotografia.')); }
 }
 
 /* ---------- AO VIVO (placar ESPN, sugestões ao intervalo ≥85%) ---------- */
