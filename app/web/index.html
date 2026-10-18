@@ -426,7 +426,7 @@
   nav.bottom button[aria-current="page"] svg { animation: navpop .5s var(--spring); }
   @keyframes navpop { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-3px) scale(1.12); } 100% { transform: none; } }
   /* separadores: sublinhado que desliza */
-  .hojetabs { position: relative; } .hojetabs .tabind { position: absolute; bottom: -1px; height: 2px; border-radius: 2px; background: var(--lime); left: 0; width: 0;
+  .hojetabs .tabind {  /* a barra é sticky (já é posicionada): o sublinhado fica dentro dela */ position: absolute; bottom: -1px; height: 2px; border-radius: 2px; background: var(--lime); left: 0; width: 0;
     transition: left .45s var(--spring), width .45s var(--spring); pointer-events: none; }
   .hojetabs button[aria-pressed="true"] { border-bottom-color: transparent !important; }
   /* avisos a subir com mola */
@@ -1134,7 +1134,7 @@ async function renderPhone(c) {
 function historicoPanel(H) {
   if (!H) return '';
   const row = c => `<tr><td>${esc(c.faixa)}</td><td>${c.n}</td><td>${pc(c.previsto)}</td><td class="${Math.abs(c.real - c.previsto) <= 0.02 || c.real > c.previsto ? 'good' : 'bad'}">${pc(c.real)}</td></tr>`;
-  const days = (H.dias || []).filter(d => d.apostas);
+  const days = (H.dias || []).filter(d => d.apostas).sort((a, b) => a.dia.localeCompare(b.dia));  // por ordem: o dia mais antigo primeiro
   return `<div class="chart learn"><h3>Digo X%, acontece X%?</h3>
       <p>Quando digo 80%, devem falhar cerca de 2 em cada 10. Esta tabela mostra se isso é verdade: primeiro em ${(H.teste || []).reduce((s, c) => s + c.n, 0).toLocaleString('pt-PT')} apostas de épocas que o modelo nunca viu, depois nas previsões feitas aqui na app.</p>
       <table><thead><tr><th>Confiança</th><th>Apostas</th><th>Previsto</th><th>Real</th></tr></thead><tbody>${(H.teste || []).map(row).join('')}</tbody></table>
