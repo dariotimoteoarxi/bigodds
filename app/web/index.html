@@ -525,14 +525,18 @@ const store = { get: (k, d) => { try { return localStorage.getItem(k) ?? d; } ca
 const STAKE = { Alta: 0.02, 'Média': 0.01, Baixa: 0.005 };  // fração da banca sugerida por nível de confiança
 let data = null, bets = null, league = 'Todas', period = store.get('period', 'semana');
 const bank = () => parseFloat(store.get('bank', '100')) || 100;
+// valor apostado a partir da odd real: ¼ de Kelly, no máximo 3% da banca, em múltiplos de 0,10 €
+const kellyStake = (p, odd) => { const k = (p * odd - 1) / (odd - 1); return k > 0 ? Math.floor(Math.min(0.03, k / 4) * bank() * 10) / 10 : 0; };
 const espSels = g => (g.especialista || []).map(o => ({ sel: 'esp:' + o.key, label: o.label, market: o.family, short: o.family, p_est: o.p, conf: o.conf,
   min_odd_est: o.min_odd, best_odd: null, hist: o.hist, texto: o.texto, titulo: o.titulo, risco: o.risco, name: o.name, onde: o.onde }));
-const lineLabel = (k, ln) => { const lt = String(ln).replace('.', ','); return { 'c+': `Mais de ${lt} cantos`, 'c-': `Menos de ${lt} cantos`, 'y+': `Mais de ${lt} amarelos`, 'y-': `Menos de ${lt} amarelos` }[k]; };
-const confOf = p => p >= 0.80 ? 'Alta' : p >= 0.74 ? 'Média' : 'Baixa';
+const lineLabel = (k, ln, g) => { const lt = String(ln).replace('.', ',');
+  return { 'c+': `Mais de ${lt} cantos`, 'c-': `Menos de ${lt} cantos`, 'y+': `Mais de ${lt} amarelos`, 'y-': `Menos de ${lt} amarelos`,
+    'hc-': `${g.home}: menos de ${lt} cantos`, 'ac-': `${g.away}: menos de ${lt} cantos`, 'hy-': `${g.home}: menos de ${lt} amarelos` }[k]; };
+const confOf = p => Math.round(p * 100) >= 80 ? 'Alta' : Math.round(p * 100) >= 74 ? 'Média' : 'Baixa';
 // todas as linhas de cada mercado (cantos e amarelos têm várias), para comparar com as odds da casa
 const ladSels = g => (g.especialista || []).flatMap(o => (o.linhas || [[o.line, o.p]]).map(([ln, p]) => {
   const k = o.key.replace(/[\d.]+$/, ''), multi = !!o.linhas;
-  return { sel: 'esp:' + (multi ? k + ln : o.key), label: multi ? lineLabel(k, ln) : o.label, market: o.family, short: o.family, p_est: p, conf: confOf(p), min_odd_est: +(1.02 / p).toFixed(2), best_odd: null };
+  return { sel: 'esp:' + (multi ? k + ln : o.key), label: multi ? lineLabel(k, ln, g) : o.label, market: o.family, short: o.family, p_est: p, conf: confOf(p), min_odd_est: +(1.02 / p).toFixed(2), best_odd: null };
 }));
 const allSels = g => { const es = espSels(g), seen = new Set(es.map(x => x.sel));
   return es.concat(ladSels(g).filter(x => !seen.has(x.sel) && seen.add(x.sel)), g.markets.flatMap(m => m.selections.map(s => ({ ...s, line: m.line })))); };
@@ -672,7 +676,7 @@ function riscoBlock() {
       <div class="when">${hm(r.kickoff)}<span class="dot"></span>${esc(r.league)}</div>
       <div class="match">${esc(r.home)} – ${esc(r.away)}</div>
       <div class="core"><div class="bet"><small>${esc(r.market)}</small><b>${esc(r.label)}</b>
-        <div class="minodd">só entra a ≥ ${fmt(r.min_odd)} <span>odd justa ${fmt(r.fair_odd)}</span></div></div>${ring(r.p)}</div>
+        <div class="minodd"><span>entra com</span> ${fmt(r.min_odd)}+</div><div class="fairodd">odd justa ${fmt(r.fair_odd)}${r.fonte ? ` · ${r.fonte === 'Betfair Exchange' ? 'preço da Betfair' : 'média das casas'}, sem margem` : ''}</div></div>${ring(r.p)}</div>
       <p class="why">${r.valor ? `<b style="color:var(--lime)">Valor confirmado:</b> a ${esc(r.best_book)} paga ${fmt(r.best_odd)}, ${fmt(r.edge * 100, 1)}% acima do justo.`
         : r.best_odd ? `Hoje a melhor casa que vejo (${esc(r.best_book)}) paga ${fmt(r.best_odd)}: ainda abaixo do mínimo. Vê se a 22bet ou a Betclic pagam ${fmt(r.min_odd)} ou mais.`
         : 'Sem odds das casas que acompanho: vê se a 22bet ou a Betclic pagam o mínimo.'}
@@ -749,7 +753,7 @@ function renderRaspadinhas() {
   motion($('#raspadinhas'));
 }
 // um boletim faz-se numa só casa: a 22bet tem todos os mercados; a Betclic não tem cartões
-const needs22 = legs => legs.some(l => /^esp:y/.test(l.sel));
+const needs22 = legs => legs.some(l => /^esp:[ha]?y/.test(l.sel));
 const path22 = o => ((o.onde || '').match(/22bet: ([^·(]+)/) || [])[1]?.trim() || '';
 function raspadinhas(sel, byId) {
   if (!sel.boletins || !sel.boletins.length) return '';
@@ -779,7 +783,7 @@ function tipCard(p, g, now) {
     <div class="match">${esc(g.home)} – ${esc(g.away)}</div>
     <div class="core"><div class="bet"><small>${esc(p.titulo)}</small><b>${esc(p.label)}</b>
       <div class="minodd"><span>entra com</span> ${fmt(Math.max(ODD_FLOOR, p.min_odd))}+</div>
-      <div class="fairodd">odd justa ${fmt(p.fair_odd || 1 / p.p)}</div>${p.onde ? `<div class="fairodd">${esc(p.onde)}</div>` : ''}</div>${ring(p.p)}</div>
+      <div class="fairodd">odd justa ${fmt(p.fair_odd || 1 / p.p)}</div>${path22(p) ? `<div class="fairodd">22bet › ${esc(path22(p))}${needs22([p]) ? ' · só na 22bet' : ' · também na Betclic'}</div>` : ''}</div>${ring(p.p)}</div>
     ${started ? '' : `<div class="valchk"><input class="oddchk" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="odd da casa" data-chk="${esc(g.id)}" data-sel="${esc(p.sel)}" data-p="${p.p}" data-label="${esc(p.label)}" data-market="${esc(p.market || '')}" aria-label="Odd que a tua casa dá em ${esc(p.label)}"><span class="meta chkout"></span></div>`}
     ${p.revisao ? `<div class="note" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Em revisão:</b> ${esc(p.revisao)}</div>` : ''}
     ${g.onzes && g.onzes.atencao ? onzesNote(g) : ''}
@@ -902,7 +906,7 @@ document.addEventListener('change', async e => {
   if (!s || !(odd > 1)) return;
   const pr = inp.dataset.p ? +inp.dataset.p : s.p_est, minOdd = inp.dataset.p ? 1.02 / pr : s.min_odd_est;  // risco: preço justo do mercado
   const edge = odd * pr - 1, ok = odd * pr >= 1.02 && odd >= ODD_FLOOR;
-  out.innerHTML = ok && pr < 0.70 && inp.closest('.lad') ? `<b style="color:var(--amber)">Valor +${fmt(edge * 100, 1)}%</b>, mas o acerto fica abaixo de 70%.` : odd < ODD_FLOOR ? `<b style="color:var(--red)">Não entra:</b> abaixo de 1,20 não vale o risco (a tua regra).` : ok ? `<b style="color:var(--lime)">Entra · valor +${fmt(edge * 100, 1)}%</b> a ${fmt(odd)}.`
+  out.innerHTML = ok && pr < 0.70 && inp.closest('.lad') ? `<b style="color:var(--amber)">Valor +${fmt(edge * 100, 1)}%</b>, mas o acerto fica abaixo de 70%.` : odd < ODD_FLOOR ? `<b style="color:var(--red)">Não entra:</b> abaixo de 1,20 não vale o risco (a tua regra).` : ok ? `<b style="color:var(--lime)">Entra · valor +${fmt(edge * 100, 1)}%</b> a ${fmt(odd)}${kellyStake(pr, odd) >= 0.1 ? ` · aposta ${eur(kellyStake(pr, odd))}` : ''}.`
     : `<b style="color:var(--red)">Não entra:</b> a ${fmt(odd)} ${edge < 0 ? `pagas ${fmt(-edge * 100, 1)}% acima do justo` : 'a margem é curta demais'}. Mínimo ${fmt(minOdd)}.`;
   try { await api('/api/apostas', { action: 'odd', game_id: g.id, sel: s.sel, label: s.label, market: s.market, book: myBook(), odd, p: pr, kickoff: g.kickoff }); }
   catch (err) { toast('Não guardei a odd: ' + err.message); }
@@ -919,7 +923,7 @@ function markBest(box) {
 function cacaValor(g) {
   const rows = ladSels(g).filter(s => s.p_est >= 0.6 && s.p_est <= 0.88);
   if (!rows.length) return '';
-  const fam = { Cantos: 'Cantos', 'Cartões': 'Amarelos' }, groups = {};
+  const fam = { Cantos: 'Cantos', 'Cartões': 'Amarelos', 'Cantos por equipa': 'Cantos por equipa', 'Cartões por equipa': 'Amarelos por equipa' }, groups = {};
   for (const r of rows) (groups[fam[r.market] || 'Golos e resultado'] ||= []).push(r);
   return `<div class="cv"><h3>Caça-valor</h3>${howto('Escreve a odd que a tua casa dá em cada linha. Calculo o valor de cada uma (odd × acerto − 1) e escolho a melhor a partir de 1,30, só entre as de 70% ou mais. As linhas com ● estão na faixa-alvo (74–80%). Cada odd fica guardada para eu aprender onde a casa paga acima do justo.')}
     ${Object.entries(groups).map(([t, rs]) => `<p class="cvt">${t}</p>${rs.sort((a, b) => b.p_est - a.p_est).map(r => `<div class="lad ${r.p_est >= 0.74 && r.p_est <= 0.80 ? 'alvo' : ''}" data-p="${r.p_est}">
@@ -981,7 +985,7 @@ function betSheet(id, selId) {
     <p class="sub">${esc(s.market)} · ${esc(g.home)} – ${esc(g.away)} · ${hm(g.kickoff)}</p>
     <div class="opt" style="border:1px solid var(--line-soft);border-radius:12px"><span class="name">Acerto estimado</span><span class="pc">${pc(s.p_est)}</span>
       <span class="track ${s.conf}"><i style="width:${s.p_est * 100}%"></i></span><span class="meta">${confDots(s.conf)}<span>entra a ≥ <b>${fmt(s.min_odd_est)}</b></span></span></div>
-    <div class="field"><label>Casa</label><div class="seg" id="book">${['Betclic', '22bet'].map(b => `<button aria-pressed="${b === (/^esp:y/.test(selId) ? '22bet' : myBook())}">${b}</button>`).join('')}</div></div>
+    <div class="field"><label>Casa</label><div class="seg" id="book">${['Betclic', '22bet'].map(b => `<button aria-pressed="${b === (/^esp:[ha]?y/.test(selId) ? '22bet' : myBook())}">${b}</button>`).join('')}</div></div>
     <div class="field"><label for="odd">Odd a que apostaste</label><input id="odd" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="ex. ${fmt(s.min_odd_est)}"></div>
     <div class="field"><label for="stk">Valor apostado (€)</label><input id="stk" type="number" inputmode="decimal" step="0.5" min="0.5" value="${st}"></div>
     <div class="preview" id="pv">Escreve a odd para ver o ganho potencial.</div>
@@ -1095,12 +1099,12 @@ function renderDefinicoes() {
     ${me ? `<div class="chart"><h3>Conta</h3><p>Estás na conta <b>${esc(me)}</b>. As apostas, o desempenho e os avisos são só desta conta; as análises são iguais para todos.</p>
       <button class="btn ghost" data-trocar style="width:100%">Trocar de conta</button></div>` : ''}
     <div class="chart" id="phone"></div>
-      <div class="chart"><h3>Banca</h3><p>Serve para calcular o valor sugerido de cada aposta e o limite diário (5%).</p>
+      <div class="chart"><h3>Banca</h3>${howto('Serve para calcular o valor sugerido de cada aposta (¼ de Kelly, no máximo 3%) e o limite diário (5%).')}
         <div class="bankset">Banca <input id="bank" type="number" min="1" step="1" value="${bank()}"> €</div></div>
-      <div class="chart"><h3>Os teus dados</h3><p>Descarrega todas as apostas e pernas dos boletins em CSV (abre no Excel).</p>
+      <div class="chart"><h3>Os teus dados</h3>
         <button class="btn ghost" data-csv style="width:100%">Exportar apostas (CSV)</button></div>
-      <div class="chart"><h3>Jogo responsável</h3><p>Limites fixos: 5% da banca por dia, pausa depois de 2 apostas perdidas no dia e pausa quando perderes 15% da banca numa semana. Aviso se subires o valor logo após uma derrota.
-        A 22bet não tem licença do SRIJ em Portugal: se houver problema com levantamentos não tens a quem reclamar. A Betclic é licenciada.</p></div>`;
+      <div class="chart"><h3>Jogo responsável</h3><p>5% da banca por dia · pausa após 2 derrotas no dia ou −15% na semana.</p>${howto(`Aviso se subires o valor logo após uma derrota.
+        A 22bet não tem licença do SRIJ em Portugal: se houver problema com levantamentos não tens a quem reclamar. A Betclic é licenciada.`, 'Mais sobre as regras e as casas')}</div>`;
   $('#bank').onchange = e => { store.set('bank', e.target.value); renderHoje(); if (bets) renderDesempenho(); };
   renderPhone();
   motion($('#definicoes'));
@@ -1226,7 +1230,7 @@ function clvPanel(C) {
 }
 const STEM = { 'esp:y-': 'Menos de X amarelos', 'esp:y+': 'Mais de X amarelos', 'esp:c-': 'Menos de X cantos', 'esp:c+': 'Mais de X cantos',
   'esp:ht+': '1.ª parte: mais de 0,5 golos', 'esp:g2+': '2.ª parte: mais de 0,5 golos', 'esp:hs': 'Equipa da casa marca', 'esp:as': 'Equipa de fora marca',
-  'esp:fav': 'Favorito ganha', 'esp:dc': 'Dupla hipótese', 'esp:y1-': 'Menos amarelos 1.ª parte', 'esp:y1+': 'Mais amarelos 1.ª parte' };
+  'esp:fav': 'Favorito ganha', 'esp:dc': 'Dupla hipótese', 'esp:hc-': 'Menos cantos da casa', 'esp:ac-': 'Menos cantos de fora', 'esp:hy-': 'Menos amarelos da casa', 'esp:y1-': 'Menos amarelos 1.ª parte', 'esp:y1+': 'Mais amarelos 1.ª parte' };
 function precosPanel(P) {
   return `<div class="chart learn"><h3>Onde a casa paga acima do justo</h3>${howto(`Cada odd que escreves (no caça-valor, no cartão ou ao registar) é comparada com a odd justa. A partir de 40 odds num mercado, os mercados onde a casa paga mais de 2% acima do justo passam à frente na seleção do dia.`)}
     ${P && P.length ? `<table><thead><tr><th>Mercado</th><th>Odds</th><th>Com valor</th><th>Margem</th></tr></thead><tbody>
@@ -1259,6 +1263,11 @@ function liveLeg(l) {
     const cur = (v.eventos || []).filter(e => e.tipo === 'amarelo' && gMin(e.min) <= 45).length, what = `amarelo${cur === 1 ? '' : 's'} na 1.ª parte`;
     if (m[1] === '+') return cur > +m[2] ? won(`${cur} ${what}`) : ht ? lost(`${cur} ${what}`) : run(`${cur} ${what} até agora · ${v.minuto || ''}`);
     return cur > +m[2] ? lost(`já vão ${cur} ${what}`) : ht ? won(`${cur} ${what}`) : run(`${cur} ${what} até agora · ${v.minuto || ''}`);
+  }
+  if ((m = /^([ha])([cy])([+-])(\d\.5)$/.exec(k))) {  // por equipa
+    const i = m[1] === 'h' ? 0 : 1, cur = m[2] === 'y' ? v.amarelos[i] : +v.cantos[i], what = (m[2] === 'y' ? 'amarelo' : 'canto') + (cur === 1 ? '' : 's');
+    if (m[3] === '+') return cur > +m[4] ? won(`${cur} ${what}`) : end ? lost(`${cur} ${what}`) : run(`${cur} ${what} até agora`);
+    return cur > +m[4] ? lost(`já vão ${cur} ${what}`) : end ? won(`${cur} ${what}`) : run(`${cur} ${what} até agora`);
   }
   if ((m = /^([cy])([+-])(\d+\.5)$/.exec(k))) {
     const cur = m[1] === 'y' ? v.amarelos[0] + v.amarelos[1] : +v.cantos[0] + +v.cantos[1], what = (m[1] === 'y' ? 'amarelo' : 'canto') + (cur === 1 ? '' : 's');
@@ -1304,6 +1313,7 @@ let chartPts = [];
 const CH = { W: 640, H: 220, L: 52, R: 16, T: 16, B: 24 };
 function chart(done) {
   if (done.length < 2) return `<div class="chart"><h3>Real contra esperado</h3><p>O gráfico aparece a partir de 2 apostas fechadas.</p></div>`;
+  CH.W = Math.max(320, Math.min(640, innerWidth - 72));  // desenho à largura real: no telemóvel as legendas ficam legíveis
   const sorted = [...done].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
   let r = 0, e = 0;
   chartPts = sorted.map((b, i) => ({ i, real: r += b.profit, exp: e += b.ev, b }));
@@ -1319,7 +1329,7 @@ function chart(done) {
       <path d="${path('exp')}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 5"/>
       <path d="${path('real')}" fill="none" stroke="var(--lime)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
       <circle cx="${x(last.i)}" cy="${y(last.real)}" r="4.5" fill="var(--lime)"/>
-      <text x="${x(last.i) - 8}" y="${y(last.real) - 10}" text-anchor="end" font-size="12" font-weight="600" fill="var(--ink)">${signed(last.real)}</text>
+      <text x="${x(last.i) - 8}" y="${Math.max(14, y(last.real) - 10)}" text-anchor="end" font-size="12" font-weight="600" fill="var(--ink)">${signed(last.real)}</text>
       ${gap ? '' : `<text x="${x(last.i) - 8}" y="${y(last.exp) + 16}" text-anchor="end" font-size="11" fill="var(--muted)">esperado ${signed(last.exp)}</text>`}
       <line id="cross" y1="${T}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>
       <rect id="hit" x="${L - 10}" y="0" width="${W - L - R + 20}" height="${H}" fill="transparent"/>
@@ -1488,6 +1498,11 @@ function parseMarket(txt, g) {
     const half1 = /(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t);
     if (/cart/.test(t) && half1) return line < 10 ? { sel: `esp:y1${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} amarelos na 1.ª parte`, market: 'Cartões 1.ª parte', line } : null;
     if (/canto|escante/.test(t) && half1) return null;  // cantos por parte: ainda não acompanho
+    // por equipa: Betclic "Total de Cantos - Parma", 22bet "Total 1/2" (só acompanho os "menos de")
+    const side = /total\s*1\b/.test(t) || t.includes(deaccent(g.home)) ? 'h' : /total\s*2\b/.test(t) || t.includes(deaccent(g.away)) ? 'a' : null;
+    if (side && /canto|escante/.test(t)) return up ? null : { sel: `esp:${side}c-${line}`, label: `${side === 'h' ? g.home : g.away}: menos de ${lt} cantos`, market: 'Cantos por equipa', line };
+    if (side === 'h' && /cart/.test(t)) return up ? null : { sel: `esp:hy-${line}`, label: `${g.home}: menos de ${lt} amarelos`, market: 'Cartões por equipa', line };
+    if (side && /cart/.test(t)) return null;
     if (/cart/.test(t)) return { sel: `esp:y${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} amarelos`, market: 'Cartões', line };
     if (/canto|escante/.test(t)) return { sel: `esp:c${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} cantos`, market: 'Cantos', line };
     if (/(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:ht+0.5', label: '1.ª parte: mais de 0,5 golos', market: 'Golos por parte' } : null;

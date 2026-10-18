@@ -423,9 +423,11 @@ BLIND_MIN, BLIND_HIST = 0.90, 0.818    # boletim blindado: backtest 2025/26–20
 CONF_ALTA, CONF_MEDIA = 0.80, 0.74
 NAMES = {"ht+": "Golo na 1.ª parte", "g2+": "Golo na 2.ª parte", "hs": "Equipa da casa marca", "as": "Equipa de fora marca",
          "c+": "Cantos: mais de", "c-": "Cantos: menos de", "y+": "Amarelos: mais de", "y-": "Amarelos: menos de",
-         "fav": "Favorito ganha", "dc": "Dupla hipótese"}
+         "fav": "Favorito ganha", "dc": "Dupla hipótese",
+         "hc-": "Cantos da casa: menos de", "ac-": "Cantos de fora: menos de", "hy-": "Amarelos da casa: menos de"}
 FAMILY = {"ht+": "Golos por parte", "g2+": "Golos por parte", "hs": "Equipa marca", "as": "Equipa marca", "c+": "Cantos",
-          "c-": "Cantos", "y+": "Cartões", "y-": "Cartões", "fav": "Resultado", "dc": "Resultado"}
+          "c-": "Cantos", "y+": "Cartões", "y-": "Cartões", "fav": "Resultado", "dc": "Resultado",
+          "hc-": "Cantos por equipa", "ac-": "Cantos por equipa", "hy-": "Cartões por equipa"}
 _poisson_over, _negbin_over = poisson_over, negbin_over
 
 
@@ -499,11 +501,13 @@ def especialista(game, rows, modelos, live=None):
     if not ft:
         return []
     M, cal = modelos["models"], modelos["cal"]
-    mu = {k: predict_mu(M[k], ft) for k in ("ht", "c", "y", "g2", "hg", "ag") if k in M}
+    mu = {k: predict_mu(M[k], ft) for k in ("ht", "c", "y", "g2", "hg", "ag", "hc", "ac", "hy") if k in M}
     game["mu"] = {k: round(v, 3) for k, v in mu.items()}  # o modelo do intervalo parte daqui
     ref = referee_profile(rows, game.get("referee"))
     if ref and game.get("div") in REF_COEF:
-        mu["y"] *= math.exp(REF_COEF[game["div"]] * ref["rel"])  # critério do árbitro (cartões por falta)
+        for k in ("y", "hy"):
+            if k in mu:
+                mu[k] *= math.exp(REF_COEF[game["div"]] * ref["rel"])  # critério do árbitro (cartões por falta)
     cands = {"ht+": [(0.5, 1 - math.exp(-mu["ht"]))], "c+": [], "c-": [], "y+": [], "y-": []}
     for key, fam in (("g2+", "g2"), ("hs", "hg"), ("as", "ag")):
         if fam in mu:
@@ -513,6 +517,9 @@ def especialista(game, rows, modelos, live=None):
             po = negbin_over(mu[fam], line, M[fam]["disp"])
             cands[fam + "+"].append((line, po))
             cands[fam + "-"].append((line, 1 - po))
+    for fam in ("hc", "ac", "hy"):  # por equipa: só "menos de" (os "mais de" falharam o teste fora da amostra)
+        if fam in mu and fam in modelos["lines"]:
+            cands[fam + "-"] = [(ln, 1 - negbin_over(mu[fam], ln, M[fam]["disp"])) for ln in modelos["lines"][fam]]
     fav = None
     if mk.get("pH") is not None and mk.get("pA") is not None:
         fav = h if mk["pH"] >= mk["pA"] else a
@@ -524,7 +531,10 @@ def especialista(game, rows, modelos, live=None):
            "c_h": sum(last(H, lambda x: x["cf"] + x["ca"])) / len(H[-10:]), "c_a": sum(last(A, lambda x: x["cf"] + x["ca"])) / len(A[-10:]),
            "y_h": sum(last(H, lambda x: x["yf"] + x["ya"])) / len(H[-10:]), "y_a": sum(last(A, lambda x: x["yf"] + x["ya"])) / len(A[-10:]),
            "f_h": sum(last(H, lambda x: x["ff"])) / len(H[-10:]), "f_a": sum(last(A, lambda x: x["ff"])) / len(A[-10:]),
-           "mu": mu, "lam_tot": ft["_lam_tot"], "balance": ft["y_balance"], "fav": fav}
+           "mu": mu, "lam_tot": ft["_lam_tot"], "balance": ft["y_balance"], "fav": fav,
+           "hcf": sum(last(H, lambda x: x["cf"])) / len(H[-10:]), "aca": sum(last(A, lambda x: x["ca"])) / len(A[-10:]),
+           "acf": sum(last(A, lambda x: x["cf"])) / len(A[-10:]), "hca": sum(last(H, lambda x: x["ca"])) / len(H[-10:]),
+           "hyf": sum(last(H, lambda x: x["yf"])) / len(H[-10:]), "aya": sum(last(A, lambda x: x["ya"])) / len(A[-10:])}
     ctx["ref"] = ref
     out = []
     for key, opts in cands.items():
@@ -534,7 +544,7 @@ def especialista(game, rows, modelos, live=None):
             adj = (live or {}).get(NAMES[key])
             if adj:
                 p = min(0.97, max(0.03, p + adj))  # correção aprendida com os resultados reais
-            if ref and ((key == "y+" and ref["tipo"] == "brando") or (key == "y-" and ref["tipo"] == "rigoroso")):
+            if ref and ((key == "y+" and ref["tipo"] == "brando") or (key in ("y-", "hy-") and ref["tipo"] == "rigoroso")):
                 p = max(0.03, p - REF_PENALTY)  # filtro de risco: o árbitro joga contra esta aposta
             scored.append((line, p, p_raw))
         # a linha dentro da faixa-alvo; sem nenhuma lá dentro, a mais próxima dela
@@ -543,7 +553,8 @@ def especialista(game, rows, modelos, live=None):
                  "c-": f"Menos de {_lt(line)} cantos" if line else "", "y+": f"Mais de {_lt(line)} amarelos" if line else "",
                  "y-": f"Menos de {_lt(line)} amarelos" if line else "", "fav": f"{fav} ganha",
                  "g2+": "2.ª parte: mais de 0,5 golos", "hs": f"{h}: mais de 0,5 golos", "as": f"{a}: mais de 0,5 golos",
-                 "dc": f"{fav} ou empate"}[key]  # com os nomes que a Betclic e a 22bet usam
+                 "dc": f"{fav} ou empate", "hc-": f"{h}: menos de {_lt(line)} cantos" if line else "",
+                 "ac-": f"{a}: menos de {_lt(line)} cantos" if line else "", "hy-": f"{h}: menos de {_lt(line)} amarelos" if line else ""}[key]  # com os nomes que a Betclic e a 22bet usam
         band = None
         for lo, b in sorted(((float(k), v) for k, v in modelos.get("faixas", {}).get(key, {}).items()), reverse=True):
             if p >= lo:
@@ -552,10 +563,10 @@ def especialista(game, rows, modelos, live=None):
         o = {"key": key + (format(line, "g") if line is not None and key not in ("hs", "as") else ""), "name": NAMES[key], "label": label,
              "linhas": [[ln, round(q, 3)] for ln, q, _ in scored] if len(scored) > 1 else None,  # escada para o caça-valor
              "family": FAMILY[key], "line": line, "p": round(p, 3), "p_raw": round(p_raw, 3),
-             "conf": "Alta" if p >= CONF_ALTA else "Média" if p >= CONF_MEDIA else "Baixa",
+             "conf": "Alta" if round(p, 2) >= CONF_ALTA else "Média" if round(p, 2) >= CONF_MEDIA else "Baixa",  # como a percentagem mostrada
              "onde": ONDE[key], "fair_odd": round(1 / p, 2), "min_odd": round(1.02 / p, 2), "hist": band}
         o.update(_texto_especialista(o, key, game, ctx))
-        if ref and ((key == "y+" and ref["tipo"] == "brando") or (key == "y-" and ref["tipo"] == "rigoroso")):
+        if ref and ((key == "y+" and ref["tipo"] == "brando") or (key in ("y-", "hy-") and ref["tipo"] == "rigoroso")):
             o["veto"] = f"Árbitro {ref['tipo']} ({ref['nome']}): não aconselho esta aposta."
         out.append(o)
     return sorted(out, key=lambda o: -o["p"])
@@ -571,6 +582,9 @@ ONDE = {"ht+": "22bet: 1.ª parte › Total › Acima de 0,5 · Betclic: Golos �
         "y+": "Só na 22bet: Cartões amarelos › Total (a Betclic não tem cartões)",
         "y-": "Só na 22bet: Cartões amarelos › Total (a Betclic não tem cartões)",
         "fav": "22bet: 1X2 (V1/V2) · Betclic: Resultado (Tempo Regulamentar)",
+        "hc-": "22bet: Cantos › Total 1 · Betclic: Estatísticas › Cantos › Total de Cantos da equipa da casa",
+        "ac-": "22bet: Cantos › Total 2 · Betclic: Estatísticas › Cantos › Total de Cantos da equipa de fora",
+        "hy-": "Só na 22bet: Cartões amarelos › Total 1 (a Betclic não tem cartões)",
         "dc": "22bet: Hipótese dupla (1X/2X) · Betclic: Resultado duplo"}
 
 
@@ -599,6 +613,17 @@ def _texto_especialista(o, key, g, c):
                 "texto": f"{h}: golo na 1.ª parte em {c['ht_h']} dos últimos 10 jogos. {a}: {c['ht_a']} em 10. "
                          f"O mercado espera {_n(c['lam_tot'])} golos no jogo; até ao intervalo conto com {_n(c['mu']['ht'])}." + track,
                 "risco": "Equipas que entram cautelosas podem empurrar o primeiro golo para a 2.ª parte."}
+    if key in ("hc-", "ac-"):
+        t, o_, f_, c_, m_ = (h, a, c["hcf"], c["aca"], c["mu"]["hc"]) if key == "hc-" else (a, h, c["acf"], c["hca"], c["mu"]["ac"])
+        return {"titulo": "Poucos cantos",
+                "texto": f"{t}: {_n(f_)} cantos a favor por jogo nos últimos 10. {o_} concede {_n(c_)}. "
+                         f"Espero cerca de {_n(m_)} cantos de {t}, abaixo da linha de {_lt(o['line'])}." + track,
+                "risco": f"Se {t} estiver a perder cedo, carrega no ataque e os cantos sobem."}
+    if key == "hy-":
+        return {"titulo": "Poucos amarelos",
+                "texto": f"{h}: {_n(c['hyf'])} amarelos por jogo nos últimos 10. {a} provoca {_n(c['aya'])} amarelos aos adversários. "
+                         f"Espero cerca de {_n(c['mu']['hy'])} amarelos para {h}." + track,
+                "risco": "Um jogo quente ou um árbitro rigoroso muda isto depressa."}
     if key in ("c+", "c-"):
         return {"titulo": "Jogo de muitos cantos" if key == "c+" else "Poucos cantos",
                 "texto": f"{h}: {_n(c['c_h'])} cantos por jogo nos últimos 10. {a}: {_n(c['c_a'])}. "
@@ -627,7 +652,9 @@ def stem(sel):
     return re.sub(r"[\d.]+$", "", sel)
 
 
-NOT_PICKED = {"g2+"}  # golo na 2.ª parte: nem sempre existe na 22bet (falta no Braga–Gil Vicente); fica só na ficha do jogo
+# fora do boletim, só na ficha do jogo: golo na 2.ª parte nem sempre existe na 22bet (faltou no Braga–Gil Vicente);
+# cantos por equipa: a Betclic só tem 3 linhas à volta da média e as linhas da 22bet ainda não foram confirmadas
+NOT_PICKED = {"g2+", "hc-", "ac-"}
 PRICE_MIN_N = 40  # odds registadas num mercado antes de o preço aprendido mexer na ordem
 
 

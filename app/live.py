@@ -162,6 +162,12 @@ def decided(pick, g, s):
         if key == "y1+":
             return 1 if cur > line else 0 if half else None
         return 0 if cur > line else 1 if half else None
+    if key and key[:2] in ("hc", "ac", "hy", "ay") and line is not None:  # por equipa: [casa, fora]
+        i = 0 if key[0] == "h" else 1
+        cur = (s.get("amarelos") or [0, 0])[i] if key[1] == "y" else int((s.get("cantos") or [0, 0])[i] or 0)
+        if key[2] == "+":
+            return 1 if cur > line else 0 if end else None
+        return 0 if cur > line else 1 if end else None
     if key and key[0] in "cy" and line is not None:
         cur = sum(s.get("amarelos") or [0]) if key[0] == "y" else sum(int(x or 0) for x in s.get("cantos") or [0])
         if key[1] == "+":
@@ -192,6 +198,8 @@ def _self_test():
     assert decided({"key": "c-", "line": 11.5}, gm, st) == 1 and decided({"key": "y+", "line": 3.5}, gm, st) == 0
     assert decided({"key": "fav", "label": "Milan ganha"}, gm, st) == 1 and decided({"key": "g2+"}, gm, st) == 0
     assert decided({"key": "c-", "line": 11.5}, gm, dict(st, estado="in", cantos=["3", "3"])) is None
+    assert decided({"key": "hc-", "line": 4.5}, gm, st) == 1 and decided({"key": "ac-", "line": 4.5}, gm, st) == 0  # cantos 4 e 5
+    assert decided({"key": "hy-", "line": 1.5}, gm, dict(st, estado="in")) is None and decided({"key": "hy-", "line": 0.5}, gm, dict(st, estado="in")) == 0
     y1 = dict(st, estado="in", fase="STATUS_FIRST_HALF", parte=1, eventos=[{"tipo": "amarelo", "min": "30'"}, {"tipo": "amarelo", "min": "50'"}])
     assert decided({"key": "y1-", "line": 1.5}, gm, y1) is None and decided({"key": "y1-", "line": 1.5}, gm, dict(y1, fase="STATUS_HALFTIME")) == 1
     assert decided({"key": "y1-", "line": 0.5}, gm, y1) == 0

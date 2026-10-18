@@ -71,6 +71,9 @@ row = {"HTHG": "0", "HTAG": "1", "HC": "5", "AC": "4", "HY": "2", "AY": "1", "FT
 assert esp_outcome("ht+0.5", row, "", "X") == 1 and esp_outcome("c+8.5", row, "", "X") == 1 and esp_outcome("c-10.5", row, "", "X") == 1
 assert esp_outcome("c+9.5", row, "", "X") == 0 and esp_outcome("y+3.5", row, "", "X") == 0 and esp_outcome("y-4.5", row, "", "X") == 1
 assert esp_outcome("y+2.5", row, "", "X") == 1 and esp_outcome("zz", row, "", "X") is None
+assert esp_outcome("hc-5.5", row, "", "X") == 1 and esp_outcome("ac-3.5", row, "", "X") == 0 and esp_outcome("hy-1.5", row, "", "X") == 0  # HC 5, AC 4, HY 2
+from server import ESP_SEL, ESP_KEY
+assert ESP_SEL.match("esp:hc-4.5") and ESP_SEL.match("esp:hy-1.5") and not ESP_SEL.match("esp:hc+4.5") and ESP_KEY.match("ac-3.5").groups() == ("ac-", "3.5")
 assert esp_outcome("fav", row, "Braga ganha", "Braga") == 0 and esp_outcome("fav", row, "Gil ganha", "Braga") == 1
 cal = {"m": {"cal": [(0.5, 0.6), (0.8, 0.75)]}}
 assert calibrate(cal, "m", 0.3) == 0.6 and calibrate(cal, "m", 0.9) == 0.75 and abs(calibrate(cal, "m", 0.65) - 0.675) < 1e-9

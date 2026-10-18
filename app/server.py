@@ -68,7 +68,7 @@ def market(row, key, title, sels, ref_cols, books):
         best_odd, best_book = offers[0] if offers else (None, None)
         edge = best_odd * fair[i] - 1 if best_odd else None
         max_odd = num(row, col.format("Max"))
-        out.append({"sel": f"{key}:{sid}", "short": sid, "label": label, "market": title, "p": round(fair[i], 4),
+        out.append({"sel": f"{key}:{sid}", "short": sid, "label": label, "market": title, "p": round(fair[i], 4), "fonte": ref_name,
                     "fair_odd": round(1 / fair[i], 2), "min_odd": round((1 + MIN_EDGE) / fair[i], 2),
                     "best_odd": best_odd, "best_book": best_book, "edge": round(edge, 4) if edge is not None else None,
                     "offers": [{"book": n, "odd": o} for o, n in offers]
@@ -270,7 +270,7 @@ def risco(games, now, n=6, paused=()):
                 if RISK_ODDS[0] <= x["min_odd"] <= RISK_ODDS[1]:
                     out.append({"game_id": g["id"], "home": g["home"], "away": g["away"], "kickoff": g["kickoff"], "league": g["league"],
                                 "sel": x["sel"], "label": x["label"], "market": x["market"], "p": x["p"], "min_odd": x["min_odd"],
-                                "fair_odd": x["fair_odd"], "best_odd": x["best_odd"], "best_book": x["best_book"], "edge": x["edge"],
+                                "fair_odd": x["fair_odd"], "best_odd": x["best_odd"], "best_book": x["best_book"], "edge": x["edge"], "fonte": x.get("fonte"),
                                 "valor": bool(x["edge"] is not None and x["edge"] >= MIN_EDGE),
                                 "stake": stake(x["p"], max(x["best_odd"] or 0, x["min_odd"]), 100, cap=0.01)})
     out.sort(key=lambda x: (not x["valor"], -(x["edge"] if x["edge"] is not None else -1)))
@@ -340,9 +340,9 @@ DB = os.path.join(HERE, "data", "apostas.sqlite")
 NOTES = os.path.join(HERE, "data", "notas.json")  # notas do consultor por jogo (id do jogo -> texto)
 SEASON_URL = "https://www.football-data.co.uk/mmz4281/{season}/{div}.csv"
 SELS = {"1x2:1", "1x2:X", "1x2:2", "ou:+2,5", "ou:-2,5", "ah:casa", "ah:fora"}
-ESP_SEL = re.compile(r"^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|fav)$")  # y1: amarelos na 1.ª parte
+ESP_SEL = re.compile(r"^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|[ha][cy]-\d\.5|fav)$")  # y1: amarelos na 1.ª parte; hc/ac/hy: por equipa
 RESULTS = {"ganha": 1.0, "meio-ganha": 0.5, "anulada": 0.0, "meio-perdida": -0.5, "perdida": -1.0}
-MODEL_VERSION = "especialista v3.0 (18/10/2026) · sem golo na 2.ª parte no boletim · caminhos da 22bet e da Betclic · linha-alvo 74–80% · preços aprendidos · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
+MODEL_VERSION = "especialista v3.1 (19/10/2026) · amarelos e cantos por equipa · sem golo na 2.ª parte no boletim · linha-alvo 74–80% · preços aprendidos · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
 LEG_SCHEMA = """create table if not exists legs(bet_id integer, div text, date text, home text, away text, kickoff text,
   sel text, label text, market text, line real, odd real, p real, result text default 'pendente', dono text)"""
 PUB_SCHEMA = """create table if not exists published(day text, game_id text, ord integer, pick text, published_at text,
@@ -409,6 +409,9 @@ def esp_outcome(key, row, label, home):
             return int(row.get("FTR") != ("A" if label.removesuffix(" ou empate") == home else "H"))
         if key in ("hs", "as"):
             return int(g("FTHG" if key == "hs" else "FTAG") > 0)
+        if key[:2] in ("hc", "ac", "hy"):  # por equipa: hc-4.5 = cantos da casa abaixo de 4,5
+            v, line = g({"hc": "HC", "ac": "AC", "hy": "HY"}[key[:2]]), float(key[3:])
+            return int(v > line) if key[2] == "+" else int(v < line)
         if key.startswith("g2"):
             return int(g("FTHG") + g("FTAG") - g("HTHG") - g("HTAG") > float(key[3:]))
         fam = "ht" if key.startswith("ht") else key[0]
@@ -547,7 +550,7 @@ def leg_return(b, row):
     return settle_return(b["sel"], b["line"], b["odd"], int(row["FTHG"]), int(row["FTAG"])), closing_p(b["sel"], b["line"], row)
 
 
-ESP_KEY = re.compile(r"^(ht\+|g2\+|y1[+-]|[cy][+-])(\d+(?:\.\d)?)$")
+ESP_KEY = re.compile(r"^(ht\+|g2\+|y1[+-]|[ha][cy][+-]|[cy][+-])(\d+(?:\.\d)?)$")
 
 
 def espn_return(b):

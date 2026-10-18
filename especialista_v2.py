@@ -50,7 +50,7 @@ def build():
                 out.append({**ft, "L": lg, "S": r["S"], "dt": r["dt"], "home": h, "away": a,
                             "y_ht": eh["htf"] + eh["hta"], "y_c": el["c"], "y_y": el["y"],
                             "y_ft": el["fth"] + el["fta"], "y_g2": el["fth"] + el["fta"] - el["hth"] - el["hta"],
-                            "y_hg": el["fth"], "y_ag": el["fta"], "y_hth": el["hth"], "y_hta": el["hta"], "pH": x[0] if x else None, "pD": x[1] if x else None,
+                            "y_hg": el["fth"], "y_ag": el["fta"], "y_hc": float(r["HC"]), "y_ac": float(r["AC"]), "y_hy": float(r["HY"]), "y_hth": el["hth"], "y_hta": el["hta"], "pH": x[0] if x else None, "pD": x[1] if x else None,
                             "pA": x[2] if x else None, "res": r["FTR"],
                             "fav_p": fav, "fav_win": (int(r["FTR"] == ("H" if x[0] >= x[2] else "A")) if x else None)})
             if eh and ea:

@@ -86,6 +86,8 @@ def features(H, A, L, mk):
     y_venue = pair(hv, av, "yf", "ya") + pair(av, hv, "yf", "ya")
     fouls = pair(H, A, "ff", "fa") + pair(A, H, "ff", "fa")
     lg_safe = lambda x: math.log(max(x, 1e-3))
+    c2, y2 = c_avg / 2, y_avg / 2  # média por equipa na liga
+    side = lambda T1, T2, kf, ka, avg: lg_safe(t(T1, kf) * t(T2, ka) / avg / avg)  # ataque de uma x o que a outra concede
     return {
         # golos na 1.ª parte
         "ht_model": lg_safe(ht_model), "ht_venue": lg_safe(ht_venue), "ht_mkt": lg_safe(lam_tot * (ht_h + ht_a) / ft),
@@ -95,6 +97,12 @@ def features(H, A, L, mk):
         # amarelos (com faltas e tendência recente da liga)
         "y_base": lg_safe(y_base / y_avg), "y_venue": lg_safe(y_venue / y_avg), "y_lg": lg_safe(y_avg),
         "y_trend": lg_safe(y_rec / y_avg), "y_fouls": lg_safe(fouls / f_avg), "y_balance": 1 - strength, "y_goals": lam_tot / ft,
+        # por equipa (cantos e amarelos de cada lado)
+        "hc_base": side(H, A, "cf", "ca", c2), "ac_base": side(A, H, "cf", "ca", c2),
+        "hc_venue": side(hv, av, "cf", "ca", c2), "ac_venue": side(av, hv, "cf", "ca", c2),
+        "hy_base": side(H, A, "yf", "ya", y2), "ay_base": side(A, H, "yf", "ya", y2),
+        "hy_venue": side(hv, av, "yf", "ya", y2), "ay_venue": side(av, hv, "yf", "ya", y2),
+        "lc2": lg_safe(c2), "ly2": lg_safe(y2),
         # mercado 1X2 (para "equipa marca")
         "mk_ph": pH if pH is not None else 0.45, "mk_pa": pA if pA is not None else 0.30,
         # contexto para o texto humano
@@ -110,6 +118,9 @@ MODEL_COLS = {
     "g2": ["ht_mkt", "ht_model", "ht_venue"],
     "hg": ["ht_mkt", "ht_model", "ht_venue", "mk_ph", "mk_pa"],
     "ag": ["ht_mkt", "ht_model", "ht_venue", "mk_ph", "mk_pa"],
+    "hc": ["hc_base", "hc_venue", "lc2", "mk_ph", "mk_pa", "c_goals"],
+    "ac": ["ac_base", "ac_venue", "lc2", "mk_ph", "mk_pa", "c_goals"],
+    "hy": ["hy_base", "hy_venue", "ly2", "y_trend", "y_fouls", "mk_ph", "mk_pa", "y_balance"],
 }
 
 
