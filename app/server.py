@@ -340,7 +340,7 @@ DB = os.path.join(HERE, "data", "apostas.sqlite")
 NOTES = os.path.join(HERE, "data", "notas.json")  # notas do consultor por jogo (id do jogo -> texto)
 SEASON_URL = "https://www.football-data.co.uk/mmz4281/{season}/{div}.csv"
 SELS = {"1x2:1", "1x2:X", "1x2:2", "ou:+2,5", "ou:-2,5", "ah:casa", "ah:fora"}
-ESP_SEL = re.compile(r"^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|fav)$")
+ESP_SEL = re.compile(r"^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|fav)$")  # y1: amarelos na 1.ª parte
 RESULTS = {"ganha": 1.0, "meio-ganha": 0.5, "anulada": 0.0, "meio-perdida": -0.5, "perdida": -1.0}
 MODEL_VERSION = "especialista v2.4 (18/10/2026) · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
 LEG_SCHEMA = """create table if not exists legs(bet_id integer, div text, date text, home text, away text, kickoff text,
@@ -396,6 +396,8 @@ LIVE_PRIOR = 150   # previsões fechadas necessárias para a correção aprendid
 def esp_outcome(key, row, label, home):
     """1 se a previsão de especialista se confirmou, 0 se falhou, None se faltam dados. key: ht+0.5, c+8.5, y-4.5, fav."""
     g = lambda k: f(row, k)
+    if key.startswith("y1"):
+        return None  # o football-data não tem cartões por parte: fecha pelo placar ao vivo (settle_pending)
     try:
         if key == "fav":
             return int(row.get("FTR") == ("H" if label.removesuffix(" ganha") == home else "A"))
@@ -540,6 +542,22 @@ def settle_pending(con, now):
         r = next((r for r in cache[key] if r.get("Date") == b["date"] and r.get("HomeTeam") == b["home"]), None)
         return r if r and r.get("FTHG") else None
 
+    live_by_id = {g["id"]: g for g in _LAST["games"] if g.get("live")}
+
+    def by_halves(b):
+        """Amarelos na 1.ª parte: decide-se ao intervalo pelos cartões da ESPN (com o minuto de cada um)."""
+        g = live_by_id.get(f"{b['div']}-{b['date']}-{b['home']}")
+        won = aovivo.decided({"key": b["sel"][4:7], "line": float(b["sel"][7:])}, g, g["live"]) if g else None
+        return None if won is None else (b["odd"] - 1 if won else -1.0)
+
+    for b in con.execute("select * from bets where result='pendente' and sel like 'esp:y1%'").fetchall():
+        ret = by_halves(b)
+        if ret is not None:
+            con.execute("update bets set result=?, profit=? where id=?", (result_label(ret, b["odd"]), round(ret * b["stake"], 2), b["id"]))
+    for l in con.execute("select rowid, * from legs where result='pendente' and sel like 'esp:y1%'").fetchall():
+        ret = by_halves(l)
+        if ret is not None:
+            con.execute("update legs set result=? where rowid=?", (result_label(ret, l["odd"]), l["rowid"]))
     for b in con.execute("select * from bets where result='pendente' and sel != 'multi' and kickoff < ?", (cutoff,)).fetchall():
         row = row_for(b)
         ret, cp = leg_return(b, row) if row else (None, None)

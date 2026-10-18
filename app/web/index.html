@@ -1042,6 +1042,11 @@ function liveLeg(l) {
   if (k === 'ht+0.5') { const e = goals.find(e => gMin(e.min) <= 45); return e ? won(`golo aos ${e.min}`) : ht ? lost('sem golos na 1.ª parte') : run(`ainda sem golo · ${v.minuto || ''}`); }
   if (k === 'g2+0.5') { const e = goals.find(e => gMin(e.min) > 45); return e ? won(`golo aos ${e.min}`) : end ? lost('sem golos na 2.ª parte') : run(ht ? `2.ª parte ainda sem golo · ${v.minuto || ''}` : 'a 2.ª parte ainda não começou'); }
   if (k === 'hs' || k === 'as') { const n = k === 'hs' ? v.hg : v.ag; return n ? won(`já marcou (${sc})`) : end ? lost(`não marcou (${sc})`) : run(`ainda não marcou (${sc})`); }
+  if ((m = /^y1([+-])(\d\.5)$/.exec(k))) {  // amarelos na 1.ª parte: decide-se ao intervalo
+    const cur = (v.eventos || []).filter(e => e.tipo === 'amarelo' && gMin(e.min) <= 45).length, what = `amarelo${cur === 1 ? '' : 's'} na 1.ª parte`;
+    if (m[1] === '+') return cur > +m[2] ? won(`${cur} ${what}`) : ht ? lost(`${cur} ${what}`) : run(`${cur} ${what} até agora · ${v.minuto || ''}`);
+    return cur > +m[2] ? lost(`já vão ${cur} ${what}`) : ht ? won(`${cur} ${what}`) : run(`${cur} ${what} até agora · ${v.minuto || ''}`);
+  }
   if ((m = /^([cy])([+-])(\d+\.5)$/.exec(k))) {
     const cur = m[1] === 'y' ? v.amarelos[0] + v.amarelos[1] : +v.cantos[0] + +v.cantos[1], what = (m[1] === 'y' ? 'amarelo' : 'canto') + (cur === 1 ? '' : 's');
     if (m[2] === '+') return cur > +m[3] ? won(`${cur} ${what}`) : end ? lost(`${cur} ${what}`) : run(`${cur} ${what} até agora`);
