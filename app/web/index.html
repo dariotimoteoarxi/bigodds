@@ -233,7 +233,7 @@
   .chart { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 16px; margin: 12px 0; position: relative; }
   .chart h3 { font: 600 17px var(--serif); margin: 0 0 2px; }
   .chart p { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
-  .chart svg { width: 100%; height: auto; display: block; touch-action: none; }
+  .chart svg:not(.flag) { width: 100%; height: auto; display: block; touch-action: none; }
   .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 6px; }
   .legend i { display: inline-block; width: 16px; height: 0; border-top: 2.5px solid var(--lime); margin-right: 6px; vertical-align: middle; }
   .legend i.ref { border-top: 2px dashed var(--muted); }
