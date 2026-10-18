@@ -102,10 +102,11 @@ def leituras(g, s, modelo):
     for name, label, p_raw in cands:
         p = calibrate(modelo["cal"], name, p_raw)
         if p >= LIVE_MIN:
-            out.append({"key": name, "label": label, "p": round(p, 3), "min_odd": round(1.02 / p, 2), "mu_2p": round(mu, 2),
+            mo = max(1.20, round(1.02 / p, 2))  # regra do utilizador: nunca abaixo de 1,20
+            out.append({"key": name, "label": label, "p": round(p, 3), "min_odd": mo, "mu_2p": round(mu, 2),
                         "texto": f"Ao intervalo está {s['hg']}-{s['ag']}. Antes do jogo contava com {mu0:.1f} golos na 2.ª parte; "
                                  f"com o resultado de agora espero {mu:.1f}. Em jogos parecidos isto bateu {round(p * 100)}% das vezes. "
-                                 f"Só entra se a 22bet ou a Betclic pagarem pelo menos {1.02 / p:.2f}."})
+                                 f"Só entra se a 22bet ou a Betclic pagarem pelo menos {max(1.20, 1.02 / p):.2f}."})
     return out
 
 

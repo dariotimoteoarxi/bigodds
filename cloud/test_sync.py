@@ -62,7 +62,7 @@ rel = json.loads(cf.kv["relatorio"])
 assert {"aprendizagem", "equipas", "historico"} <= set(rel)
 assert "relatorio:Dário" in cf.kv and "relatorio:Ana" in cf.kv
 eq = lambda k: {x["equipa"]: x for x in json.loads(cf.kv[k])["equipas"]["equipas"]}
-assert "Real Madrid" in eq("relatorio:Ana") and eq("relatorio:Ana")["Real Madrid"]["apostas"]["n"] == 0  # ainda aberta
+assert "Real Madrid" in eq("relatorio:Ana") and eq("relatorio:Ana")["Real Madrid"]["apostas"]["n"] in (0, 1)  # 1 se a ESPN já deu o jogo como terminado
 assert all(x["apostas"]["n"] == 0 for x in eq("relatorio").values())  # o geral não tem apostas de ninguém
 assert "ntfy_vistos:Ana" in cf.kv and "ntfy_vistos:Dário" not in cf.kv  # só quem ligou os avisos
 assert set(sent_to) <= {"bigodds-teste"}

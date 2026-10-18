@@ -342,7 +342,7 @@ SEASON_URL = "https://www.football-data.co.uk/mmz4281/{season}/{div}.csv"
 SELS = {"1x2:1", "1x2:X", "1x2:2", "ou:+2,5", "ou:-2,5", "ah:casa", "ah:fora"}
 ESP_SEL = re.compile(r"^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|fav)$")  # y1: amarelos na 1.ª parte
 RESULTS = {"ganha": 1.0, "meio-ganha": 0.5, "anulada": 0.0, "meio-perdida": -0.5, "perdida": -1.0}
-MODEL_VERSION = "especialista v2.4 (18/10/2026) · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
+MODEL_VERSION = "especialista v2.5 (18/10/2026) · odd mínima 1,20 · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
 LEG_SCHEMA = """create table if not exists legs(bet_id integer, div text, date text, home text, away text, kickoff text,
   sel text, label text, market text, line real, odd real, p real, result text default 'pendente', dono text)"""
 PUB_SCHEMA = """create table if not exists published(day text, game_id text, ord integer, pick text, published_at text,
@@ -356,6 +356,10 @@ def publish(con, sel, games, now):
         return sel
     rows = con.execute("select * from published where day=? order by ord", (day,)).fetchall()
     by_id = {g["id"]: g for g in games}
+    if rows and rows[0]["version"] != MODEL_VERSION and all(
+            datetime.fromisoformat(json.loads(r["pick"])["jogo"]["kickoff"]) > now for r in rows):
+        con.execute("delete from published where day=?", (day,))  # regras novas e nenhum jogo começou: publica de novo
+        rows = []
     if not rows:
         for i, p in enumerate(sel["apostas"] + sel.get("blindado", [])):
             g = by_id[p["game_id"]]
@@ -534,7 +538,8 @@ ESP_KEY = re.compile(r"^(ht\+|g2\+|y1[+-]|[cy][+-])(\d+(?:\.\d)?)$")
 
 
 def espn_return(b):
-    """Lucro por unidade pelo resultado final da ESPN (None se o jogo não acabou ou não o encontro)."""
+    """Lucro por unidade pela ESPN: mercados do especialista logo que o resultado é certo (golo aos 3' fecha
+    "Há golo na 1.ª parte"), 1X2/golos/handicap no apito final. None se ainda está em aberto ou não encontro o jogo."""
     if b["div"] not in aovivo.SLUG:
         return None
     try:
@@ -546,17 +551,17 @@ def espn_return(b):
     sim = lambda s: (SequenceMatcher(None, arbitros.norm(b["home"]), arbitros.norm(s["home_espn"])).ratio()
                      + SequenceMatcher(None, arbitros.norm(b["away"]), arbitros.norm(s["away_espn"])).ratio())
     s = max(evs, key=sim, default=None)
-    if not s or sim(s) < 1.1 or s["estado"] != "post":
+    if not s or sim(s) < 1.1 or s["estado"] == "pre":
         return None
     if not b["sel"].startswith("esp:"):
-        return settle_return(b["sel"], b["line"], b["odd"], s["hg"], s["ag"])
+        return settle_return(b["sel"], b["line"], b["odd"], s["hg"], s["ag"]) if s["estado"] == "post" else None
     m = ESP_KEY.match(b["sel"][4:])
     pick = {"key": m.group(1), "line": float(m.group(2)), "label": b["label"]} if m else {"key": b["sel"][4:], "label": b["label"]}
     won = aovivo.decided(pick, {"home": b["home"], "away": b["away"]}, s)
     return None if won is None else (b["odd"] - 1 if won else -1.0)
 
 
-def settle_pending(con, now):
+def settle_pending(con, now, official=True):
     """Liquida apostas e pernas de boletins cujos jogos já acabaram e já estão publicados no football-data."""
     cutoff = (now - timedelta(hours=2, minutes=30)).isoformat()
     cache = {}
@@ -577,7 +582,7 @@ def settle_pending(con, now):
         return None if won is None else (b["odd"] - 1 if won else -1.0)
 
     # resultado final da ESPN: fecha no próprio dia (o football-data só publica no dia seguinte)
-    espn_cut = (now - timedelta(hours=2)).isoformat()
+    espn_cut = now.isoformat()  # já começou: a ESPN diz se está decidido
     for b in con.execute("select * from bets where result='pendente' and sel != 'multi' and kickoff < ?", (espn_cut,)).fetchall():
         ret = espn_return(b)
         if ret is not None:
@@ -594,7 +599,7 @@ def settle_pending(con, now):
         ret = by_halves(l)
         if ret is not None:
             con.execute("update legs set result=? where rowid=?", (result_label(ret, l["odd"]), l["rowid"]))
-    for b in con.execute("select * from bets where result='pendente' and sel != 'multi' and kickoff < ?", (cutoff,)).fetchall():
+    for b in (con.execute("select * from bets where result='pendente' and sel != 'multi' and kickoff < ?", (cutoff,)).fetchall() if official else []):
         row = row_for(b)
         ret, cp = leg_return(b, row) if row else (None, None)
         if ret is None:
@@ -602,7 +607,7 @@ def settle_pending(con, now):
         con.execute("update bets set result=?, profit=?, closing_p=?, clv=? where id=?",
                     (result_label(ret, b["odd"]), round(ret * b["stake"], 2), cp,
                      round(b["odd"] * cp - 1, 4) if cp else None, b["id"]))
-    for l in con.execute("select rowid, * from legs where result='pendente' and kickoff < ?", (cutoff,)).fetchall():
+    for l in (con.execute("select rowid, * from legs where result='pendente' and kickoff < ?", (cutoff,)).fetchall() if official else []):
         row = row_for(l)
         ret, _ = leg_return(l, row) if row else (None, None)
         if ret is not None:
@@ -612,6 +617,9 @@ def settle_pending(con, now):
               "meio-perdida": lambda o: 0.5, "perdida": lambda o: 0.0}
     for b in con.execute("select * from bets where result='pendente' and sel='multi'").fetchall():
         legs = con.execute("select * from legs where bet_id=?", (b["id"],)).fetchall()
+        if legs and any(l["result"] == "perdida" for l in legs):  # uma perna perdida chega: não espera pelas outras
+            con.execute("update bets set result='perdida', profit=? where id=?", (round(-b["stake"], 2), b["id"]))
+            continue
         if not legs or any(l["result"] == "pendente" for l in legs):
             continue
         prod_legs = math.prod(l["odd"] for l in legs)

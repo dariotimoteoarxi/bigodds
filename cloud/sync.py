@@ -60,6 +60,14 @@ def push(cf, before, after):
     new_pub = [v for k, v in after["published"].items() if k not in before["published"]]
     insert_many(cf, "published", new_pub)
     n += len(new_pub)
+    for k, v in after["published"].items():  # republicado com regras novas (mesmo jogo, aposta diferente)
+        if k in before["published"] and before["published"][k] != v:
+            cf.query("update published set ord=?, pick=?, published_at=?, version=? where day=? and game_id=?",
+                     [v["ord"], v["pick"], v["published_at"], v["version"], k[0], k[1]])
+            n += 1
+    for k in set(before["published"]) - set(after["published"]):  # já não faz parte do boletim do dia
+        cf.query("delete from published where day=? and game_id=?", list(k))
+        n += 1
     for bid, v in after["bets"].items():
         if bid in before["bets"] and before["bets"][bid] != v:
             cf.query("update bets set result=?, profit=?, closing_p=?, clv=? where id=?", list(v) + [bid])
@@ -180,10 +188,14 @@ def aovivo(cf):
     for g in games:  # minutos até ao início, como se a agenda tivesse sido calculada agora
         g["minutes_to_ko"] = round((datetime.fromisoformat(g["kickoff"]) - now).total_seconds() / 60)
     server._LAST["games"] = games
+    before = snapshot(con)
+    server.settle_pending(con, now, official=False)  # fecha pela ESPN o que já é certo (o oficial fica para a completa)
+    con.commit()
+    settled = push(cf, before, snapshot(con))
     state = live_payload(server, con, games, now)
     cf.kv_put("live", json.dumps(state, ensure_ascii=False))
     sent = send_alerts(cf, server, con, games, now)
-    print(f"aovivo: {sum(1 for k in state if not k.startswith('_'))} jogos com estado · {sent} avisos")
+    print(f"aovivo: {sum(1 for k in state if not k.startswith('_'))} jogos com estado · {settled} apostas fechadas · {sent} avisos")
 
 
 if __name__ == "__main__":

@@ -33,13 +33,13 @@
   @media (max-width: 900px) { .brand img.word { display: none; } .tabs button { padding: 8px 7px; font-size: 14px; } }
   @media (max-width: 780px) { .tabs button { padding: 8px 5px; font-size: 13px; } }
   .brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; }
-  .brand img.mark { width: 30px; height: 30px; }
+  .brand img.mark { width: 40px; height: 40px; }
   .brand img.word { height: 22px; }
   .tabs { margin-left: auto; display: flex; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
   .tabs button { background: none; border: 0; color: var(--muted); padding: 8px 11px; white-space: nowrap; flex: none; border-radius: 999px; font-weight: 500; }
   .tabs button[aria-current="page"] { background: var(--raised); color: var(--ink); }
   nav.bottom { display: none; }
-  .gear { flex: none; display: grid; place-items: center; width: 38px; height: 38px; margin-left: 4px; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--muted); }
+  .gear { flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-left: 4px; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--muted); }
   .gear[aria-current="page"], .gear:hover { color: var(--lime); border-color: var(--lime); }
   @media (max-width: 640px) { .gear { margin-left: auto; } }
 
@@ -102,6 +102,8 @@
   .chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
   /* ligas: uma linha que desliza, botões finos com a cor da liga e o número de jogos */
   .howto { margin: 2px 0 12px; }
+  .opt.low { opacity: .5; } .opt.low .name::after { content: " · abaixo de 1,20"; font: 500 11px var(--tech); color: var(--faint); }
+  .pref { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font: 700 10px var(--tech); color: var(--bg); background: var(--lime); vertical-align: 2px; }
   .bactions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 14px; } .bactions .btn { display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; margin: 0; padding: 12px 10px; }
   .lv-note { margin: 12px 0 0; display: inline-block; padding: 3px 10px; border-radius: 999px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line-soft); color: var(--faint); font: 500 12px var(--tech); }
   .viewsw { margin: 10px 0 6px; max-width: 320px; } .viewsw button { padding: 7px 10px; } .howto summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
@@ -124,7 +126,11 @@
   .day.today { border-left-color: var(--red); background: linear-gradient(90deg, rgba(232, 111, 94, .14), rgba(232, 111, 94, 0) 70%); }
   .day .rel { font: 700 11px var(--tech); letter-spacing: .12em; text-transform: uppercase; color: var(--lime); }
   .day.today .rel { color: var(--red); }
-  .day .n { margin-left: auto; font: 500 12px var(--tech); color: var(--muted); }
+  .day .n { margin-left: auto; font: 500 12px var(--tech); color: var(--muted); white-space: nowrap; }
+  @media (max-width: 640px) {
+    .day { font-size: 15px; padding: 10px 12px; margin-top: 20px; } .day > span:not(.n) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lede { font-size: 15px; } .section-title { font-size: 22px; } .row .teams { font-size: 15px; } .row .teams small { font-size: 13px; }
+  }
   .cal-head, .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }  /* minmax(0): as colunas encolhem no telemóvel */
   .cal-head span { text-align: center; font: 600 11px var(--tech); letter-spacing: .1em; color: var(--faint); padding: 14px 0 4px; }
   .cal button { aspect-ratio: 1 / 1.05; border-radius: 14px; border: 1px solid var(--line-soft); background: rgba(255, 255, 255, .02); color: var(--ink);
@@ -143,16 +149,16 @@
   .cal button[aria-pressed="true"] small { color: var(--bg); }
   .cal-key { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin: 10px 0 0; }
   .cal-key span { display: inline-flex; gap: 6px; align-items: center; } .cal-key i { width: 8px; height: 8px; border-radius: 50%; }
-  .row { display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line-soft); padding: 14px 4px; }
+  .row { display: grid; grid-template-columns: 52px 1fr 96px; gap: 12px; align-items: center; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line-soft); padding: 14px 4px; }
   .row:hover { background: rgba(255, 255, 255, .02); }
   .row .t { font-weight: 600; font-variant-numeric: tabular-nums; }
   .row .t small { display: block; color: var(--faint); font-weight: 500; font-size: 11px; }
   .row .teams { font-weight: 600; }
   .row .teams small { display: block; color: var(--muted); font-weight: 400; font-size: 13px; }
-  .row .side { display: grid; justify-items: end; gap: 6px; }
+  .row .side { display: grid; justify-items: stretch; gap: 6px; } .row .side > .tag, .row .side > .conf { justify-self: stretch; text-align: center; justify-content: center; }
   .tag { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
   .tag.aconselhada { background: var(--lime-soft); color: var(--lime); }
-  .meter { width: 64px; height: 5px; border-radius: 3px; background: var(--line-soft); overflow: hidden; }
+  .meter { width: 100%; height: 5px; border-radius: 3px; background: var(--line-soft); overflow: hidden; }
   .meter i { display: block; height: 100%; border-radius: 3px; background: var(--muted); }
   .meter.Alta i { background: var(--lime); } .meter.Média i { background: var(--amber); }
 
@@ -400,7 +406,7 @@
   .navn { margin-left: 6px; font: 700 11px var(--tech); color: var(--red); } .navn:empty { display: none; }
   .livecard { display: block; width: 100%; text-align: left; color: inherit; font: inherit; cursor: pointer; padding: 0; background: none; border: 0; }
   .livecard .livebox { transition: border-color .2s; } .livecard:hover .livebox { border-color: rgba(232, 111, 94, .7); }
-  .livecard .lg { float: right; font: 600 11px var(--tech); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .livecard .lg { display: inline-flex; align-items: center; gap: 6px; float: right; font: 600 11px var(--tech); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
   /* ecrã de arranque: trevo a crescer folha a folha, anel a rodar e mensagens do que estou a fazer */
   #splash { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 18px; background: var(--bg);
     transition: opacity .5s ease, visibility .5s; }
@@ -457,7 +463,7 @@
       <button data-view="boletins">Boletins</button>
       <button data-view="desempenho">Desempenho</button>
     </div>
-    <button class="gear" data-view="definicoes" aria-label="Definições" title="Definições"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button class="gear" data-view="definicoes" aria-label="Definições" title="Definições"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
 </header>
 
@@ -744,7 +750,7 @@ function tipCard(p, g, now) {
     ${(() => { const L = started && liveLeg({ sel: p.sel, div: g.div, date: g.date, home: g.home, label: p.label }); return L ? `<div class="lvnote ${L.cls}" style="font-weight:600;margin:-2px 0 6px">${esc(L.note)}</div>` : ''; })()}
     <div class="match">${esc(g.home)} – ${esc(g.away)}</div>
     <div class="core"><div class="bet"><small>${esc(p.titulo)}</small><b>${esc(p.label)}</b>
-      <div class="minodd">a partir de ${fmt(p.min_odd)} <span>odd mínima</span></div></div>${ring(p.p)}</div>
+      <div class="minodd">a partir de ${fmt(Math.max(ODD_FLOOR, p.min_odd))} <span>odd mínima</span>${p.min_odd >= ODD_PREF ? '<span class="pref">1,30+</span>' : ''}</div></div>${ring(p.p)}</div>
     ${p.revisao ? `<div class="note" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Em revisão:</b> ${esc(p.revisao)}</div>` : ''}
     ${g.onzes && g.onzes.atencao ? onzesNote(g) : ''}
     <details class="why-d"><summary>Porquê</summary><p class="why">${esc(p.texto)}</p><p class="risk">${esc(p.risco)}</p>
@@ -757,12 +763,13 @@ function tipCard(p, g, now) {
 }
 
 /* ---------- JOGOS ---------- */
-const topSel = g => espSels(g).sort((a, b) => b.p_est - a.p_est)[0] || allSels(g).filter(s => s.best_odd && s.best_odd >= 1.3).sort((a, b) => b.p_est - a.p_est)[0];
+const ODD_FLOOR = 1.20, ODD_PREF = 1.30;  // regra do utilizador: nada abaixo de 1,20; de preferência 1,30 ou mais
+const topSel = g => espSels(g).filter(s => s.min_odd_est >= ODD_FLOOR).sort((a, b) => b.p_est - a.p_est)[0] || allSels(g).filter(s => s.best_odd && s.best_odd >= 1.3).sort((a, b) => b.p_est - a.p_est)[0];
 const dayKey = d => d.toLocaleDateString('sv-SE');
 function dayHead(k, n, noun = ['jogo', 'jogos']) {
   const today = dayKey(new Date()), tom = dayKey(new Date(Date.now() + 864e5));
   const rel = k === today ? 'Hoje' : k === tom ? 'Amanhã' : '';
-  const d = new Date(k + 'T12:00').toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
+  const d = new Date(k + 'T12:00').toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' }).replace('-feira', '');
   return `<div class="day ${k === today ? 'today' : ''}" role="heading" aria-level="3">${rel ? `<span class="rel">${rel}</span>` : ''}<span>${d.replace(/^./, c => c.toUpperCase())}</span><span class="n">${n} ${n === 1 ? noun[0] : noun[1]}</span></div>`;
 }
 function gameRow(g) {
@@ -862,8 +869,8 @@ document.addEventListener('change', async e => {
   const out = inp.closest('.opt, .tip').querySelector('.chkout');  // a mesma seleção pode estar no Hoje e na ficha
   if (!s || !(odd > 1)) return;
   const pr = inp.dataset.p ? +inp.dataset.p : s.p_est, minOdd = inp.dataset.p ? 1.02 / pr : s.min_odd_est;  // risco: preço justo do mercado
-  const edge = odd * pr - 1, ok = odd * pr >= 1.02;
-  out.innerHTML = ok ? `<b style="color:var(--lime)">Entra:</b> a ${fmt(odd)} tens ${fmt(edge * 100, 1)}% de margem a teu favor.`
+  const edge = odd * pr - 1, ok = odd * pr >= 1.02 && odd >= ODD_FLOOR;
+  out.innerHTML = odd < ODD_FLOOR ? `<b style="color:var(--red)">Não entra:</b> abaixo de 1,20 não vale o risco (a tua regra).` : ok ? `<b style="color:var(--lime)">Entra:</b> a ${fmt(odd)} tens ${fmt(edge * 100, 1)}% de margem a teu favor.`
     : `<b style="color:var(--red)">Não entra:</b> a ${fmt(odd)} ${edge < 0 ? `pagas ${fmt(-edge * 100, 1)}% acima do justo` : 'a margem é curta demais'}. Mínimo ${fmt(minOdd)}.`;
   try { await api('/api/apostas', { action: 'odd', game_id: g.id, sel: s.sel, label: s.label, market: s.market, book: myBook(), odd, p: pr, kickoff: g.kickoff }); }
   catch (err) { toast('Não guardei a odd: ' + err.message); }
@@ -872,7 +879,7 @@ function espBlock(g) {
   const es = espSels(g);
   if (!es.length) return '<p class="sub">Ainda não há jogos suficientes destas equipas para estes mercados.</p>';
   const best = Math.max(...es.map(s => s.p_est));
-  return `<div class="mkt">${es.map(s => `<div class="opt ${s.p_est === best ? 'top' : ''}">
+  return `<div class="mkt">${es.map(s => `<div class="opt ${s.p_est === best ? 'top' : ''} ${s.min_odd_est < ODD_FLOOR ? 'low' : ''}">
       <span class="name">${esc(s.label)}</span><span class="pc">${pc(s.p_est)}</span>
       <span class="track ${s.conf}"><i style="width:${s.p_est * 100}%"></i></span>
       <span class="meta">${confDots(s.conf)}<span>odd mínima <b>${fmt(s.min_odd_est)}</b></span>
@@ -931,6 +938,7 @@ function betSheet(id, selId) {
     const o = parseFloat($('#odd').value), v = parseFloat($('#stk').value);
     if (!(o > 1 && v > 0)) { $('#pv').textContent = 'Escreve a odd para ver o ganho potencial.'; return; }
     $('#pv').innerHTML = `Se ganhar recebes <b>${eur(v * o)}</b> (lucro ${eur(v * (o - 1))}). Com ${pc(s.p_est)} de acerto, o lucro esperado é <b>${signed(v * (s.p_est * o - 1))}</b>.
+      ${o < ODD_FLOOR ? `<div class="warn">Abaixo de 1,20: pela tua regra não vale o risco.</div>` : ''}
       ${o < s.min_odd_est ? `<div class="warn">Abaixo da odd mínima (${fmt(s.min_odd_est)}): a longo prazo esta aposta perde dinheiro.</div>` : ''}
       ${todayBets.reduce((a, b) => a + b.stake, 0) + v > bank() * DAY_LIMIT ? `<div class="warn">Passa o teu limite de hoje (${eur(bank() * DAY_LIMIT)}). O meu conselho: reduz o valor.</div>` : ''}`;
   };
@@ -1038,15 +1046,13 @@ function equipasPanel(E) {
   const list = all.filter(x => x.hist && x.hist.n >= 60 && (eqLeague === 'Todas' || x.liga === eqLeague))
     .sort((a, b) => eqSort === 'melhor' ? rate(b) - rate(a) : rate(a) - rate(b)).slice(0, eqLeague === 'Todas' ? 15 : 30);
   const live = x => `${pc(x.previsoes.certas / x.previsoes.n)} em ${x.previsoes.n}`;
-  return `<div class="chart learn"><h3>As tuas apostas por equipa</h3>
-      <p>Uma linha por equipa em que apostaste. Nas apostas sobre o jogo inteiro (cantos, cartões, golos) aparece o jogo. Conta simples e pernas de boletins já fechadas.</p>
+  return `<div class="chart learn"><h3>As tuas apostas por equipa</h3>${howto(`Uma linha por equipa em que apostaste. Nas apostas sobre o jogo inteiro (cantos, cartões, golos) aparece o jogo. Conta simples e pernas de boletins já fechadas.`)}
       ${mine.length ? `<table><thead><tr><th>Equipa ou jogo</th><th>Apostas</th><th>Ganhas</th><th>Acerto</th><th>Lucro (simples)</th></tr></thead><tbody>
         ${mine.map(x => `<tr><td>${esc(x.equipa)}</td><td>${x.apostas.n}</td><td>${x.apostas.ganhas}</td>
           <td class="${x.apostas.ganhas / x.apostas.n >= 0.7 ? 'good' : 'bad'}">${pc(x.apostas.ganhas / x.apostas.n)}</td><td>${signed(x.apostas.lucro)}</td></tr>`).join('')}</tbody></table>`
         : '<p style="color:var(--faint)">Aparece quando as tuas apostas fecharem.</p>'}</div>
-    <div class="chart learn"><h3>Em que equipas as minhas previsões acertam</h3>
-      <p>Percentagem de acerto das apostas que eu sugeriria (confiança ≥72%) em jogos de cada equipa, nas épocas 2025/26 e 2026/27. A verde: acertei mais do que previa; a vermelho: menos.
-      Testei usar isto para mudar a confiança e piorou a previsão, por isso é só contexto.</p>
+    <div class="chart learn"><h3>Em que equipas as minhas previsões acertam</h3>${howto(`Percentagem de acerto das apostas que eu sugeriria (confiança ≥72%) em jogos de cada equipa, nas épocas 2025/26 e 2026/27. A verde: acertei mais do que previa; a vermelho: menos.
+      Testei usar isto para mudar a confiança e piorou a previsão, por isso é só contexto.`)}
       <div class="chips">${leagues.map(l => `<button aria-pressed="${l === eqLeague}" data-eql="${esc(l)}">${esc(l)}</button>`).join('')}</div>
       <div class="miniseg">Ordenar<button data-eqs="melhor" aria-pressed="${eqSort === 'melhor'}">mais acerto</button><button data-eqs="pior" aria-pressed="${eqSort === 'pior'}">menos acerto</button></div>
       ${list.map(x => { const h = x.hist, good = h.real >= h.previsto;
@@ -1135,29 +1141,25 @@ function historicoPanel(H) {
   if (!H) return '';
   const row = c => `<tr><td>${esc(c.faixa)}</td><td>${c.n}</td><td>${pc(c.previsto)}</td><td class="${Math.abs(c.real - c.previsto) <= 0.02 || c.real > c.previsto ? 'good' : 'bad'}">${pc(c.real)}</td></tr>`;
   const days = (H.dias || []).filter(d => d.apostas).sort((a, b) => a.dia.localeCompare(b.dia));  // por ordem: o dia mais antigo primeiro
-  return `<div class="chart learn"><h3>Digo X%, acontece X%?</h3>
-      <p>Quando digo 80%, devem falhar cerca de 2 em cada 10. Esta tabela mostra se isso é verdade: primeiro em ${(H.teste || []).reduce((s, c) => s + c.n, 0).toLocaleString('pt-PT')} apostas de épocas que o modelo nunca viu, depois nas previsões feitas aqui na app.</p>
+  return `<div class="chart learn"><h3>Digo X%, acontece X%?</h3>${howto(`Quando digo 80%, devem falhar cerca de 2 em cada 10. Esta tabela mostra se isso é verdade: primeiro em ${(H.teste || []).reduce((s, c) => s + c.n, 0).toLocaleString('pt-PT')} apostas de épocas que o modelo nunca viu, depois nas previsões feitas aqui na app.`)}
       <table><thead><tr><th>Confiança</th><th>Apostas</th><th>Previsto</th><th>Real</th></tr></thead><tbody>${(H.teste || []).map(row).join('')}</tbody></table>
       <p style="margin-top:12px"><b>Na app</b> (desde 18/10/2026)</p>
       ${H.app && H.app.length ? `<table><thead><tr><th>Confiança</th><th>Previsões</th><th>Previsto</th><th>Real</th></tr></thead><tbody>${H.app.map(row).join('')}</tbody></table>`
         : '<p style="color:var(--faint)">As previsões fecham no dia a seguir aos jogos; a tabela enche-se sozinha.</p>'}</div>
-    <div class="chart learn"><h3>Boletins do dia, um a um</h3>
-      <p>O que publiquei em cada dia e quantas acertei. Não apago dias maus.</p>
+    <div class="chart learn"><h3>Boletins do dia, um a um</h3>${howto(`O que publiquei em cada dia e quantas acertei. Não apago dias maus.`)}
       ${days.length ? `<table><thead><tr><th>Dia</th><th>Apostas</th><th>Certas</th><th>Falhadas</th><th>Por fechar</th></tr></thead><tbody>
         ${days.map(d => `<tr><td>${new Date(d.dia + 'T12:00').toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' })}</td><td>${d.apostas}</td>
           <td class="good">${d.certas}</td><td class="${d.falhadas ? 'bad' : ''}">${d.falhadas}</td><td>${d.apostas - d.certas - d.falhadas}</td></tr>`).join('')}</tbody></table>` : '<p style="color:var(--faint)">Ainda sem boletins publicados.</p>'}</div>`;
 }
 function clvPanel(C) {
-  return `<div class="chart learn"><h3>Bates a odd de fecho? (CLV por mercado)</h3>
-    <p>É o sinal mais rápido de que as tuas entradas são boas: se apostas a 2,10 e o jogo fecha a 1,95, estás a comprar bem. Com 30 ou mais apostas, um mercado com CLV médio abaixo de −2% sai das sugestões de risco até melhorar. Só existe para 1X2, golos 2,5 e handicap (são os únicos com odd de fecho pública).</p>
+  return `<div class="chart learn"><h3>Bates a odd de fecho? (CLV por mercado)</h3>${howto(`É o sinal mais rápido de que as tuas entradas são boas: se apostas a 2,10 e o jogo fecha a 1,95, estás a comprar bem. Com 30 ou mais apostas, um mercado com CLV médio abaixo de −2% sai das sugestões de risco até melhorar. Só existe para 1X2, golos 2,5 e handicap (são os únicos com odd de fecho pública).`)}
     ${C && C.length ? `<table><thead><tr><th>Mercado</th><th>Apostas</th><th>CLV médio</th><th>Bateu o fecho</th><th>Estado</th></tr></thead><tbody>
       ${C.map(c => `<tr><td>${esc(c.mercado)}</td><td>${c.n}</td><td class="${c.clv >= 0 ? 'good' : 'bad'}">${c.clv > 0 ? '+' : ''}${fmt(c.clv * 100, 1)}%</td><td>${pc(c.positivo)}</td>
         <td>${c.pausa ? '<b style="color:var(--red)">em pausa</b>' : c.n < 30 ? `a medir (${c.n}/30)` : 'ativo'}</td></tr>`).join('')}</tbody></table>`
       : '<p style="color:var(--faint)">Aparece quando tiveres apostas simples nestes mercados e os jogos fecharem.</p>'}</div>`;
 }
 function oddsPanel(O) {
-  return `<div class="chart learn"><h3>Os preços das tuas casas</h3>
-    <p>Cada odd que escreves (ao verificar um mercado ou ao registar uma aposta) fica guardada. Com o tempo isto mostra em que mercados a 22bet e a Betclic costumam pagar acima do justo.</p>
+  return `<div class="chart learn"><h3>Os preços das tuas casas</h3>${howto(`Cada odd que escreves (ao verificar um mercado ou ao registar uma aposta) fica guardada. Com o tempo isto mostra em que mercados a 22bet e a Betclic costumam pagar acima do justo.`)}
     ${O && O.length ? `<table><thead><tr><th>Mercado</th><th>Casa</th><th>Odds</th><th>Odd média</th><th>Com valor</th><th>Margem</th></tr></thead><tbody>
       ${O.map(o => `<tr><td>${esc(o.mercado)}</td><td>${esc(o.casa)}</td><td>${o.n}</td><td>${fmt(o.odd)}</td>
         <td class="${o.valor >= 0.5 ? 'good' : 'bad'}">${pc(o.valor)}</td><td class="${o.margem >= 0 ? 'good' : 'bad'}">${o.margem > 0 ? '+' : ''}${fmt(o.margem * 100, 1)}%</td></tr>`).join('')}</tbody></table>`
@@ -1165,8 +1167,7 @@ function oddsPanel(O) {
 }
 function learnPanel(L) {
   const rows = Object.entries(L || {});
-  return `<div class="chart learn"><h3>Como o Bigodds está a acertar</h3>
-    <p>Todas as previsões que publico são confrontadas com o resultado real. Quando falho mais do que previa num mercado, a confiança desse mercado baixa sozinha.</p>
+  return `<div class="chart learn"><h3>Como o Bigodds está a acertar</h3>${howto(`Todas as previsões que publico são confrontadas com o resultado real. Quando falho mais do que previa num mercado, a confiança desse mercado baixa sozinha.`)}
     ${rows.length ? `<table><thead><tr><th>Mercado</th><th>Previsões</th><th>Previsto</th><th>Real</th><th>Ajuste</th></tr></thead><tbody>
       ${rows.map(([n, v]) => `<tr><td>${esc(n)}</td><td>${v.n}</td><td>${pc(v.previsto)}</td>
         <td class="${v.real >= v.previsto - 0.02 ? 'good' : 'bad'}">${pc(v.real)}</td><td>${v.ajuste > 0 ? '+' : ''}${fmt(v.ajuste * 100, 1)} pp</td></tr>`).join('')}</tbody></table>`
@@ -1512,7 +1513,7 @@ function liveTip(o, g) {
     <p class="risk">A odd ao vivo mexe depressa: confirma-a na 22bet ou na Betclic antes de entrar e não entres abaixo de ${fmt(o.min_odd)}.</p>
     <div class="foot"><span class="grow"></span><button class="btn ghost small" data-game="${esc(g.id)}">Ver jogo</button></div></article>`;
 }
-const liveCard = g => `<button class="livecard" data-game="${esc(g.id)}" aria-label="${esc(g.home)} – ${esc(g.away)}: ver análise">${liveBox(g).replace('<div class="livebox">', `<div class="livebox"><span class="lg">${esc(g.league)} · ${hm(g.kickoff)}</span>`)}</button>`;
+const liveCard = g => `<button class="livecard" data-game="${esc(g.id)}" aria-label="${esc(g.home)} – ${esc(g.away)}: ver análise">${liveBox(g).replace(/<div class="livebox( goal)?">/, m => `${m}<span class="lg">${flag(g.league, 13)} ${esc(LEAGUE_SHORT[g.league] || g.league)} · ${hm(g.kickoff)}</span>`)}</button>`;
 function aoVivo() {
   const live = data.games.filter(g => g.live && g.live.estado === 'in'), sug = live.flatMap(g => (g.ao_vivo || []).map(o => liveTip(o, g)));
   if (!live.length) return '';

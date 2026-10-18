@@ -417,7 +417,8 @@ import os as _os
 from features import entry, features, league_entry, negbin_over, num, poisson_over, predict_mu
 
 MODELS_FILE = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "modelos.json")
-PICK_MIN, PICK_MAX = 0.72, 0.88       # abaixo de 72% não aconselho; acima de 88% a odd já não tem interesse
+ODD_FLOOR, ODD_PREF = 1.20, 1.30      # regra do utilizador: nada abaixo de 1,20; de preferência 1,30 ou mais
+PICK_MIN, PICK_MAX = 0.72, round(1.02 / ODD_FLOOR, 3)  # 72%–85%: a odd mínima fica sempre ≥ 1,20 (antes ia até 88%)
 BLIND_MIN, BLIND_HIST = 0.90, 0.818    # boletim blindado: backtest 2025/26–2026/27, 77 dias, certo em 81,8%
 CONF_ALTA, CONF_MEDIA = 0.80, 0.74
 NAMES = {"ht+": "Golo na 1.ª parte", "g2+": "Golo na 2.ª parte", "hs": "Equipa da casa marca", "as": "Equipa de fora marca",
@@ -620,9 +621,7 @@ def selecao_especialista(games, today, n=4):
         top = next((o for o in ok if PICK_MIN <= o["p"] <= PICK_MAX), None)
         if top:
             best.append({**top, "game_id": g["id"], "sel": "esp:" + top["key"], "market": top["family"]})
-        safe = next((o for o in ok if o["p"] >= BLIND_MIN), None)  # especialista vem ordenado por p
-        if safe:
-            blind.append({**safe, "game_id": g["id"], "sel": "esp:" + safe["key"], "market": safe["family"], "grupo": "blindado"})
+        # boletim blindado (≥90%) desligado: as odds dessas seleções ficam sempre abaixo de 1,20 (regra do utilizador)
     best.sort(key=lambda o: -o["p"])
     blind.sort(key=lambda o: -o["p"])
     return {"dia": day, "apostas": best[:n], "blindado": blind[:3], "boletins": make_boletins(best[:n], blind[:3])}

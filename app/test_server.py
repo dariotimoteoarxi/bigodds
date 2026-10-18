@@ -243,5 +243,8 @@ assert espn_return(leg("esp:y-5.5", "Menos de 5,5 amarelos", 5.5)) == 0.5
 assert espn_return(leg("1x2:2", "Sociedad ganha", odd=2.0)) == 1.0
 assert espn_return({**leg("esp:hs", "x"), "home": "Barcelona", "away": "Girona"}) is None  # outro jogo
 ev["status"]["type"]["state"] = "in"
-assert espn_return(leg("esp:ht+0.5", "Há golo na 1.ª parte")) is None  # ainda a decorrer
+ev["status"]["type"]["name"] = "STATUS_FIRST_HALF"; ev["status"]["period"] = 1; ev["status"]["displayClock"] = "30'"
+assert abs(espn_return(leg("esp:ht+0.5", "Há golo na 1.ª parte", odd=1.275)) - 0.275) < 1e-9  # golo aos 3': já é certo
+assert espn_return(leg("esp:hs", "Malaga marca")) is None  # ainda pode marcar
+assert espn_return(leg("1x2:2", "Sociedad ganha", odd=2.0)) is None  # resultado só no fim
 print("fecho ESPN ok")
