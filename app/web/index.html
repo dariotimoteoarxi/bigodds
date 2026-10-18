@@ -7,6 +7,7 @@
 <title>Bigodds</title>
 <link rel="icon" href="icone.svg">
 <link rel="apple-touch-icon" href="icone-192.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -889,8 +890,28 @@ function periodStart(now) {
 }
 let dtab = ['resumo', 'equipas', 'mercados'].includes(store.get('dtab')) ? store.get('dtab') : 'resumo', eqLeague = 'Todas', eqSort = 'melhor';
 document.addEventListener('click', e => { const b = e.target.closest('[data-dtab]'); if (b) { dtab = b.dataset.dtab; store.set('dtab', dtab); bets ? renderDesempenho() : loadBets(); } });
+/* instalar como app (PWA): no Android o Chrome oferece "Instalar app"; aqui fica o botão e as instruções */
+let installEvt = null;
+const installed = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!$('#definicoes').hidden) renderDefinicoes(); });
+addEventListener('appinstalled', () => { installEvt = null; toast('Bigodds instalado: já está no teu ecrã principal'); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+function installCard() {
+  if (installed()) return '';
+  const ios = /iphone|ipad/i.test(navigator.userAgent);
+  return `<div class="chart"><h3>Instalar no telemóvel</h3>
+    <p>O Bigodds instala-se como uma app: fica no ecrã principal e na lista de apps, abre em ecrã inteiro e sem a barra do browser.</p>
+    ${installEvt ? '<button class="btn primary" data-install style="width:100%">Instalar o Bigodds</button>'
+      : ios ? '<p>No iPhone (Safari): botão <b>Partilhar</b> → <b>Adicionar ao ecrã principal</b>.</p>'
+      : '<p>No Android (Chrome): menu <b>⋮</b> → <b>Instalar app</b> (ou <b>Adicionar ao ecrã principal</b>).</p>'}</div>`;
+}
+document.addEventListener('click', async e => {
+  if (!e.target.closest('[data-install]') || !installEvt) return;
+  installEvt.prompt(); await installEvt.userChoice; installEvt = null; renderDefinicoes();
+});
 function renderDefinicoes() {
   $('#definicoes').innerHTML = `<div class="hero"><p class="eyebrow">Definições</p><h1>O teu Bigodds</h1></div>
+    ${installCard()}
     ${me ? `<div class="chart"><h3>Conta</h3><p>Estás na conta <b>${esc(me)}</b>. As apostas, o desempenho e os avisos são só desta conta; as análises são iguais para todos.</p>
       <button class="btn ghost" data-trocar style="width:100%">Trocar de conta</button></div>` : ''}
     <div class="chart" id="phone"></div>
