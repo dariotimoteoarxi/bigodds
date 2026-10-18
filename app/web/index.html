@@ -462,7 +462,8 @@ async function apiFetch(path, body, retry = true) {
   if (body) headers['Content-Type'] = 'application/json';
   const r = await fetch(path, body ? { method: 'POST', headers, body: JSON.stringify(body) } : { headers });
   if (r.status === 401 && retry) {
-    askKey ||= Promise.resolve(prompt('Palavra-passe do Bigodds (a que puseste no GitHub):'));
+    const why = (await r.clone().json().catch(() => ({}))).error || '';
+    askKey ||= Promise.resolve(prompt((store.get('chave', '') ? why + '\n\n' : '') + 'Palavra-passe da tua conta Bigodds (só a palavra-passe, sem o nome):'));
     const k = await askKey; setTimeout(() => { askKey = null; }, 1000);
     if (k) { store.set('chave', k.trim()); return apiFetch(path, body, false); }
   }

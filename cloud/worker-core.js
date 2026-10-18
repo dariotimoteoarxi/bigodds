@@ -186,7 +186,11 @@ const json = (status, obj) => new Response(JSON.stringify(obj), { status, header
 export async function handle(request, env) {
   const url = new URL(request.url), path = url.pathname.replace(/^\/api\//, '');
   const dono = whoIs(request, env);
-  if (!dono) return json(401, { error: 'Falta a palavra-passe do Bigodds.' });
+  if (!dono) {
+    const n = accounts(env).length;  // diz o que falha sem revelar nomes nem palavras-passe
+    return json(401, { error: n ? 'Palavra-passe errada. Escreve só a palavra-passe (sem o nome nem os dois pontos).'
+                                : 'Não há contas configuradas: o segredo BIGODDS_UTILIZADORES tem de ser Nome:palavra-passe;Nome2:palavra-passe2', contas: n });
+  }
   try {
     if (request.method === 'GET') {
       if (path === 'agenda' || path === 'calendario' || path === 'live') {
