@@ -10,7 +10,35 @@ SCHEMA = [s.strip() for s in open(os.path.join(HERE, "worker-core.js")).read().s
           if s.strip().startswith("create")]
 
 MIGRATIONS = re.findall(r"'(alter table [^']+)'", open(os.path.join(HERE, "worker-core.js")).read())
-cf = CF(create=True)
+def check_token():
+    """Diz em português o que está mal no token, antes de tentar criar coisas."""
+    import json, urllib.error, urllib.request
+    tok, acc = "".join(os.environ["CLOUDFLARE_API_TOKEN"].split()), "".join(os.environ["CLOUDFLARE_ACCOUNT_ID"].split())
+    print(f"token com {len(tok)} caracteres")  # o tamanho não revela o token
+    for path in (f"/accounts/{acc}/tokens/verify", "/user/tokens/verify"):  # tokens de conta e de utilizador
+        req = urllib.request.Request("https://api.cloudflare.com/client/v4" + path, headers={"Authorization": f"Bearer {tok}"})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                st = json.load(r)["result"]["status"]
+            print(f"token válido ({st})")
+            if st != "active":
+                sys.exit("O token existe mas não está ativo: cria um novo na Cloudflare.")
+            return
+        except urllib.error.HTTPError:
+            continue
+    sys.exit("A Cloudflare não reconhece o token: o segredo CLOUDFLARE_API_TOKEN não é um token válido (copiado incompleto, "
+             "trocado com outro valor, ou o token foi apagado). Cria um token novo e volta a pô-lo no GitHub.")
+
+
+check_token()
+try:
+    cf = CF(create=True)
+except RuntimeError as e:
+    if "Authentication error" in str(e) or " 403 " in str(e):
+        sys.exit("O token é válido mas não tem as permissões precisas. No token da Cloudflare confirma: "
+                 "Account · D1 · Edit, Account · Workers KV Storage · Edit, Account · Cloudflare Pages · Edit, "
+                 "Account · Account Settings · Read, User · User Details · Read; e em Account Resources a tua conta.")
+    raise
 for q in SCHEMA:
     cf.query(q)
 for q in MIGRATIONS:  # bases antigas, sem a coluna dono
