@@ -382,12 +382,30 @@
   .livecard { display: block; width: 100%; text-align: left; color: inherit; font: inherit; cursor: pointer; padding: 0; background: none; border: 0; }
   .livecard .livebox { transition: border-color .2s; } .livecard:hover .livebox { border-color: rgba(232, 111, 94, .7); }
   .livecard .lg { float: right; font: 600 11px var(--tech); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  /* ecrã de arranque: trevo a crescer folha a folha, anel a rodar e mensagens do que estou a fazer */
+  #splash { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 18px; background: var(--bg);
+    transition: opacity .5s ease, visibility .5s; }
+  #splash.out { opacity: 0; visibility: hidden; }
+  .sp-logo { position: relative; width: 140px; height: 140px; display: grid; place-items: center; }
+  .sp-clover { width: 104px; height: 104px; animation: sp-breathe 2.4s ease-in-out infinite; filter: drop-shadow(0 0 18px rgba(198, 244, 50, .25)); }
+  .sp-clover .leaf { transform-box: view-box; transform-origin: 96px 96px; animation: sp-leaf 2.8s ease-out infinite both; animation-delay: var(--d); }  /* cresce a partir do centro do trevo */
+  .sp-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(198, 244, 50, .12); border-top-color: var(--lime); animation: sp-spin 1.1s linear infinite; }
+  .sp-word { height: 30px; opacity: .95; }
+  #spMsg { margin: 0; color: var(--muted); font: 500 14px var(--tech); letter-spacing: .02em; min-height: 1.4em; transition: opacity .25s; }
+  @keyframes sp-spin { to { transform: rotate(360deg); } }
+  @keyframes sp-breathe { 50% { transform: scale(1.06) rotate(4deg); } }
+  @keyframes sp-leaf { 0% { opacity: 0; transform: scale(.3); } 14% { opacity: 1; transform: scale(1.1); } 22%, 86% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.3); } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
+<div id="splash" role="status" aria-live="polite">
+  <div class="sp-logo"><span class="sp-ring"></span><svg class="sp-clover" viewBox="0 0 200 200" aria-hidden="true"><g transform="translate(6,-4)"><path class="stem" d="M100 110 C100 150 106 166 124 176" stroke="#2F8F5B" stroke-width="8" stroke-linecap="round" fill="none"/><g transform="rotate(0 100 100)" fill="#2F8F5B"><g class="leaf" style="--d:0s"><rect x="60" y="60" width="36" height="36"/><circle cx="60" cy="78" r="18"/><circle cx="78" cy="60" r="18"/></g></g><g transform="rotate(90 100 100)" fill="#C6F432"><g class="leaf" style="--d:0.15s"><rect x="60" y="60" width="36" height="36"/><circle cx="60" cy="78" r="18"/><circle cx="78" cy="60" r="18"/></g></g><g transform="rotate(180 100 100)" fill="#2F8F5B"><g class="leaf" style="--d:0.3s"><rect x="60" y="60" width="36" height="36"/><circle cx="60" cy="78" r="18"/><circle cx="78" cy="60" r="18"/></g></g><g transform="rotate(270 100 100)" fill="#2F8F5B"><g class="leaf" style="--d:0.45s"><rect x="60" y="60" width="36" height="36"/><circle cx="60" cy="78" r="18"/><circle cx="78" cy="60" r="18"/></g></g></g></svg></div>
+  <img class="sp-word" src="wordmark.svg" alt="Bigodds">
+  <p id="spMsg">A preparar a tua análise…</p>
+</div>
 <header>
   <div class="wrap">
     <button class="brand" id="home" aria-label="Bigodds: ir para Hoje"><img class="mark" src="icone.svg" alt=""><img class="word" src="wordmark.svg" alt="Bigodds"></button>
@@ -1578,6 +1596,16 @@ document.addEventListener('click', async e => {
   renderHoje(); renderAoVivo();
 });
 
+const SPLASH_MSGS = ['A ler as odds das casas…', 'A analisar a época de cada equipa…', 'A ver árbitros e onzes…', 'A calcular as apostas do dia…', 'A acompanhar os jogos ao vivo…'];
+let splashTimer = null;
+function splash(on) {
+  const el = $('#splash'); if (!el) return;
+  if (on) {
+    let i = 0; clearInterval(splashTimer);
+    splashTimer = setInterval(() => { const m = $('#spMsg'); m.style.opacity = 0; setTimeout(() => { m.textContent = SPLASH_MSGS[i++ % SPLASH_MSGS.length]; m.style.opacity = 1; }, 250); }, 1500);
+  } else { clearInterval(splashTimer); el.classList.add('out'); setTimeout(() => el.remove(), 600); }
+}
+splash(true);
 async function load() {
   $('#hoje').innerHTML = '<div class="empty"><h3>A analisar os jogos…</h3>Leio as odds, a época de cada equipa e as notícias.</div>';
   try {
@@ -1592,6 +1620,7 @@ async function load() {
     pollLive();  // lembretes e lances logo ao abrir
   }
   catch (e) { $('#hoje').innerHTML = `<div class="empty"><h3>Não consegui carregar</h3>${esc(e.message)}</div>`; }
+  splash(false);  // só existe na primeira vez; depois de removido isto não faz nada
 }
 show(store.get('view', 'hoje'));
 load();
