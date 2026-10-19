@@ -1073,8 +1073,9 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 let verTag = null;
 async function checkVersion() {
   try {
-    const r = await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }), t = r.headers.get('etag') || r.headers.get('last-modified');
-    if (!t) return;
+    // a Cloudflare não manda ETag nesta página: compara uma impressão digital do conteúdo
+    const txt = await (await fetch(location.pathname, { cache: 'no-store' })).text();
+    let t = 0; for (let i = 0; i < txt.length; i++) t = (t * 31 + txt.charCodeAt(i)) | 0;
     if (verTag === null) verTag = t;
     else if (t !== verTag && !$('.upd')) document.body.insertAdjacentHTML('beforeend', '<button class="upd" onclick="location.reload()">Nova versão · tocar para atualizar</button>');
   } catch { /* sem rede: tenta na próxima */ }
