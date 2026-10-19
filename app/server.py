@@ -131,10 +131,16 @@ def analyse(row, bank, now):
 
 def load_fixtures(force=False):
     if force or not os.path.exists(CACHE) or time.time() - os.path.getmtime(CACHE) > 3600:
-        with urllib.request.urlopen(FIXTURES_URL, timeout=30) as r:
-            data = r.read()
-        with open(CACHE, "wb") as f:
-            f.write(data)
+        for attempt in (1, 2):  # o football-data às vezes demora: tenta outra vez e, sem resposta, usa a última cópia
+            try:
+                with urllib.request.urlopen(FIXTURES_URL, timeout=30) as r:
+                    data = r.read()
+                with open(CACHE, "wb") as f:
+                    f.write(data)
+                break
+            except OSError:
+                if attempt == 2 and not os.path.exists(CACHE):
+                    raise
     with open(CACHE, encoding="utf-8-sig") as f:
         return list(csv.DictReader(f)), datetime.fromtimestamp(os.path.getmtime(CACHE), TZ)
 
