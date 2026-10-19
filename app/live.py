@@ -119,6 +119,45 @@ def _minute(txt):
     return (int(m.group(1)), int(m.group(2) or 0)) if m else (0, 0)
 
 
+def _mu2(g, s, modelo):
+    """Golos esperados na 2.ª parte, sabendo o resultado ao intervalo (modelo do intervalo)."""
+    mu = g["mu"]
+    ht = [sum(e["lado"] == x for e in s.get("eventos", []) if e["tipo"] == "golo" and _minute(e["min"])[0] <= 45) for x in ("home", "away")]
+    if not modelo:
+        return mu["g2"]
+    pH, pA = (g.get("mk") or {}).get("pH"), (g.get("mk") or {}).get("pA")
+    losing = float(pH is not None and pA is not None and (ht[0] < ht[1] if pH >= pA else ht[1] < ht[0]))
+    x = {"log_mu": math.log(mu["g2"]), "ht_tot": sum(ht), "ht_gd": abs(ht[0] - ht[1]), "fav_losing": losing}
+    return math.exp(modelo["intercept"] + sum(c * x[k] for k, c in zip(modelo["cols"], modelo["coef"])))
+
+
+def ao_minuto(g, s, modelo, aom):
+    """Leituras a cada minuto (especialista_aominuto.py, 2323 jogos; teste 2026/27 depois de calibrar):
+    "já não há golo na 1.ª parte" e "ainda há golo no jogo" (2.ª parte) acertaram o previsto ou mais.
+    As outras duas direções falharam o teste e não existem aqui."""
+    mu = g.get("mu") or {}
+    if not aom or s["estado"] != "in" or any(s.get("vermelhos") or []) or not mu.get("ht") or not mu.get("g2"):
+        return []
+    m, tot = _minute(s.get("minuto"))[0], s["hg"] + s["ag"]
+    out = []
+    if s.get("parte") == 1 and s["fase"] != "STATUS_HALFTIME" and 10 <= m <= 42:
+        p_at = lambda mm: calibrate(aom["cal"], "1", math.exp(-mu["ht"] * (45 + aom["stop1"] - mm) / 45))
+        p = p_at(m)
+        quando = next((mm for mm in range(m + 1, 45) if p_at(mm) >= LIVE_MIN), None) if p < LIVE_MIN else None
+        out.append({"key": "Ao minuto: já não há golo na 1.ª parte", "pred_key": f"ht-{tot}.5", "label": f"1.ª parte: menos de {tot},5 golos",
+                    "p": round(p, 3), "a_partir": quando,
+                    "texto": f"Aos {m}' está {s['hg']}-{s['ag']}. Cada minuto sem golo sobe a probabilidade"
+                             + (f"; passa {round(LIVE_MIN * 100)}% aos {quando}'." if quando else ".")})
+    if s.get("parte") == 2 and 50 <= m <= 87:
+        p = 1 - calibrate(aom["cal"], "2", math.exp(-_mu2(g, s, modelo) * (90 + aom["stop2"] - m) / 45))
+        out.append({"key": "Ao minuto: ainda há golo no jogo", "pred_key": f"go+{tot}.5", "label": f"Mais de {tot},5 golos no jogo",
+                    "p": round(p, 3), "a_partir": None,
+                    "texto": f"Aos {m}' está {s['hg']}-{s['ag']}. Nos jogos testados há mais golos no fim do que um ritmo constante faria esperar."})
+    for o in out:
+        o["min_odd"] = max(1.20, round(1.02 / o["p"], 2))  # regra do utilizador: nunca abaixo de 1,20
+    return out
+
+
 def prob_golo(g, s, modelo):
     """Probabilidade de ainda haver golo (no jogo e de cada equipa) até ao fim.
 
@@ -133,14 +172,7 @@ def prob_golo(g, s, modelo):
     if first_half:
         rem = mu["ht"] * max(0, 45 - base) / 45 + mu["g2"]
     else:
-        ht = [sum(e["lado"] == x for e in s.get("eventos", []) if e["tipo"] == "golo" and _minute(e["min"])[0] <= 45) for x in ("home", "away")]
-        mu2 = mu["g2"]
-        if modelo:
-            pH, pA = (g.get("mk") or {}).get("pH"), (g.get("mk") or {}).get("pA")
-            losing = float(pH is not None and pA is not None and (ht[0] < ht[1] if pH >= pA else ht[1] < ht[0]))
-            x = {"log_mu": math.log(mu["g2"]), "ht_tot": sum(ht), "ht_gd": abs(ht[0] - ht[1]), "fav_losing": losing}
-            mu2 = math.exp(modelo["intercept"] + sum(c * x[k] for k, c in zip(modelo["cols"], modelo["coef"])))
-        rem = mu2 * (1 if s["fase"] == "STATUS_HALFTIME" else max(0, 90 - base) / 45)
+        rem = _mu2(g, s, modelo) * (1 if s["fase"] == "STATUS_HALFTIME" else max(0, 90 - base) / 45)
     sh = mu["hg"] / (mu["hg"] + mu["ag"]) if mu.get("hg") and mu.get("ag") else 0.5
     p = lambda lam: round(1 - math.exp(-lam), 3)
     return {"jogo": p(rem), "casa": p(rem * sh), "fora": p(rem * (1 - sh))}
@@ -157,6 +189,9 @@ def decided(pick, g, s):
         return 1 if any(_minute(e["min"])[0] <= 45 for e in goals) else 0 if (end or s["fase"] == "STATUS_HALFTIME" or (s.get("parte") or 1) >= 2) else None
     if key == "g2+":
         return 1 if any(_minute(e["min"])[0] > 45 for e in goals) else 0 if end else None
+    if key == "ht-" and line is not None:  # leitura ao minuto: já não há (mais) golo na 1.ª parte
+        n = sum(1 for e in goals if _minute(e["min"])[0] <= 45)
+        return 0 if n > line else 1 if (end or s["fase"] == "STATUS_HALFTIME" or (s.get("parte") or 1) >= 2) else None
     if key in ("go+", "go-") and line is not None:  # total de golos noutra linha (boletins lidos por foto)
         tot = s["hg"] + s["ag"]
         return (1 if tot > line else 0 if end else None) if key == "go+" else (0 if tot > line else 1 if end else None)
@@ -211,6 +246,15 @@ def _self_test():
     assert decided({"key": "fav", "label": "Milan ganha"}, gm, st) == 1 and decided({"key": "g2+"}, gm, st) == 0
     assert decided({"key": "c-", "line": 11.5}, gm, dict(st, estado="in", cantos=["3", "3"])) is None
     assert decided({"key": "g2-", "line": 2.5}, gm, st) == 1 and decided({"key": "g2-", "line": 0.5}, gm, dict(st, estado="in", eventos=[{"tipo": "golo", "min": "50'"}])) == 0
+    assert decided({"key": "ht-", "line": 0.5}, gm, st) == 0 and decided({"key": "ht-", "line": 1.5}, gm, st) == 1  # golo aos 24'
+    aom = {"stop1": 2, "stop2": 4, "cal": {"1": [(0.3, 0.3), (0.9, 0.9)], "2": [(0.1, 0.1), (0.9, 0.9)]}}
+    gg = {"mu": {"ht": 0.96, "g2": 1.24}, "mk": {}}
+    s1 = {"estado": "in", "fase": "STATUS_FIRST_HALF", "parte": 1, "minuto": "19'", "hg": 0, "ag": 1, "vermelhos": [0, 0], "eventos": []}
+    r = ao_minuto(gg, s1, None, aom)[0]
+    assert r["pred_key"] == "ht-1.5" and abs(r["p"] - math.exp(-0.96 * 28 / 45)) < 1e-3 and r["a_partir"] == 27, r
+    assert ao_minuto(gg, dict(s1, vermelhos=[1, 0]), None, aom) == [] and ao_minuto(gg, s1, None, None) == []
+    r2 = ao_minuto(gg, dict(s1, parte=2, fase="STATUS_SECOND_HALF", minuto="70'"), None, aom)[0]
+    assert r2["pred_key"] == "go+1.5" and abs(r2["p"] - (1 - math.exp(-1.24 * 24 / 45))) < 1e-3, r2
     assert decided({"key": "go+", "line": 1.5}, gm, st) == 1 and decided({"key": "go-", "line": 3.5}, gm, st) == 0  # 3-2
     assert decided({"key": "hc-", "line": 4.5}, gm, st) == 1 and decided({"key": "ac-", "line": 4.5}, gm, st) == 0  # cantos 4 e 5
     assert decided({"key": "hy-", "line": 1.5}, gm, dict(st, estado="in")) is None and decided({"key": "hy-", "line": 0.5}, gm, dict(st, estado="in")) == 0

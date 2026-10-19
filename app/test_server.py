@@ -71,6 +71,7 @@ row = {"HTHG": "0", "HTAG": "1", "HC": "5", "AC": "4", "HY": "2", "AY": "1", "FT
 assert esp_outcome("ht+0.5", row, "", "X") == 1 and esp_outcome("c+8.5", row, "", "X") == 1 and esp_outcome("c-10.5", row, "", "X") == 1
 assert esp_outcome("c+9.5", row, "", "X") == 0 and esp_outcome("y+3.5", row, "", "X") == 0 and esp_outcome("y-4.5", row, "", "X") == 1
 assert esp_outcome("y+2.5", row, "", "X") == 1 and esp_outcome("zz", row, "", "X") is None
+assert esp_outcome("ht-1.5", row, "", "X") == 1 and esp_outcome("ht-0.5", row, "", "X") == 0  # 0-1 ao intervalo
 assert esp_outcome("hc-5.5", row, "", "X") == 1 and esp_outcome("ac-3.5", row, "", "X") == 0 and esp_outcome("hy-1.5", row, "", "X") == 0  # HC 5, AC 4, HY 2
 from server import ESP_SEL, ESP_KEY
 assert ESP_SEL.match("esp:hc-4.5") and ESP_SEL.match("esp:hy-1.5") and not ESP_SEL.match("esp:hc+4.5") and ESP_KEY.match("ac-3.5").groups() == ("ac-", "3.5")

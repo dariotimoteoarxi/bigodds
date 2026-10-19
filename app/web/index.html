@@ -385,6 +385,7 @@
   .livebox .pg .row3 .m { height: 4px; border-radius: 2px; background: var(--line-soft); overflow: hidden; margin-top: 4px; } .livebox .pg .row3 .m i { display: block; height: 100%; background: var(--lime); }
   .oddchk { width: 72px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); color: var(--ink); font: 600 13px var(--tech); }
   .chkout:empty { display: none; }
+  .liveread { margin: 10px 0 0; font-size: 13px; color: var(--muted); } .liveread b { color: var(--ink); font-weight: 600; }
   .slip .casa { margin: 4px 0 6px; font-size: 13px; color: var(--muted); } .slip .casa b { color: var(--lime); font-weight: 600; }
   .fairodd { margin-top: 6px; font: 500 12px var(--tech); color: var(--faint); }
   .valchk { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0 2px; } .valchk .oddchk { width: 118px; }
@@ -1638,7 +1639,8 @@ function liveBox(g) {
     <div class="board"><span class="tm">${esc(g.home)}</span><span class="sc">${l.hg} – ${l.ag}</span><span class="tm">${esc(g.away)}</span></div>
     ${stat('Cantos', l.cantos)}${stat('Amarelos', l.amarelos)}${stat('Remates à baliza', l.remates)}${stat('Posse de bola', l.posse, '%')}${l.vermelhos.some(x => x) ? stat('Vermelhos', l.vermelhos) : ''}
     ${probGolo(g)}
-    ${(g.ao_vivo || []).map(o => `<div class="note" style="border-left-color:var(--red);margin-top:14px"><b style="color:var(--red)">${esc(o.label)} · ${pc(o.p)}</b> a partir de ${fmt(o.min_odd)}. ${esc(o.texto)}</div>`).join('')
+    ${(g.ao_minuto || []).filter(o => o.p < 0.65).map(o => `<p class="liveread"><b>${esc(o.label)}</b> · ${pc(o.p)} agora${o.a_partir ? ` · passa 65% aos ${o.a_partir}'` : ''}</p>`).join('')}
+    ${(g.ao_vivo || []).map(o => `<div class="note" style="border-left-color:var(--red);margin-top:14px"><b style="color:var(--red)">${esc(o.label)} · ${pc(o.p)}</b> · entra com ${fmt(o.min_odd)}+. ${esc(o.texto)}</div>`).join('')
       || liveNote(g)}</div>`;
 }
 function renderAoVivo() {
@@ -1751,10 +1753,10 @@ async function espnRefresh() {
 async function pollLive() {
   if (!data || document.hidden && !('Notification' in window && Notification.permission === 'granted')) return;
   try {
-    const sig = () => JSON.stringify(data.games.map(g => [g.live, g.ao_vivo, g.onzes]));
+    const sig = () => JSON.stringify(data.games.map(g => [g.live, g.ao_vivo, g.ao_minuto, g.onzes]));
     const goals = Object.fromEntries(data.games.map(g => [g.id, g.live ? g.live.hg + g.live.ag : null]));
     const before = sig(), live = await api('/api/live');
-    for (const g of data.games) Object.assign(g, live[g.id] || { live: null, ao_vivo: [], onzes: g.onzes || null });
+    for (const g of data.games) Object.assign(g, live[g.id] || { live: null, ao_vivo: [], ao_minuto: [], onzes: g.onzes || null });
     await espnRefresh();
     for (const g of data.games) if (g.live && goals[g.id] !== null && g.live.hg + g.live.ag > goals[g.id]) g._goal = Date.now();  // golo agora
     const changed = sig() !== before;
