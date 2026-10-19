@@ -526,6 +526,8 @@ def especialista(game, rows, modelos, live=None):
         cands["fav"] = [(None, max(mk["pH"], mk["pA"]))]
         if mk.get("pD") is not None:
             cands["dc"] = [(None, max(mk["pH"], mk["pA"]) + mk["pD"])]
+    if game.get("taca"):  # taças: só os mercados testados em jogos europeus (sem cantos nos dados; 2.ª parte e favorito não testados)
+        cands = {k: v for k, v in cands.items() if k in modelos.get("uefa", {})}
     last = lambda T, f_: [f_(x) for x in T[-10:]]
     ctx = {"ht_h": sum(last(H, lambda x: x["htf"] + x["hta"] > 0)), "ht_a": sum(last(A, lambda x: x["htf"] + x["hta"] > 0)),
            "c_h": sum(last(H, lambda x: x["cf"] + x["ca"])) / len(H[-10:]), "c_a": sum(last(A, lambda x: x["cf"] + x["ca"])) / len(A[-10:]),
@@ -541,6 +543,8 @@ def especialista(game, rows, modelos, live=None):
         scored = []
         for line, p_raw in opts:
             p = calibrate(cal, key, p_raw)
+            if game.get("taca"):  # taças europeias: correção por mercado testada em jogos europeus (especialista_uefa.py)
+                p = calibrate(modelos["uefa"], key, p)
             adj = (live or {}).get(NAMES[key])
             if adj:
                 p = min(0.97, max(0.03, p + adj))  # correção aprendida com os resultados reais

@@ -266,6 +266,7 @@ if __name__ == "__main__":
 
 # --- calendário: próximas semanas das 6 ligas e das taças europeias (a ESPN aceita um mês inteiro: dates=aaaamm) ---
 CUPS = {"UCL": ("uefa.champions", "Liga dos Campeões"), "UEL": ("uefa.europa", "Liga Europa"), "UECL": ("uefa.europa.conf", "Conference League")}
+SLUG.update({k: v[0] for k, v in CUPS.items()})  # placar ao vivo e fecho pela ESPN também nas taças
 CAL_S, CAL_DAYS = 6 * 3600, 28
 TZ = ZoneInfo("Europe/Lisbon")
 

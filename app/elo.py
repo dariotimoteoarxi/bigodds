@@ -67,11 +67,22 @@ def league_games():
     return out
 
 
+# nomes que a semelhança não apanha (ESPN -> football-data), verificados à mão em 20/10/2026
+ALIASES = {"1. FC Heidenheim 1846": "Heidenheim", "Atlético Madrid": "Ath Madrid", "Athletic Club": "Ath Bilbao",
+           "Brighton & Hove Albion": "Brighton", "Celta Vigo": "Celta", "FC Cologne": "FC Koln", "Leicester City": "Leicester",
+           "Manchester City": "Man City", "Manchester United": "Man United", "Newcastle United": "Newcastle",
+           "Paris Saint-Germain": "Paris SG", "Rayo Vallecano": "Vallecano", "Real Betis": "Betis", "Real Sociedad": "Sociedad",
+           "Stade Rennais": "Rennes", "Tottenham Hotspur": "Tottenham", "West Ham United": "West Ham", "Nottingham Forest": "Nott'm Forest"}
+
+
 def name_map(fd_teams, espn_names):
     """Nome ESPN -> nome football-data para os clubes das 6 ligas; os outros ficam com o nome ESPN."""
     idx = {norm(t): t for t in fd_teams}
     out = {}
     for n in espn_names:
+        if ALIASES.get(n) in fd_teams:
+            out[n] = ALIASES[n]
+            continue
         hit = difflib.get_close_matches(norm(n), list(idx), n=1, cutoff=0.8)
         out[n] = idx[hit[0]] if hit else n
     return out
@@ -134,7 +145,8 @@ def ratings(max_age=6 * 3600):
         games, nm = all_games(refresh_current=True)
         fd = {g["home"] for g in games if not g["cup"]}
         R, _ = run(games, p["K"], p["H"], outsider=p["outsider"], fd_teams=fd)
-        _STATE.update(t=time.time(), R=R, nm=nm, p=p)
+        where = {t: g["L"] for g in games if not g["cup"] for t in (g["home"], g["away"])}  # liga atual de cada clube
+        _STATE.update(t=time.time(), R=R, nm=nm, p=p, where=where)
     return _STATE["R"], _STATE["nm"], _STATE.get("p")
 
 
@@ -154,6 +166,7 @@ def _self_test():
     g = [{"dt": datetime(2025, 1, i + 1), "home": "A", "away": "B", "hg": 2, "ag": 0, "neutral": False} for i in range(10)]
     R, hist = run(g, K=20, H=60)
     assert R["A"] > 1500 > R["B"] and hist[0][1] == 60
+    assert name_map({"Man City", "Betis"}, ["Manchester City", "Real Betis", "Celtic"]) == {"Manchester City": "Man City", "Real Betis": "Betis", "Celtic": "Celtic"}
     ph, pd, pa = probs(200, {"beta": 1.0, "c1": -1.0, "c2": 0.2})
     assert ph > pa and abs(ph + pd + pa - 1) < 1e-9
 

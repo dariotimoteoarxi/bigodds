@@ -272,3 +272,9 @@ assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19")["apostas
 assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19", precos={"esp:c+": (50, 0.06)})["apostas"]] == ["b", "a"]
 assert [x["game_id"] for x in selecao_especialista(jogos, "2026-10-19", precos={"esp:c+": (10, 0.06)})["apostas"]] == ["a", "b"]
 assert selecao_especialista([esp("d", 0.77, "g2+0.5")], "2026-10-19")["apostas"] == []  # não existe sempre na 22bet
+
+# taças europeias: sem cantos nem 2.ª parte (não testados), percentagens com a correção europeia
+import json as _js, os as _os
+from consultor import especialista as _esp
+_M = _js.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "modelos.json")))
+assert _M["uefa"]["jogos"] >= 500 and {"y-", "y+", "hy-", "ht+", "hs", "as", "dc"} <= set(_M["uefa"])

@@ -850,9 +850,12 @@ function renderCalendario() {
   motion($('#calendario'));
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-calday]'); if (b) { calDay = b.dataset.calday; renderCalendario(); } });
-const LEAGUE_SHORT = { 'Premier League': 'Premier', 'Liga Portugal': 'Liga PT' };
+const LEAGUE_SHORT = { 'Premier League': 'Premier', 'Liga Portugal': 'Liga PT', 'Liga dos Campeões': 'Champions', 'Conference League': 'Conference' };
 // bandeiras (domínio público) em vez dos logótipos oficiais das ligas, que são marcas registadas
 const FLAG = {
+  'Liga dos Campeões': '<rect width="24" height="24" fill="#0B1E5B"/><path d="M12 5l1.9 4.6 4.9.4-3.7 3.2 1.1 4.8L12 15.4 7.8 18l1.1-4.8L5.2 10l4.9-.4z" fill="#fff"/>',
+  'Liga Europa': '<rect width="24" height="24" fill="#F68E1E"/><path d="M12 5l1.9 4.6 4.9.4-3.7 3.2 1.1 4.8L12 15.4 7.8 18l1.1-4.8L5.2 10l4.9-.4z" fill="#111"/>',
+  'Conference League': '<rect width="24" height="24" fill="#1BB55C"/><path d="M12 5l1.9 4.6 4.9.4-3.7 3.2 1.1 4.8L12 15.4 7.8 18l1.1-4.8L5.2 10l4.9-.4z" fill="#fff"/>',
   'Premier League': '<rect width="24" height="24" fill="#fff"/><rect x="10" width="4" height="24" fill="#CE1124"/><rect y="10" width="24" height="4" fill="#CE1124"/>',
   'La Liga': '<rect width="24" height="24" fill="#AA151B"/><rect y="6" width="24" height="12" fill="#F1BF00"/>',
   'Serie A': '<rect width="8" height="24" fill="#009246"/><rect x="8" width="8" height="24" fill="#fff"/><rect x="16" width="8" height="24" fill="#CE2B37"/>',
@@ -966,6 +969,7 @@ function gameSheet(id) {
     ${liveBox(g)}
     <p class="sub">${pk ? `Aconselhada: <b style="color:var(--lime)">${esc(pk.label)}</b> a partir de ${fmt(pk.min_odd)} · ${pc(pk.p)} de acerto estimado.` : 'Não está na seleção do dia. Podes registar qualquer aposta em baixo.'}</p>
     ${g.nota ? `<div class="note"><b>Notícias:</b> ${esc(g.nota)}</div>` : ''}
+    ${g.taca ? `<div class="note"><b>Taça europeia:</b> as percentagens têm a correção europeia por mercado, testada em 521 jogos entre clubes das 6 ligas (no teste de 2025/26–2026/27 acertou o mostrado ou mais); sem cantos, que não há nos dados das taças. Sem odds públicas: escreve a odd da tua casa no caça-valor.</div>` : ''}
     ${g.alerta ? `<div class="note" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Atenção:</b> ${esc(g.alerta.texto)}</div>` : ''}
     ${onzesNote(g)}
     <h3>Os meus mercados</h3><div class="field" style="margin:0 0 6px"><label>A tua casa</label><div class="seg" id="mybook">${['Betclic', '22bet'].map(b => `<button aria-pressed="${b === myBook()}">${b}</button>`).join('')}</div></div>${howto('Acerto estimado e calibrado com 5 épocas de resultados. Não há odds públicas destes mercados: entra só se a tua casa pagar pelo menos a odd mínima.')}

@@ -171,11 +171,47 @@ def alerta(g):
             "estado": "em observação"}
 
 
+UEFA_DAYS = 7  # jogos das taças europeias nos próximos dias
+
+
+def uefa_games(now):
+    """Jogos das taças entre dois clubes das 6 ligas (é deles que há histórico), com o 1X2 do Elo próprio no lugar das odds."""
+    import elo
+    R, nm, p = elo.ratings()
+    where = elo._STATE.get("where") or {}
+    if not R:
+        return []
+    out = []
+    for div, (slug, name) in aovivo.CUPS.items():
+        for ym in sorted({now.strftime("%Y%m"), (now + timedelta(days=UEFA_DAYS)).strftime("%Y%m")}):
+            for e in aovivo.scoreboard(div, ym):
+                ko = datetime.fromisoformat(e["date"].replace("Z", "+00:00")).astimezone(TZ)
+                mins = (ko - now).total_seconds() / 60
+                if not (-LIVE_WINDOW < mins <= UEFA_DAYS * 1440):
+                    continue
+                c = e["competitions"][0]
+                side = {t["homeAway"]: t["team"]["displayName"] for t in c["competitors"]}
+                h, a = nm.get(side["home"], side["home"]), nm.get(side["away"], side["away"])
+                if h not in where or a not in where or h not in R or a not in R:
+                    continue
+                ph, pd, pa = elo.probs(R[h] - R[a] + (0 if c.get("neutralSite") else p["H"]), p)
+                date = ko.strftime("%d/%m/%Y")
+                out.append({"id": f"{div}-{date}-{h}", "league": name, "div": div, "taca": True, "ligas": (where[h], where[a]),
+                            "mk": {"pH": ph, "pD": pd, "pA": pa}, "kickoff": ko.isoformat(), "date": date, "home": h, "away": a,
+                            "referee": None, "markets": [], "pick": None, "verdict": "nao",
+                            "reason": "Taça europeia: sem odds públicas. Escreve a odd da tua casa no caça-valor.", "minutes_to_ko": round(mins)})
+    return out
+
+
 def agenda(bank, force=False, now=None):
     rows, fetched = load_fixtures(force)
     now = now or datetime.now(TZ)
     games = [g for r in rows if r.get("Div") in LEAGUES
              for g in [analyse(r, bank, now)] if g and g["minutes_to_ko"] > -LIVE_WINDOW]
+    try:
+        games += uefa_games(now)
+    except Exception:
+        pass  # sem rede para a ESPN: as taças ficam para a próxima análise
     games.sort(key=lambda g: g["kickoff"])
     notes = {}
     try:
@@ -194,11 +230,16 @@ def agenda(bank, force=False, now=None):
         try:
             cur = season_of(g["date"])
             prev = f"{int(cur[:2]) - 1:02d}{cur[:2]}"
-            for s in (cur, prev):
-                if (g["div"], s) not in seasons:
-                    seasons[(g["div"], s)] = season_rows(g["div"], s)
-            g["analise"] = analysis(g, seasons[(g["div"], cur)], seasons[(g["div"], prev)], bank)
-            rows_lg = seasons[(g["div"], prev)] + seasons[(g["div"], cur)]
+            for lg in g.get("ligas") or (g["div"],):  # taça: as ligas das duas equipas
+                for s in (cur, prev):
+                    if (lg, s) not in seasons:
+                        seasons[(lg, s)] = season_rows(lg, s)
+            if g.get("taca"):
+                g["analise"] = None
+                rows_lg = [r for lg in dict.fromkeys(g["ligas"]) for s in (prev, cur) for r in seasons[(lg, s)]]
+            else:
+                g["analise"] = analysis(g, seasons[(g["div"], cur)], seasons[(g["div"], prev)], bank)
+                rows_lg = seasons[(g["div"], prev)] + seasons[(g["div"], cur)]
             if g["div"] in ("P1", "I1"):  # árbitros: nomeações oficiais (Liga Portugal, Lega Serie A) ligadas aos jogos
                 if g["div"] not in noms:
                     try:
@@ -241,6 +282,7 @@ def agenda(bank, force=False, now=None):
                 continue
             todos.append({"id": f"{r['Div']}-{r['Date']}-{r['HomeTeam']}", "div": r["Div"], "date": r["Date"],
                           "kickoff": ko.isoformat(), "home": r["HomeTeam"], "away": r["AwayTeam"], "league": LEAGUES[r["Div"]]})
+    todos += [{k: g[k] for k in ("id", "div", "date", "kickoff", "home", "away", "league")} for g in games if g.get("taca")]
     return {"fetched": fetched.isoformat(), "source": FIXTURES_URL, "games": games, "todos": todos, "risco": risco(games, now, paused={c["mercado"] for c in clv_markets(con) if c["pausa"]}), "warning": warning, "selecao": sel, "aprendizagem": learning(con),
             "rules": {"min_edge": MIN_EDGE, "max_odd": MAX_ODD, "lineup_min": LINEUP_MIN}}
 
@@ -323,7 +365,7 @@ def live_state(games, now=None):
         ev = found.get(g["id"])
         if ev and ev["estado"] != "post" and not (g.get("onzes") or {}).get("confirmado"):
             try:
-                g["onzes"] = onzes.check(g, ev)
+                g["onzes"] = None if g.get("taca") else onzes.check(g, ev)  # nas taças os titulares habituais vêm do campeonato
             except Exception:
                 pass  # sem rede ou ESPN mudou: tenta no próximo minuto
     states = {k: v for k, v in found.items() if v["estado"] != "pre"}
@@ -602,6 +644,8 @@ def settle_pending(con, now, official=True):
     cache = {}
 
     def row_for(b):
+        if b["div"] not in LEAGUES:
+            return None  # taças: não estão no football-data, fecham pela ESPN
         key = (b["div"], season_of(b["date"]))
         if key not in cache:
             cache[key] = season_rows(*key)
@@ -682,7 +726,7 @@ def settle_preds(con, now):
     cache = {}
     for p in pend:
         o = None
-        if p["kickoff"] < old:  # o football-data só tem o jogo depois de acabar
+        if p["kickoff"] < old and p["div"] in LEAGUES:  # o football-data só tem o jogo depois de acabar (não tem as taças)
             key = (p["div"], season_of(p["date"]))
             if key not in cache:
                 cache[key] = season_rows(*key)
