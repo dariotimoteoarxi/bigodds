@@ -19,7 +19,7 @@ export const SCHEMA = [
 export const MIGRATIONS = ['alter table bets add column dono text', 'alter table legs add column dono text', 'alter table odds add column dono text'];
 
 const SELS = new Set(['1x2:1', '1x2:X', '1x2:2', 'ou:+2,5', 'ou:-2,5', 'ah:casa', 'ah:fora']);
-const ESP_SEL = /^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|[ha][cy]-\d\.5|fav)$/;  // y1: amarelos na 1.ª parte; hc/ac/hy: por equipa
+const ESP_SEL = /^esp:(ht\+0\.5|g2\+0\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|[ha][cy]-\d\.5|go[+-]\d\.5|fav)$/;  // y1: amarelos na 1.ª parte; hc/ac/hy: por equipa
 const RESULTS = { ganha: 1, 'meio-ganha': 0.5, anulada: 0, 'meio-perdida': -0.5, perdida: -1 };
 const VALUE_MIN = 1.02;
 const WON = new Set(['ganha', 'meio-ganha']);
