@@ -334,6 +334,7 @@ def live_state(games, now=None):
         g["ao_vivo"] = aovivo.leituras(g, s, modelo) if s else []
         if s:
             s["prob_golo"] = aovivo.prob_golo(g, s, modelo)
+    log_live_preds(db(), games)
     out = {g["id"]: {"live": g["live"], "ao_vivo": g["ao_vivo"], "onzes": g.get("onzes")} for g in games if g["live"] or g.get("onzes")}
     try:
         out["_lembretes"] = lembretes(db(), games, now)
@@ -419,8 +420,9 @@ def esp_outcome(key, row, label, home):
         if key[:2] in ("hc", "ac", "hy"):  # por equipa: hc-4.5 = cantos da casa abaixo de 4,5
             v, line = g({"hc": "HC", "ac": "AC", "hy": "HY"}[key[:2]]), float(key[3:])
             return int(v > line) if key[2] == "+" else int(v < line)
-        if key.startswith("g2"):
-            return int(g("FTHG") + g("FTAG") - g("HTHG") - g("HTAG") > float(key[3:]))
+        if key.startswith("g2"):  # g2+0.5: há golo na 2.ª parte; g2-2.5: no máximo 2 golos na 2.ª parte (leitura ao vivo)
+            v = g("FTHG") + g("FTAG") - g("HTHG") - g("HTAG")
+            return int(v > float(key[3:])) if key[2] == "+" else int(v < float(key[3:]))
         fam = "ht" if key.startswith("ht") else key[0]
         side = key[len(fam)]
         line = float(key[len(fam) + 1:])
@@ -557,7 +559,7 @@ def leg_return(b, row):
     return settle_return(b["sel"], b["line"], b["odd"], int(row["FTHG"]), int(row["FTAG"])), closing_p(b["sel"], b["line"], row)
 
 
-ESP_KEY = re.compile(r"^(ht\+|g2\+|y1[+-]|[ha][cy][+-]|[cy][+-])(\d+(?:\.\d)?)$")
+ESP_KEY = re.compile(r"^(ht\+|g2[+-]|y1[+-]|[ha][cy][+-]|[cy][+-])(\d+(?:\.\d)?)$")
 
 
 def espn_return(b):
@@ -657,6 +659,14 @@ def settle_pending(con, now, official=True):
         res = "perdida" if mult == 0 else "ganha" if all(l["result"] == "ganha" for l in legs) else "anulada" if abs(mult - 1) < 1e-9 else \
               ("meio-ganha" if profit > 0 else "meio-perdida")
         con.execute("update bets set result=?, profit=? where id=?", (res, round(profit, 2), b["id"]))
+    con.commit()
+
+
+def log_live_preds(con, games):
+    """Cada leitura ao intervalo fica registada como previsão: o Desempenho mostra o acerto real contra o previsto."""
+    rows = [(g["id"], "Ao vivo: " + o["key"], "g2+0.5" if o["key"].startswith("Há golo") else "g2-2.5", o["label"], g["div"], g["date"],
+             g["home"], g["away"], g["kickoff"], o["p"], o["p"]) for g in games for o in g.get("ao_vivo") or []]
+    con.executemany("insert or ignore into preds(game_id, name, key, label, div, date, home, away, kickoff, p, p_raw) values(?,?,?,?,?,?,?,?,?,?,?)", rows)
     con.commit()
 
 

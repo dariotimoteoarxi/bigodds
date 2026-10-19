@@ -1,8 +1,8 @@
 """Mercados por equipa: cantos da casa, cantos de fora e amarelos da casa (só "menos de").
 
 Treina em 2021/22–2024/25, testa em 2025/26–2026/27 e junta os modelos a app/data/modelos.json.
-Teste fora da amostra (19/10/2026), faixa 74–80%: menos cantos casa 77,2% real para 76,9% previsto,
-fora 77,5% para 76,8%, menos amarelos casa 77,0% para 77,0%. Os "mais de" e os amarelos de fora
+Teste fora da amostra (19/10/2026), faixa 74–80%, linhas até 9,5 (a 22bet tem 7 linhas à volta da média):
+menos cantos casa 77,8% real para 76,6% previsto, fora 76,8% para 76,9%, menos amarelos casa 77,0% para 77,0%. Os "mais de" e os amarelos de fora
 ficaram 3 a 5 pontos abaixo do previsto e não entram. Uso: python3 especialista_equipa.py (depois de especialista_v2.py)
 """
 import json, os, sys
@@ -15,7 +15,7 @@ import especialista_v2 as E  # noqa: E402
 from features import MODEL_COLS, negbin_over  # noqa: E402
 
 TARGET = {"hc": "y_hc", "ac": "y_ac", "hy": "y_hy"}
-LINES = {"hc": [2.5, 3.5, 4.5, 5.5, 6.5], "ac": [2.5, 3.5, 4.5, 5.5, 6.5], "hy": [0.5, 1.5, 2.5, 3.5]}
+LINES = {"hc": [2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5], "ac": [2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5], "hy": [0.5, 1.5, 2.5, 3.5]}
 KEEP = ("hc-", "ac-", "hy-")
 
 if __name__ == "__main__":

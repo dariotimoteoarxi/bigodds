@@ -157,6 +157,9 @@ def decided(pick, g, s):
         return 1 if any(_minute(e["min"])[0] <= 45 for e in goals) else 0 if (end or s["fase"] == "STATUS_HALFTIME" or (s.get("parte") or 1) >= 2) else None
     if key == "g2+":
         return 1 if any(_minute(e["min"])[0] > 45 for e in goals) else 0 if end else None
+    if key == "g2-" and line is not None:  # leitura ao vivo: no máximo N golos na 2.ª parte
+        n = sum(1 for e in goals if _minute(e["min"])[0] > 45)
+        return 0 if n > line else 1 if end else None
     if key in ("hs", "as"):
         return 1 if (s["hg"] if key == "hs" else s["ag"]) else 0 if end else None
     if key in ("y1+", "y1-") and line is not None:  # amarelos na 1.ª parte (o 2.º amarelo conta como vermelho)
@@ -204,6 +207,7 @@ def _self_test():
     assert decided({"key": "c-", "line": 11.5}, gm, st) == 1 and decided({"key": "y+", "line": 3.5}, gm, st) == 0
     assert decided({"key": "fav", "label": "Milan ganha"}, gm, st) == 1 and decided({"key": "g2+"}, gm, st) == 0
     assert decided({"key": "c-", "line": 11.5}, gm, dict(st, estado="in", cantos=["3", "3"])) is None
+    assert decided({"key": "g2-", "line": 2.5}, gm, st) == 1 and decided({"key": "g2-", "line": 0.5}, gm, dict(st, estado="in", eventos=[{"tipo": "golo", "min": "50'"}])) == 0
     assert decided({"key": "hc-", "line": 4.5}, gm, st) == 1 and decided({"key": "ac-", "line": 4.5}, gm, st) == 0  # cantos 4 e 5
     assert decided({"key": "hy-", "line": 1.5}, gm, dict(st, estado="in")) is None and decided({"key": "hy-", "line": 0.5}, gm, dict(st, estado="in")) == 0
     y1 = dict(st, estado="in", fase="STATUS_FIRST_HALF", parte=1, eventos=[{"tipo": "amarelo", "min": "30'"}, {"tipo": "amarelo", "min": "50'"}])

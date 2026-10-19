@@ -122,6 +122,15 @@ print("árbitros PT ok")
 r2 = {"HTHG": "1", "HTAG": "0", "FTHG": "1", "FTAG": "1", "FTR": "D"}
 assert esp_outcome("g2+0.5", r2, "", "X") == 1 and esp_outcome("hs", r2, "", "X") == 1
 assert esp_outcome("as", {**r2, "FTAG": "0"}, "", "X") == 0
+assert esp_outcome("g2-2.5", r2, "", "X") == 1 and esp_outcome("g2-0.5", r2, "", "X") == 0  # 1 golo na 2.ª parte
+import sqlite3 as _sq
+from server import PRED_SCHEMA, log_live_preds
+_c = _sq.connect(":memory:"); _c.execute(PRED_SCHEMA)
+_g = {"id": "I1-x", "div": "I1", "date": "19/10/2026", "home": "A", "away": "B", "kickoff": "2026-10-19T19:45:00+01:00",
+      "ao_vivo": [{"key": "Há golo na 2.ª parte", "label": "Mais de 1,5 golos no jogo", "p": 0.7},
+                  {"key": "Menos de (intervalo + 2,5) golos", "label": "Menos de 3,5 golos no jogo", "p": 0.72}]}
+log_live_preds(_c, [_g]); log_live_preds(_c, [_g])  # a segunda leitura do mesmo intervalo não duplica
+assert sorted(r[0] for r in _c.execute("select key from preds")) == ["g2+0.5", "g2-2.5"]
 assert esp_outcome("dc", r2, "Braga ou empate", "Braga") == 1 and esp_outcome("dc", {**r2, "FTR": "A"}, "Braga ou empate", "Braga") == 0
 assert esp_outcome("dc", {**r2, "FTR": "H"}, "Gil ou empate", "Braga") == 0
 assert ESP_SEL.match("esp:g2+0.5") and ESP_SEL.match("esp:hs") and ESP_SEL.match("esp:dc")

@@ -192,8 +192,8 @@ def aovivo(cf):
     before = snapshot(con)
     server.settle_pending(con, now, official=False)  # fecha pela ESPN o que já é certo (o oficial fica para a completa)
     con.commit()
+    state = live_payload(server, con, games, now)  # antes do envio: as leituras ao intervalo ficam como previsões
     settled = push(cf, before, snapshot(con))
-    state = live_payload(server, con, games, now)
     cf.kv_put("live", json.dumps(state, ensure_ascii=False))
     sent = send_alerts(cf, server, con, games, now)
     print(f"aovivo: {sum(1 for k in state if not k.startswith('_'))} jogos com estado · {settled} apostas fechadas · {sent} avisos")

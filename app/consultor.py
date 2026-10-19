@@ -582,8 +582,8 @@ ONDE = {"ht+": "22bet: 1.ª parte › Total › Acima de 0,5 · Betclic: Golos �
         "y+": "Só na 22bet: Cartões amarelos › Total (a Betclic não tem cartões)",
         "y-": "Só na 22bet: Cartões amarelos › Total (a Betclic não tem cartões)",
         "fav": "22bet: 1X2 (V1/V2) · Betclic: Resultado (Tempo Regulamentar)",
-        "hc-": "22bet: Cantos › Total 1 · Betclic: Estatísticas › Cantos › Total de Cantos da equipa da casa",
-        "ac-": "22bet: Cantos › Total 2 · Betclic: Estatísticas › Cantos › Total de Cantos da equipa de fora",
+        "hc-": "22bet: Cantos › Total 1 · Betclic: Estatísticas › Cantos (só 3 linhas, pode não ter esta)",
+        "ac-": "22bet: Cantos › Total 2 · Betclic: Estatísticas › Cantos (só 3 linhas, pode não ter esta)",
         "hy-": "Só na 22bet: Cartões amarelos › Total 1 (a Betclic não tem cartões)",
         "dc": "22bet: Hipótese dupla (1X/2X) · Betclic: Resultado duplo"}
 
@@ -652,9 +652,8 @@ def stem(sel):
     return re.sub(r"[\d.]+$", "", sel)
 
 
-# fora do boletim, só na ficha do jogo: golo na 2.ª parte nem sempre existe na 22bet (faltou no Braga–Gil Vicente);
-# cantos por equipa: a Betclic só tem 3 linhas à volta da média e as linhas da 22bet ainda não foram confirmadas
-NOT_PICKED = {"g2+", "hc-", "ac-"}
+# fora do boletim, só na ficha do jogo: golo na 2.ª parte nem sempre existe na 22bet (faltou no Braga–Gil Vicente)
+NOT_PICKED = {"g2+"}
 PRICE_MIN_N = 40  # odds registadas num mercado antes de o preço aprendido mexer na ordem
 
 
