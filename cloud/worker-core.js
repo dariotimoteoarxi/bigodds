@@ -187,6 +187,7 @@ export async function handle(request, env) {
   const url = new URL(request.url), path = url.pathname.replace(/^\/api\//, '');
   const dono = whoIs(request, env);
   if (!dono) {
+    await new Promise(r => setTimeout(r, 800));  // cada tentativa errada demora: adivinhar palavras-passe fica impraticável
     const n = accounts(env).length;  // diz o que falha sem revelar nomes nem palavras-passe
     return json(401, { error: n ? 'Palavra-passe errada. Escreve só a palavra-passe (sem o nome nem os dois pontos).'
                                 : 'Não há contas configuradas: o segredo BIGODDS_UTILIZADORES tem de ser Nome:palavra-passe;Nome2:palavra-passe2', contas: n });

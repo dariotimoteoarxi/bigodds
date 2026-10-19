@@ -131,7 +131,7 @@ def analyse(row, bank, now):
 
 def load_fixtures(force=False):
     if force or not os.path.exists(CACHE) or time.time() - os.path.getmtime(CACHE) > 3600:
-        for attempt in (1, 2):  # o football-data às vezes demora: tenta outra vez e, sem resposta, usa a última cópia
+        for attempt in (1, 2, 3):  # o football-data às vezes demora: tenta outra vez e, sem resposta, usa a última cópia
             try:
                 with urllib.request.urlopen(FIXTURES_URL, timeout=30) as r:
                     data = r.read()
@@ -139,8 +139,9 @@ def load_fixtures(force=False):
                     f.write(data)
                 break
             except OSError:
-                if attempt == 2 and not os.path.exists(CACHE):
+                if attempt == 3 and not os.path.exists(CACHE):  # na nuvem não há cópia: cada execução começa do zero
                     raise
+                time.sleep(5 * attempt)
     with open(CACHE, encoding="utf-8-sig") as f:
         return list(csv.DictReader(f)), datetime.fromtimestamp(os.path.getmtime(CACHE), TZ)
 

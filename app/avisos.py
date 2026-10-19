@@ -1,6 +1,6 @@
 """Avisos no telemóvel via ntfy.sh (grátis, sem conta): o utilizador subscreve um canal secreto na app ntfy.
 
-O servidor vigia os jogos de minuto a minuto e envia: leituras ao vivo ≥85%, onzes confirmados dos jogos
+O servidor vigia os jogos de minuto a minuto e envia: leituras ao vivo ≥65%, onzes confirmados dos jogos
 aconselhados ou com aposta, e lances (golo, cartão, canto) dos jogos com aposta aberta. Só envia depois de o
 utilizador ativar (data/ntfy.json). O canal é público para quem souber o nome: por isso o nome é aleatório e longo.
 """

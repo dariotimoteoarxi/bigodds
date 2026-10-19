@@ -1194,7 +1194,7 @@ async function renderPhone(c) {
   const url = c.topic ? `https://ntfy.sh/${c.topic}` : '';
   $('#phone').innerHTML = `<h3>Avisos no telemóvel</h3>
     <p>${c.ativo ? (me ? 'Ligados. O Bigodds vigia os jogos de 5 em 5 minutos na nuvem, com a app fechada e o computador desligado.' : 'Ligados. O Bigodds vigia os jogos de minuto a minuto, mesmo com esta página fechada (o computador tem de estar ligado).')
-      : 'Recebe no telemóvel as leituras ao vivo acima de 85%, os onzes dos teus jogos e os golos, cartões e cantos dos jogos onde tens aposta. É grátis e não precisa de conta.'}</p>
+      : 'Recebe no telemóvel as leituras ao vivo acima de 65%, os onzes dos teus jogos e os golos, cartões e cantos dos jogos onde tens aposta. É grátis e não precisa de conta.'}</p>
     ${c.ativo ? `<ol style="color:var(--muted);font-size:14px;line-height:1.6;padding-left:18px;margin:8px 0">
         <li>Instala a app <b>ntfy</b> (Android: Play Store ou F-Droid · iPhone: App Store).</li>
         <li>Na app, carrega em <b>+</b> e subscreve o canal <b style="font-family:var(--tech);color:var(--lime);user-select:all">${esc(c.topic)}</b></li>
@@ -1578,7 +1578,7 @@ async function importPhotos(files) {
   } catch (e) { fail('Não consegui ler a foto', `Falhou ao ${step}${e && e.message ? ': ' + e.message : ''}.`); }
 }
 
-/* ---------- AO VIVO (placar ESPN, sugestões ao intervalo ≥85%) ---------- */
+/* ---------- AO VIVO (placar ESPN, sugestões ao intervalo ≥65%) ---------- */
 function onzesNote(g) {
   const o = g.onzes;
   if (!o) return '';
@@ -1603,7 +1603,7 @@ const liveCard = g => `<button class="livecard" data-game="${esc(g.id)}" aria-la
 function aoVivo() {
   const live = data.games.filter(g => g.live && g.live.estado === 'in'), sug = live.flatMap(g => (g.ao_vivo || []).map(o => liveTip(o, g)));
   if (!live.length) return '';
-  return `<details class="howto"><summary>${live.length} ${live.length === 1 ? 'jogo a decorrer' : 'jogos a decorrer'} · como funciona</summary><p>Toca num jogo para ver a análise. Ao intervalo leio cada jogo e só sugiro quando o acerto passa 85%.</p></details>
+  return `<details class="howto"><summary>${live.length} ${live.length === 1 ? 'jogo a decorrer' : 'jogos a decorrer'} · como funciona</summary><p>Toca num jogo para ver a análise. Ao intervalo leio cada jogo e só sugiro quando o acerto passa 65%.</p></details>
     ${sug.join('')}${live.map(liveCard).join('')}`;
 }
 function probGolo(g) {
@@ -1615,7 +1615,7 @@ function probGolo(g) {
 }
 function liveNote(g) {  // etiqueta discreta só quando interessa
   const l = g.live, red = (l.vermelhos || []).some(x => x);
-  const t = red && l.estado === 'in' ? 'Expulsão · sem leituras ao vivo' : l.fase === 'STATUS_HALFTIME' ? 'Intervalo · sem leitura acima de 85%' : '';
+  const t = red && l.estado === 'in' ? 'Expulsão · sem leituras ao vivo' : l.fase === 'STATUS_HALFTIME' ? 'Intervalo · sem leitura acima de 65%' : '';
   return t ? `<p class="lv-note">${t}</p>` : '';
 }
 function liveBox(g) {
@@ -1645,7 +1645,7 @@ function renderAoVivo() {
   document.querySelectorAll('.navn').forEach(n => n.textContent = live.length || '');
   const sug = live.flatMap(g => (g.ao_vivo || []).map(o => liveTip(o, g)));
   $('#aovivo').innerHTML = `<h2 class="section-title">Ao vivo</h2>
-    ${live.length ? howto('O placar atualiza-se a cada minuto; toca num jogo para ver a análise completa. Ao intervalo leio cada jogo e só sugiro quando o acerto passa 85%; os avisos no telemóvel ligam-se na roda dentada.', `${live.length} ${live.length === 1 ? 'jogo a decorrer' : 'jogos a decorrer'} · como funciona`)
+    ${live.length ? howto('O placar atualiza-se a cada minuto; toca num jogo para ver a análise completa. Ao intervalo leio cada jogo e só sugiro quando o acerto passa 65%; os avisos no telemóvel ligam-se na roda dentada.', `${live.length} ${live.length === 1 ? 'jogo a decorrer' : 'jogos a decorrer'} · como funciona`)
       : `<p class="lede" style="margin-top:4px">Nenhum jogo a decorrer agora.${next ? ` O próximo é ${esc(next.home)} – ${esc(next.away)}, ${dayLabel(next.kickoff).toLowerCase()} às ${hm(next.kickoff)}.` : ''}</p>`}
     ${sug.length ? `<h3 class="section-title" style="font-size:20px">Leituras ao intervalo</h3>${sug.join('')}` : ''}
     ${live.map(liveCard).join('')}

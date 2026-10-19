@@ -1,7 +1,7 @@
 """Jogos ao vivo: placar público da ESPN (sem conta) e leituras ao intervalo validadas no backtest.
 
-Modelo do intervalo (especialista_intervalo.py, teste 2025/26–2026/27): com confiança ≥85%,
-"Há golo na 2.ª parte" acertou 85,4% (261 jogos) e "Menos de (intervalo + 2,5) golos" 85,1% (819 jogos).
+Modelo do intervalo (especialista_intervalo.py, teste 2025/26–2026/27): "Há golo na 2.ª parte" acerta o previsto ou mais
+em todas as faixas de 65% a 100%; "Menos de (intervalo + 2,5)" fica 2 a 4 pontos abaixo entre 70% e 85% (corrigido com LIVE_REAL).
 """
 import difflib, gzip, json, math, re, time, urllib.request
 from datetime import datetime, timedelta
@@ -14,7 +14,9 @@ from features import poisson_over
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/{lg}/scoreboard?dates={d}"
 SLUG = {"E0": "eng.1", "SP1": "esp.1", "I1": "ita.1", "D1": "ger.1", "F1": "fra.1", "P1": "por.1"}
 CACHE_S = 60
-LIVE_MIN = 0.85   # só sugere ao vivo acima disto (pedido do utilizador)
+LIVE_MIN = 0.65   # só sugere ao vivo acima disto (pedido do utilizador, 19/10/2026; antes 0,85)
+# acerto real no teste 2025/26–2026/27 por faixa: onde o modelo promete mais do que acerta, mostra-se o real
+LIVE_REAL = {"Menos de (intervalo + 2,5) golos": ((0.70, 0.719), (0.75, 0.738), (0.80, 0.794), (0.85, 1.0))}
 _cache = {}
 
 
@@ -87,7 +89,7 @@ def match(games, now, include_pre=False):
 
 
 def leituras(g, s, modelo):
-    """Sugestões ao intervalo com confiança ≥85%. Só ao intervalo e sem expulsões (o modelo não as conhece)."""
+    """Sugestões ao intervalo com confiança ≥65%. Só ao intervalo e sem expulsões (o modelo não as conhece)."""
     mu0 = (g.get("mu") or {}).get("g2")
     if s["fase"] != "STATUS_HALFTIME" or not mu0 or not modelo or any(s["vermelhos"]):
         return []
@@ -102,6 +104,7 @@ def leituras(g, s, modelo):
     out = []
     for name, label, p_raw in cands:
         p = calibrate(modelo["cal"], name, p_raw)
+        p = min([p] + [real for lo, real in LIVE_REAL.get(name, ()) if p >= lo][-1:])
         if p >= LIVE_MIN:
             mo = max(1.20, round(1.02 / p, 2))  # regra do utilizador: nunca abaixo de 1,20
             out.append({"key": name, "label": label, "p": round(p, 3), "min_odd": mo, "mu_2p": round(mu, 2),
@@ -192,6 +195,9 @@ def _self_test():
     b = prob_golo(g2, {"estado": "in", "fase": "STATUS_SECOND_HALF", "parte": 2, "minuto": "80'", "eventos": []}, None)
     assert abs(a["jogo"] - (1 - math.exp(-2.5))) < 1e-3 and b["jogo"] < a["jogo"] and abs(b["casa"] - (1 - math.exp(-1.5 * 10 / 45 * 0.6))) < 1e-3, (a, b)
     assert _minute("45'+2'") == (45, 2) and _minute("") == (0, 0)
+    L = LIVE_REAL["Menos de (intervalo + 2,5) golos"]
+    real = lambda p: min([p] + [r for lo, r in L if p >= lo][-1:])
+    assert (real(0.66), real(0.72), real(0.78), real(0.83), real(0.9)) == (0.66, 0.719, 0.738, 0.794, 0.9)
     st = {"estado": "post", "fase": "STATUS_FULL_TIME", "parte": 2, "hg": 3, "ag": 2, "cantos": ["4", "5"], "amarelos": [1, 2],
           "eventos": [{"tipo": "golo", "min": "24'"}]}
     gm = {"home": "Milan", "away": "Atalanta"}

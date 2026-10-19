@@ -32,9 +32,9 @@ out, cal = [], {}
 for name, (p, y) in cand.items():
     y = np.asarray(y, float)
     pts = v2.pav(p[tr], y[tr]); pc = v2.cal_apply(pts, p); cal[name] = pts
-    for lo in (0.80, 0.85, 0.90):
-        k = te & (pc >= lo)
-        out.append([name, f"≥{lo:.0%}", int(k.sum()), round(100 * pc[k].mean(), 1) if k.sum() else None, round(100 * y[k].mean(), 1) if k.sum() else None, round(100 * y[te].mean(), 1)])
+    for lo, hi in ((0.65, 0.70), (0.70, 0.75), (0.75, 0.80), (0.80, 0.85), (0.85, 1.01)):
+        k = te & (pc >= lo) & (pc < hi)
+        out.append([name, f"{lo:.0%}–{min(hi, 1):.0%}", int(k.sum()), round(100 * pc[k].mean(), 1) if k.sum() else None, round(100 * y[k].mean(), 1) if k.sum() else None, round(100 * y[te].mean(), 1)])
 print(pd.DataFrame(out, columns=["mercado ao intervalo", "confiança", "jogos teste", "previsto %", "real %", "taxa base %"]).to_string(index=False))
 M["intervalo"] = {"cols": COLS, "coef": [round(float(c), 5) for c in m.coef_], "intercept": round(float(m.intercept_), 5),
                   "cal": {k: [(round(a, 4), round(b, 4)) for a, b in v] for k, v in cal.items()}}
