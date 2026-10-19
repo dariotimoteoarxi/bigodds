@@ -1257,8 +1257,12 @@ function liveLeg(l) {
   const goals = (v.eventos || []).filter(e => e.tipo === 'golo'), sc = `${v.hg}–${v.ag}`, tot = v.hg + v.ag;
   const won = n => ({ ic: '✓', cls: 'won', note: '✓ Ganha · ' + n }), lost = n => ({ ic: '✗', cls: 'lost', note: '✗ Perdida · ' + n }), run = n => ({ ic: '●', cls: 'live', note: n });
   const k = l.sel.replace('esp:', ''); let m;
-  if (k === 'ht+0.5') { const e = goals.find(e => gMin(e.min) <= 45); return e ? won(`golo aos ${e.min}`) : ht ? lost('sem golos na 1.ª parte') : run(`ainda sem golo · ${v.minuto || ''}`); }
-  if (k === 'g2+0.5') { const e = goals.find(e => gMin(e.min) > 45); return e ? won(`golo aos ${e.min}`) : end ? lost('sem golos na 2.ª parte') : run(ht ? `2.ª parte ainda sem golo · ${v.minuto || ''}` : 'a 2.ª parte ainda não começou'); }
+  if ((m = /^(ht|g2)([+-])(\d\.5)$/.exec(k))) {  // golos por parte, em qualquer linha
+    const first = m[1] === 'ht', n = goals.filter(e => (gMin(e.min) <= 45) === first).length, done = first ? ht : end;
+    const what = `golo${n === 1 ? '' : 's'} na ${first ? '1.ª' : '2.ª'} parte`;
+    if (m[2] === '+') return n > +m[3] ? won(`${n} ${what}`) : done ? lost(`${n} ${what}`) : run(`${n} ${what} até agora · ${v.minuto || ''}`);
+    return n > +m[3] ? lost(`já vão ${n} ${what}`) : done ? won(`${n} ${what}`) : run(`${n} ${what} até agora · ${v.minuto || ''}`);
+  }
   if (k === 'hs' || k === 'as') { const n = k === 'hs' ? v.hg : v.ag; return n ? won(`já marcou (${sc})`) : end ? lost(`não marcou (${sc})`) : run(`ainda não marcou (${sc})`); }
   if ((m = /^y1([+-])(\d\.5)$/.exec(k))) {  // amarelos na 1.ª parte: decide-se ao intervalo
     const cur = (v.eventos || []).filter(e => e.tipo === 'amarelo' && gMin(e.min) <= 45).length, what = `amarelo${cur === 1 ? '' : 's'} na 1.ª parte`;
@@ -1509,8 +1513,8 @@ function parseMarket(txt, g) {
     if (side && /cart/.test(t)) return null;
     if (/cart/.test(t)) return { sel: `esp:y${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} amarelos`, market: 'Cartões', line };
     if (/canto|escante/.test(t)) return { sel: `esp:c${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} cantos`, market: 'Cantos', line };
-    if (/(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:ht+0.5', label: '1.ª parte: mais de 0,5 golos', market: 'Golos por parte' } : null;
-    if (/(^|\D)2\s*[.,]?\s*[ºªo°a]?\s*parte|segunda parte/.test(t)) return up && line === 0.5 ? { sel: 'esp:g2+0.5', label: '2.ª parte: mais de 0,5 golos', market: 'Golos por parte' } : null;
+    if (/(^|\D)1\s*[.,]?\s*[ºªo°a]?\s*parte|primeira parte/.test(t)) return { sel: `esp:ht${up ? '+' : '-'}${line}`, label: `1.ª parte: ${up ? 'mais' : 'menos'} de ${lt} golos`, market: 'Golos por parte', line };
+    if (/(^|\D)2\s*[.,]?\s*[ºªo°a]?\s*parte|segunda parte/.test(t)) return { sel: `esp:g2${up ? '+' : '-'}${line}`, label: `2.ª parte: ${up ? 'mais' : 'menos'} de ${lt} golos`, market: 'Golos por parte', line };
     if (line === 2.5) return { sel: up ? 'ou:+2,5' : 'ou:-2,5', label: `${up ? 'Mais' : 'Menos'} de 2,5 golos`, market: 'Golos 2,5' };
     if (!/total\s*[12]\b|individual/.test(t)) return { sel: `esp:go${up ? '+' : '-'}${line}`, label: `${up ? 'Mais' : 'Menos'} de ${lt} golos`, market: 'Golos', line };
   }
@@ -1535,7 +1539,7 @@ function parseSlipText(text) {
     if (!m) { falhas.push(`${best.g.home} – ${best.g.away}: mercado "${mkt[1]}" ainda não é dos meus mercados`); continue; }
     const live = data.games.find(x => x.id === best.g.id);
     // o número testado e calibrado do especialista tem prioridade sobre a estimativa genérica do mesmo resultado
-    const espSame = live && (live.especialista || []).find(o => o.label === m.label);
+    const espSame = live && ((live.especialista || []).find(o => o.label === m.label) || (live.ao_minuto || []).find(o => o.label === m.label));  // ao vivo: a leitura ao minuto
     const s = espSame ? { p_est: espSame.p, min_odd_est: espSame.min_odd } : live ? allSels(live).find(x => x.sel === m.sel) : null;
     legs.push({ game_id: best.g.id, sel: m.sel, label: m.label, market: m.market, line: m.line ?? '', p: s ? s.p_est : null,
                 min_odd: s ? s.min_odd_est : null, home: best.g.home, away: best.g.away, kickoff: best.g.kickoff, div: best.g.div,

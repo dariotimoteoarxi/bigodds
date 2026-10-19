@@ -185,19 +185,15 @@ def decided(pick, g, s):
     """
     key, line, end = pick.get("key"), pick.get("line"), s["estado"] == "post"
     goals = [e for e in s.get("eventos") or [] if e["tipo"] == "golo"]
-    if key == "ht+":
-        return 1 if any(_minute(e["min"])[0] <= 45 for e in goals) else 0 if (end or s["fase"] == "STATUS_HALFTIME" or (s.get("parte") or 1) >= 2) else None
-    if key == "g2+":
-        return 1 if any(_minute(e["min"])[0] > 45 for e in goals) else 0 if end else None
-    if key == "ht-" and line is not None:  # leitura ao minuto: já não há (mais) golo na 1.ª parte
-        n = sum(1 for e in goals if _minute(e["min"])[0] <= 45)
-        return 0 if n > line else 1 if (end or s["fase"] == "STATUS_HALFTIME" or (s.get("parte") or 1) >= 2) else None
+    if key in ("ht+", "ht-", "g2+", "g2-"):  # golos por parte, em qualquer linha (sem linha: 0,5)
+        first = key[:2] == "ht"
+        n = sum(1 for e in goals if (_minute(e["min"])[0] <= 45) == first)
+        over = n > (line if line is not None else 0.5)
+        done = (end or s["fase"] == "STATUS_HALFTIME" or (s.get("parte") or 1) >= 2) if first else end
+        return (1 if over else 0 if done else None) if key[2] == "+" else (0 if over else 1 if done else None)
     if key in ("go+", "go-") and line is not None:  # total de golos noutra linha (boletins lidos por foto)
         tot = s["hg"] + s["ag"]
         return (1 if tot > line else 0 if end else None) if key == "go+" else (0 if tot > line else 1 if end else None)
-    if key == "g2-" and line is not None:  # leitura ao vivo: no máximo N golos na 2.ª parte
-        n = sum(1 for e in goals if _minute(e["min"])[0] > 45)
-        return 0 if n > line else 1 if end else None
     if key in ("hs", "as"):
         return 1 if (s["hg"] if key == "hs" else s["ag"]) else 0 if end else None
     if key in ("y1+", "y1-") and line is not None:  # amarelos na 1.ª parte (o 2.º amarelo conta como vermelho)
