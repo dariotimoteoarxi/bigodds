@@ -1,10 +1,10 @@
 # Corre o Bigodds: análise completa de 30 em 30 min; placar, avisos e onzes de 5 em 5 min à hora dos jogos (UTC).
 # Cada execução marca a seguinte (cloud/proxima.py): o horário automático do GitHub não estava a disparar.
-# O horário de 2 em 2 h fica só de reserva, para reiniciar a cadeia se ela parar.
+# O horário de hora a hora fica só de reserva, para reiniciar a cadeia se ela parar (a execução mais recente é que continua).
 name: Bigodds
 on:
   schedule:
-    - cron: '7 */2 * * *'
+    - cron: '7 * * * *'
     - cron: '17 4 1 * *'
   workflow_dispatch:
     inputs:
