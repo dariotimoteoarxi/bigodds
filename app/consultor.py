@@ -686,6 +686,13 @@ def selecao_especialista(games, today, n=4, precos=None):
             best.append({**top, "game_id": g["id"], "sel": "esp:" + top["key"], "market": top["family"], "valor_casa": edge(top) or None})
         # boletim blindado (≥90%) desligado: as odds dessas seleções ficam sempre abaixo de 1,20 (regra do utilizador)
     best.sort(key=lambda o: ((o["valor_casa"] or 0) < 0.02, -o["p"]))  # primeiro onde a casa paga ≥2% acima do justo
+    # no máximo 2 apostas do mesmo tipo por dia (19/10: 3 de cartões no mesmo boletim; um dia estranho num mercado leva tudo)
+    tipo = lambda o: o["family"].split()[0]  # "Cartões por equipa" e "Cartões" contam juntos
+    picked = []
+    for o in best:
+        if sum(tipo(x) == tipo(o) for x in picked) < 2:
+            picked.append(o)
+    best = picked
     blind.sort(key=lambda o: -o["p"])
     return {"dia": day, "apostas": best[:n], "blindado": blind[:3], "boletins": make_boletins(best[:n], blind[:3])}
 

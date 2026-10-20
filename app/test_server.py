@@ -281,3 +281,10 @@ import json as _js, os as _os
 from consultor import especialista as _esp
 _M = _js.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "modelos.json")))
 assert _M["uefa"]["jogos"] >= 500 and {"y-", "y+", "hy-", "ht+", "hs", "as", "dc"} <= set(_M["uefa"])
+
+# no máximo 2 apostas do mesmo tipo por dia
+_g = lambda gid, p, key, fam: {"id": gid, "minutes_to_ko": 60, "kickoff": "2026-10-21T20:00",
+                               "especialista": [{"key": key, "p": p, "family": fam, "label": "L", "min_odd": round(1.02 / p, 2)}]}
+_sel = selecao_especialista([_g("a", 0.79, "y-4.5", "Cartões"), _g("b", 0.78, "hy-2.5", "Cartões por equipa"),
+                             _g("c", 0.77, "y+3.5", "Cartões"), _g("d", 0.75, "ht+0.5", "Golos por parte")], "2026-10-21")
+assert [x["game_id"] for x in _sel["apostas"]] == ["a", "b", "d"], _sel["apostas"]
