@@ -127,6 +127,7 @@ r2 = {"HTHG": "1", "HTAG": "0", "FTHG": "1", "FTAG": "1", "FTR": "D"}
 assert esp_outcome("g2+0.5", r2, "", "X") == 1 and esp_outcome("hs", r2, "", "X") == 1
 assert esp_outcome("as", {**r2, "FTAG": "0"}, "", "X") == 0
 assert esp_outcome("go+1.5", r2, "", "X") == 1 and esp_outcome("go-1.5", r2, "", "X") == 0 and ESP_SEL.match("esp:go+1.5")  # 1-1
+assert esp_outcome("btts+", r2, "", "X") == 1 and esp_outcome("btts-", {**r2, "FTAG": "0"}, "", "X") == 1 and ESP_SEL.match("esp:btts+")
 assert esp_outcome("g2-2.5", r2, "", "X") == 1 and esp_outcome("g2-0.5", r2, "", "X") == 0  # 1 golo na 2.ª parte
 import sqlite3 as _sq
 from server import PRED_SCHEMA, log_live_preds

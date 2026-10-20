@@ -191,6 +191,9 @@ def decided(pick, g, s):
         over = n > (line if line is not None else 0.5)
         done = (end or s["fase"] == "STATUS_HALFTIME" or (s.get("parte") or 1) >= 2) if first else end
         return (1 if over else 0 if done else None) if key[2] == "+" else (0 if over else 1 if done else None)
+    if key in ("btts+", "btts-"):  # ambas marcam
+        both = s["hg"] > 0 and s["ag"] > 0
+        return (1 if both else 0 if end else None) if key == "btts+" else (0 if both else 1 if end else None)
     if key in ("go+", "go-") and line is not None:  # total de golos noutra linha (boletins lidos por foto)
         tot = s["hg"] + s["ag"]
         return (1 if tot > line else 0 if end else None) if key == "go+" else (0 if tot > line else 1 if end else None)
@@ -251,6 +254,7 @@ def _self_test():
     assert ao_minuto(gg, dict(s1, vermelhos=[1, 0]), None, aom) == [] and ao_minuto(gg, s1, None, None) == []
     r2 = ao_minuto(gg, dict(s1, parte=2, fase="STATUS_SECOND_HALF", minuto="70'"), None, aom)[0]
     assert r2["pred_key"] == "go+1.5" and abs(r2["p"] - (1 - math.exp(-1.24 * 24 / 45))) < 1e-3, r2
+    assert decided({"key": "btts+"}, gm, st) == 1 and decided({"key": "btts-"}, gm, dict(st, estado="in", ag=0)) is None
     assert decided({"key": "go+", "line": 1.5}, gm, st) == 1 and decided({"key": "go-", "line": 3.5}, gm, st) == 0  # 3-2
     assert decided({"key": "hc-", "line": 4.5}, gm, st) == 1 and decided({"key": "ac-", "line": 4.5}, gm, st) == 0  # cantos 4 e 5
     assert decided({"key": "hy-", "line": 1.5}, gm, dict(st, estado="in")) is None and decided({"key": "hy-", "line": 0.5}, gm, dict(st, estado="in")) == 0
