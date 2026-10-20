@@ -432,7 +432,7 @@ SEASON_URL = "https://www.football-data.co.uk/mmz4281/{season}/{div}.csv"
 SELS = {"1x2:1", "1x2:X", "1x2:2", "ou:+2,5", "ou:-2,5", "ah:casa", "ah:fora"}
 ESP_SEL = re.compile(r"^esp:(ht[+-]\d\.5|g2[+-]\d\.5|hs|as|dc|[cy][+-]\d{1,2}\.5|y1[+-]\d\.5|[ha][cy]-\d\.5|go[+-]\d\.5|fav)$")  # y1: amarelos na 1.ª parte; hc/ac/hy: por equipa
 RESULTS = {"ganha": 1.0, "meio-ganha": 0.5, "anulada": 0.0, "meio-perdida": -0.5, "perdida": -1.0}
-MODEL_VERSION = "especialista v3.1 (19/10/2026) · amarelos e cantos por equipa · sem golo na 2.ª parte no boletim · linha-alvo 74–80% · preços aprendidos · árbitros PT e IT · golos por parte, equipa marca, dupla hipótese"
+MODEL_VERSION = "especialista v3.2 (20/10/2026) · odds das taças (The Odds API) · amarelos e cantos por equipa · máx. 2 por tipo"
 LEG_SCHEMA = """create table if not exists legs(bet_id integer, div text, date text, home text, away text, kickoff text,
   sel text, label text, market text, line real, odd real, p real, result text default 'pendente', dono text)"""
 PUB_SCHEMA = """create table if not exists published(day text, game_id text, ord integer, pick text, published_at text,

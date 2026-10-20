@@ -194,6 +194,7 @@ def completo(cf):
         cf.kv_put("relatorio:" + dono, json.dumps(report(server, user_con(server, con, dono), games) | extra, ensure_ascii=False))
     sent = send_alerts(cf, server, con, games, now)
     n_bets = con.execute("select count(*) from bets").fetchone()[0]
+    print("boletim", agenda["selecao"]["dia"], "·", " | ".join(f"{p['jogo']['home']}: {p['label']} {round(p['p'] * 100)}%" for p in agenda["selecao"]["apostas"]))
     print(f"completo: {len(agenda['games'])} jogos · {n_bets} apostas em {len(owners(cf, con))} contas · {changed} alterações na D1 · {sent} avisos")
 
 
