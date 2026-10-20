@@ -912,8 +912,10 @@ document.addEventListener('change', async e => {
   if (!s || !(odd > 1)) return;
   const pr = inp.dataset.p ? +inp.dataset.p : s.p_est, minOdd = inp.dataset.p ? 1.02 / pr : s.min_odd_est;  // risco: preço justo do mercado
   const edge = odd * pr - 1, ok = odd * pr >= 1.02 && odd >= ODD_FLOOR;
-  out.innerHTML = ok && pr < 0.70 && inp.closest('.lad') ? `<b style="color:var(--amber)">Valor +${fmt(edge * 100, 1)}%</b>, mas o acerto fica abaixo de 70%.` : odd < ODD_FLOOR ? `<b style="color:var(--red)">Não entra:</b> abaixo de 1,20 não vale o risco (a tua regra).` : ok ? `<b style="color:var(--lime)">Entra · valor +${fmt(edge * 100, 1)}%</b> a ${fmt(odd)}${kellyStake(pr, odd) >= 0.1 ? ` · aposta ${eur(kellyStake(pr, odd))}` : ''}.`
-    : `<b style="color:var(--red)">Não entra:</b> a ${fmt(odd)} ${edge < 0 ? `pagas ${fmt(-edge * 100, 1)}% acima do justo` : 'a margem é curta demais'}. Mínimo ${fmt(minOdd)}.`;
+  out.innerHTML = ok && pr < 0.70 && inp.closest('.lad') ? `<b style="color:var(--amber)">Valor +${fmt(edge * 100, 1)}%</b>, mas o acerto fica abaixo de 70%.` : odd < ODD_FLOOR ? `<b style="color:var(--red)">Não entra:</b> a ${fmt(odd)} a casa dá ${pc(1 / odd)} a isto e eu dou ${pc(pr)}; abaixo de 1,20 não vale o risco (a tua regra).`
+    + (inp.closest('.tip') ? ` <button class="btn ghost small" data-game="${esc(g.id)}">Ver outras linhas</button>` : '') : ok ? `<b style="color:var(--lime)">Entra · valor +${fmt(edge * 100, 1)}%</b> a ${fmt(odd)}${kellyStake(pr, odd) >= 0.1 ? ` · aposta ${eur(kellyStake(pr, odd))}` : ''}.`
+    : `<b style="color:var(--red)">Não entra:</b> a ${fmt(odd)} a casa dá ${pc(1 / odd)} a isto e eu dou ${pc(pr)}${edge < 0 ? '' : ' (margem curta)'}. Mínimo ${fmt(minOdd)}.`
+    + (inp.closest('.tip') ? ` <button class="btn ghost small" data-game="${esc(g.id)}">Ver outras linhas</button>` : '');
   try { await api('/api/apostas', { action: 'odd', game_id: g.id, sel: s.sel, label: s.label, market: s.market, book: myBook(), odd, p: pr, kickoff: g.kickoff }); }
   catch (err) { toast('Não guardei a odd: ' + err.message); }
 });
