@@ -154,12 +154,31 @@ def live_payload(server, con, games, now):
     return state
 
 
+ODDS_EVERY = 12 * 3600  # plano grátis da The Odds API: 500 créditos/mês; 3 taças x 2 créditos, 2 vezes por dia ≈ 370/mês
+
+
+def uefa_odds(cf, server):
+    """Odds das taças guardadas na KV; renova de 12 em 12 h se houver chave (segredo ODDS_API_KEY)."""
+    raw = cf.kv_get("odds_uefa")
+    cache = json.loads(raw) if raw else {"t": 0, "events": []}
+    key = os.environ.get("ODDS_API_KEY", "").strip()
+    if key and time.time() - cache["t"] > ODDS_EVERY:
+        try:
+            cache = {"t": time.time(), "events": server.fetch_uefa_odds(key)}
+            cf.kv_put("odds_uefa", json.dumps(cache))
+            print(f"odds das taças: {len(cache['events'])} jogos")
+        except Exception as e:  # chave errada ou sem créditos: fica a cópia anterior e o Elo
+            print(f"odds das taças: falhou ({type(e).__name__})")
+    return cache["events"]
+
+
 def completo(cf):
     import live
     server, con = setup_local(cf, list(TABLES))
     age_cached_files()
     before = snapshot(con)
     now = datetime.now(server.TZ)
+    server.UEFA_ODDS = uefa_odds(cf, server)
     agenda = server.agenda(100, now=now)
     warning = server.bets_report(now)["warning"]  # fecha as apostas de todas as contas
     con = server.db()

@@ -43,6 +43,7 @@ jobs:
       - name: Correr
         env:
           SCHED: ${{ github.event.schedule }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           MODO: ${{ inputs.modo }}
         run: |
           if [ "$SCHED" = "17 4 1 * *" ]; then

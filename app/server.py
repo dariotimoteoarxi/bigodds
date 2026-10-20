@@ -3,7 +3,7 @@
 Correr:  python3 server.py   e abrir http://localhost:8765
 Só usa Python de base e dados públicos sem conta (football-data.co.uk/fixtures.csv).
 """
-import csv, json, math, os, re, sqlite3, time, urllib.request
+import csv, json, math, os, re, sqlite3, time, urllib.parse, urllib.request
 from datetime import datetime, timedelta
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from zoneinfo import ZoneInfo
@@ -172,6 +172,43 @@ def alerta(g):
 
 
 UEFA_DAYS = 7  # jogos das taças europeias nos próximos dias
+UEFA_ODDS = []  # eventos da The Odds API (1X2 e golos 2,5 das taças); a nuvem preenche-os de 12 em 12 h (cloud/sync.py)
+ODDS_SPORTS = ("soccer_uefa_champs_league", "soccer_uefa_europa_league", "soccer_uefa_europa_conference_league")
+
+
+def fetch_uefa_odds(key):
+    """Odds das 3 taças (2 créditos por taça: h2h e totals, região eu)."""
+    out = []
+    for sport in ODDS_SPORTS:
+        url = (f"https://api.the-odds-api.com/v4/sports/{sport}/odds/?apiKey={urllib.parse.quote(key)}"
+               "&regions=eu&markets=h2h,totals&oddsFormat=decimal&dateFormat=iso")
+        with urllib.request.urlopen(url, timeout=30) as r:
+            out += json.loads(r.read())
+    return out
+
+
+def uefa_market(home, away, ko, events=None):
+    """Probabilidades justas do mercado (média das casas) para um jogo das taças, ou None se não houver odds dele."""
+    from difflib import SequenceMatcher
+    sim = lambda x, y: SequenceMatcher(None, arbitros.norm(x), arbitros.norm(y)).ratio()
+    cand = [e for e in (UEFA_ODDS if events is None else events)
+            if abs((datetime.fromisoformat(e["commence_time"].replace("Z", "+00:00")) - ko).total_seconds()) < 3 * 3600]
+    e = max(cand, key=lambda e: sim(e["home_team"], home) + sim(e["away_team"], away), default=None)
+    if not e or sim(e["home_team"], home) + sim(e["away_team"], away) < 1.2:
+        return None
+    x12, ou = [], []
+    for b in e.get("bookmakers") or []:
+        for m in b.get("markets") or []:
+            o = {(x["name"], x.get("point")): x["price"] for x in m.get("outcomes") or []}
+            if m["key"] == "h2h" and {(e["home_team"], None), ("Draw", None), (e["away_team"], None)} <= set(o):
+                x12.append(fair_power([o[(e["home_team"], None)], o[("Draw", None)], o[(e["away_team"], None)]]))
+            if m["key"] == "totals" and {("Over", 2.5), ("Under", 2.5)} <= set(o):
+                ou.append(fair_power([o[("Over", 2.5)], o[("Under", 2.5)]])[0])
+    if not x12:
+        return None
+    avg = lambda xs: sum(xs) / len(xs)
+    return {"pH": avg([x[0] for x in x12]), "pD": avg([x[1] for x in x12]), "pA": avg([x[2] for x in x12]),
+            "po": avg(ou) if ou else None, "casas": len(x12)}
 
 
 def uefa_games(now):
@@ -195,9 +232,11 @@ def uefa_games(now):
                 if h not in where or a not in where or h not in R or a not in R:
                     continue
                 ph, pd, pa = elo.probs(R[h] - R[a] + (0 if c.get("neutralSite") else p["H"]), p)
+                mk = uefa_market(side["home"], side["away"], ko)  # odds reais das casas, quando há
                 date = ko.strftime("%d/%m/%Y")
                 out.append({"id": f"{div}-{date}-{h}", "league": name, "div": div, "taca": True, "ligas": (where[h], where[a]), "espn_id": e["id"],
-                            "mk": {"pH": ph, "pD": pd, "pA": pa}, "kickoff": ko.isoformat(), "date": date, "home": h, "away": a,
+                            "mk": mk or {"pH": ph, "pD": pd, "pA": pa}, "mk_fonte": "odds" if mk else "Elo",
+                            "kickoff": ko.isoformat(), "date": date, "home": h, "away": a,
                             "referee": None, "markets": [], "pick": None, "verdict": "nao",
                             "reason": "Taça europeia: sem odds públicas. Escreve a odd da tua casa no caça-valor.", "minutes_to_ko": round(mins)})
     return out

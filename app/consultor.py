@@ -543,8 +543,8 @@ def especialista(game, rows, modelos, live=None):
         scored = []
         for line, p_raw in opts:
             p = calibrate(cal, key, p_raw)
-            if game.get("taca"):  # taças europeias: correção por mercado testada em jogos europeus (especialista_uefa.py)
-                p = calibrate(modelos["uefa"], key, p)
+            if game.get("taca") and game.get("mk_fonte") != "odds":  # taças sem odds: correção europeia testada (especialista_uefa.py)
+                p = calibrate(modelos["uefa"], key, p)  # com odds das casas o modelo tem a mesma informação que nos campeonatos
             adj = (live or {}).get(NAMES[key])
             if adj:
                 p = min(0.97, max(0.03, p + adj))  # correção aprendida com os resultados reais

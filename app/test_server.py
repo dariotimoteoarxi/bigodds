@@ -288,3 +288,13 @@ _g = lambda gid, p, key, fam: {"id": gid, "minutes_to_ko": 60, "kickoff": "2026-
 _sel = selecao_especialista([_g("a", 0.79, "y-4.5", "Cartões"), _g("b", 0.78, "hy-2.5", "Cartões por equipa"),
                              _g("c", 0.77, "y+3.5", "Cartões"), _g("d", 0.75, "ht+0.5", "Golos por parte")], "2026-10-21")
 assert [x["game_id"] for x in _sel["apostas"]] == ["a", "b", "d"], _sel["apostas"]
+
+# odds das taças (The Odds API): casa o jogo pelos nomes e pela hora; média justa das casas
+from server import uefa_market
+_ko = datetime(2026, 10, 20, 20, 0, tzinfo=TZ)
+_ev = [{"commence_time": "2026-10-20T19:00:00Z", "home_team": "Paris Saint Germain", "away_team": "Barcelona", "bookmakers": [
+    {"markets": [{"key": "h2h", "outcomes": [{"name": "Paris Saint Germain", "price": 2.0}, {"name": "Draw", "price": 3.8}, {"name": "Barcelona", "price": 3.6}]},
+                 {"key": "totals", "outcomes": [{"name": "Over", "price": 1.6, "point": 2.5}, {"name": "Under", "price": 2.3, "point": 2.5}]}]}]}]
+_mk = uefa_market("Paris Saint-Germain", "Barcelona", _ko, _ev)
+assert _mk and abs(_mk["pH"] + _mk["pD"] + _mk["pA"] - 1) < 1e-9 and _mk["pH"] > _mk["pA"] and 0.55 < _mk["po"] < 0.62, _mk
+assert uefa_market("Liverpool", "Villarreal", _ko, _ev) is None

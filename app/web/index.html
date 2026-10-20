@@ -973,7 +973,8 @@ function gameSheet(id) {
     ${liveBox(g)}
     <p class="sub">${pk ? `Aconselhada: <b style="color:var(--lime)">${esc(pk.label)}</b> a partir de ${fmt(pk.min_odd)} · ${pc(pk.p)} de acerto estimado.` : 'Não está na seleção do dia. Podes registar qualquer aposta em baixo.'}</p>
     ${g.nota ? `<div class="note"><b>Notícias:</b> ${esc(g.nota)}</div>` : ''}
-    ${g.taca ? `<div class="note"><b>Taça europeia:</b> as percentagens têm a correção europeia por mercado, testada em 521 jogos entre clubes das 6 ligas (no teste de 2025/26–2026/27 acertou o mostrado ou mais); sem cantos, que não há nos dados das taças. Sem odds públicas: escreve a odd da tua casa no caça-valor.</div>` : ''}
+    ${g.taca && g.mk_fonte === 'odds' ? `<div class="note"><b>Taça europeia:</b> com as odds das casas (The Odds API), como nos campeonatos. Sem cantos, que não há nos dados das taças.</div>` : ''}
+    ${g.taca && g.mk_fonte !== 'odds' ? `<div class="note"><b>Taça europeia:</b> as percentagens têm a correção europeia por mercado, testada em 521 jogos entre clubes das 6 ligas (no teste de 2025/26–2026/27 acertou o mostrado ou mais); sem cantos, que não há nos dados das taças. Sem odds públicas: escreve a odd da tua casa no caça-valor.</div>` : ''}
     ${g.alerta ? `<div class="note" style="border-left-color:var(--amber)"><b style="color:var(--amber)">Atenção:</b> ${esc(g.alerta.texto)}</div>` : ''}
     ${onzesNote(g)}
     <h3>Os meus mercados</h3><div class="field" style="margin:0 0 6px"><label>A tua casa</label><div class="seg" id="mybook">${['Betclic', '22bet'].map(b => `<button aria-pressed="${b === myBook()}">${b}</button>`).join('')}</div></div>${howto('Acerto estimado e calibrado com 5 épocas de resultados. Não há odds públicas destes mercados: entra só se a tua casa pagar pelo menos a odd mínima.')}
