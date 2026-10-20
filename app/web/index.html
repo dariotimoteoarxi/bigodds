@@ -385,6 +385,8 @@
   .livebox .pg .row3 .m { height: 4px; border-radius: 2px; background: var(--line-soft); overflow: hidden; margin-top: 4px; } .livebox .pg .row3 .m i { display: block; height: 100%; background: var(--lime); }
   .oddchk { width: 72px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255, 255, 255, .03); color: var(--ink); font: 600 13px var(--tech); }
   .chkout:empty { display: none; }
+  .comphead { display: flex; align-items: center; gap: 8px; margin: 18px 0 6px; font: 600 12px var(--tech); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .comphead span { margin-left: auto; color: var(--faint); font-weight: 500; }
   .liveread { margin: 10px 0 0; font-size: 13px; color: var(--muted); } .liveread b { color: var(--ink); font-weight: 600; }
   .slip .casa { margin: 4px 0 6px; font-size: 13px; color: var(--muted); } .slip .casa b { color: var(--lime); font-weight: 600; }
   .fairodd { margin-top: 6px; font: 500 12px var(--tech); color: var(--faint); }
@@ -818,10 +820,10 @@ function gameRow(g) {
 /* ---------- CALENDÁRIO ---------- */
 let calDay = null, calExtra = [];
 const eloLine = e => { const p = e.elo, best = [['casa', e.home], ['empate', 'Empate'], ['fora', e.away]].sort((a, b) => p[b[0]] - p[a[0]])[0];
-  return `Elo: ${pc(p.casa)} · ${pc(p.empate)} · ${pc(p.fora)} · mais provável ${esc(best[1])}, entra a ≥ ${fmt(1.02 / p[best[0]])}`; };
-const extraRow = e => `<div class="row" style="cursor:default"><span class="t">${hm(e.kickoff)}<small>${esc(e.league.replace('Liga Portugal', 'Liga PT'))}</small></span>
-  <span class="teams">${esc(e.home)} – ${esc(e.away)}<small>${e.elo ? eloLine(e) : e.taca ? 'Taça europeia: sem dados destas equipas' : 'Leitura quando saírem as odds'}</small></span>
-  <span class="side">${e.taca ? '<span class="tag" style="color:var(--blue);border-color:rgba(158,193,255,.4)">UEFA</span>' : ''}</span></div>`;
+  return `${esc(best[1])} ${pc(p[best[0]])} (Elo) · entra com ${fmt(1.02 / p[best[0]])}+`; };
+const extraRow = e => `<div class="row" style="cursor:default"><span class="t">${hm(e.kickoff)}<small>${flag(e.league, 14)}</small></span>
+  <span class="teams">${esc(e.home)} – ${esc(e.away)}${e.live && e.live.estado !== 'pre' ? '<br>' + liveBadge(e) : ''}<small>${e.elo ? eloLine(e) : e.taca ? 'Clube de fora das 6 ligas: sem dados para analisar' : 'Leitura quando saírem as odds'}</small></span>
+  <span class="side"></span></div>`;
 function renderCalendario() {
   const byDay = {};
   for (const g of [...data.games, ...calExtra]) (byDay[g.kickoff.slice(0, 10)] ||= []).push(g);
@@ -845,7 +847,7 @@ function renderCalendario() {
     <div class="cal-head">${['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'].map(x => `<span>${x}</span>`).join('')}</div>
     <div class="cal">${cells}</div>
     <div class="cal-key"><span><i style="background:var(--lime)"></i>tem aposta aconselhada</span><span><i style="background:var(--red)"></i>jogo ao vivo</span><span><i style="background:var(--blue)"></i>taça europeia</span><span><i style="border:1px solid var(--red)"></i>hoje</span></div>
-    ${dayHead(calDay, gs.length)}${gs.sort((a, b) => a.kickoff.localeCompare(b.kickoff)).map(g => g.taca !== undefined ? extraRow(g) : gameRow(g)).join('')}
+    ${dayHead(calDay, gs.length)}${byComp(gs.sort((a, b) => a.kickoff.localeCompare(b.kickoff)), g => g.taca !== undefined && !data.games.includes(g) ? extraRow(g) : gameRow(g))}
 `;
   motion($('#calendario'));
 }
@@ -1613,7 +1615,8 @@ function liveTip(o, g) {
     <p class="risk">A odd ao vivo mexe depressa: confirma-a na 22bet ou na Betclic antes de entrar e não entres abaixo de ${fmt(o.min_odd)}.</p>
     <div class="foot"><span class="grow"></span><button class="btn ghost small" data-game="${esc(g.id)}">Ver jogo</button></div></article>`;
 }
-const liveCard = g => `<button class="livecard" data-game="${esc(g.id)}" aria-label="${esc(g.home)} – ${esc(g.away)}: ver análise">${liveBox(g).replace(/<div class="livebox( goal)?">/, m => `${m}<span class="lg">${flag(g.league, 13)} ${esc(LEAGUE_SHORT[g.league] || g.league)} · ${hm(g.kickoff)}</span>`)}</button>`;
+const liveCard = g => { const box = liveBox(g).replace(/<div class="livebox( goal)?">/, m => `${m}<span class="lg">${flag(g.league, 13)} ${esc(LEAGUE_SHORT[g.league] || g.league)} · ${hm(g.kickoff)}</span>`);
+  return data.games.includes(g) ? `<button class="livecard" data-game="${esc(g.id)}" aria-label="${esc(g.home)} – ${esc(g.away)}: ver análise">${box}</button>` : `<div class="livecard">${box}</div>`; };
 function aoVivo() {
   const live = data.games.filter(g => g.live && g.live.estado === 'in'), sug = live.flatMap(g => (g.ao_vivo || []).map(o => liveTip(o, g)));
   if (!live.length) return '';
@@ -1653,8 +1656,9 @@ function liveBox(g) {
       || liveNote(g)}</div>`;
 }
 function renderAoVivo() {
-  const live = data.games.filter(g => g.live && g.live.estado === 'in').sort((a, b) => a.kickoff.localeCompare(b.kickoff));
-  const done = data.games.filter(g => g.live && g.live.estado === 'post');
+  const all = [...data.games, ...extraLive()], today = dayKey(new Date());
+  const live = all.filter(g => g.live && g.live.estado === 'in').sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+  const done = all.filter(g => g.live && g.live.estado === 'post' && dayKey(new Date(g.kickoff)) === today);
   const next = data.games.filter(g => new Date(g.kickoff) > Date.now()).sort((a, b) => a.kickoff.localeCompare(b.kickoff))[0];
   document.body.classList.toggle('haslive', live.length > 0);
   document.querySelectorAll('.navn').forEach(n => n.textContent = live.length || '');
@@ -1663,8 +1667,8 @@ function renderAoVivo() {
     ${live.length ? howto('O placar atualiza-se a cada minuto; toca num jogo para ver a análise completa. Ao intervalo leio cada jogo e só sugiro quando o acerto passa 65%; os avisos no telemóvel ligam-se na roda dentada.', `${live.length} ${live.length === 1 ? 'jogo a decorrer' : 'jogos a decorrer'} · como funciona`)
       : `<p class="lede" style="margin-top:4px">Nenhum jogo a decorrer agora.${next ? ` O próximo é ${esc(next.home)} – ${esc(next.away)}, ${dayLabel(next.kickoff).toLowerCase()} às ${hm(next.kickoff)}.` : ''}</p>`}
     ${sug.length ? `<h3 class="section-title" style="font-size:20px">Leituras ao intervalo</h3>${sug.join('')}` : ''}
-    ${live.map(liveCard).join('')}
-    ${done.length ? `<h3 class="section-title" style="font-size:20px">Terminados hoje</h3>${done.map(liveCard).join('')}` : ''}`;
+    ${byComp(live, liveCard)}
+    ${done.length ? `<h3 class="section-title" style="font-size:20px">Terminados hoje</h3>${byComp(done, liveCard)}` : ''}`;
 }
 function remind(list) {
   let seen = {}; try { seen = JSON.parse(store.get('lembretes', '{}')); } catch {}
@@ -1731,7 +1735,16 @@ function betEvents() {
   store.set('betev', JSON.stringify(seen));
 }
 /* placar ao minuto direto da ESPN (deixa o browser ler): na Cloudflare o resto do estado ao vivo chega de 5 em 5 min */
-const ESPN_SLUG = { E0: 'eng.1', SP1: 'esp.1', I1: 'ita.1', D1: 'ger.1', F1: 'fra.1', P1: 'por.1' };
+const ESPN_SLUG = { E0: 'eng.1', SP1: 'esp.1', I1: 'ita.1', D1: 'ger.1', F1: 'fra.1', P1: 'por.1', UCL: 'uefa.champions', UEL: 'uefa.europa', UECL: 'uefa.europa.conf' };
+const COMP_ORDER = ['Liga Portugal', 'Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1', 'Liga dos Campeões', 'Liga Europa', 'Conference League'];
+// jogos agrupados por competição, cada grupo com o seu título (calendário e ao vivo)
+function byComp(list, render) {
+  const groups = {};
+  for (const g of list) (groups[g.league] ||= []).push(g);
+  return Object.keys(groups).sort((a, b) => (COMP_ORDER.indexOf(a) + 99) % 99 - (COMP_ORDER.indexOf(b) + 99) % 99)
+    .map(l => `<p class="comphead">${flag(l, 14)} ${esc(l)} <span>${groups[l].length}</span></p>${groups[l].map(render).join('')}`).join('');
+}
+const extraLive = () => calExtra.filter(x => x.live);  // jogos das taças sem análise, com placar da ESPN
 function espnState(e) {
   const c = e.competitions[0], side = Object.fromEntries(c.competitors.map(t => [t.homeAway, t])), st = e.status;
   const stat = (t, n) => ((t.statistics || []).find(x => x.name === n) || {}).displayValue ?? null;
@@ -1752,6 +1765,14 @@ function espnState(e) {
 async function espnRefresh() {
   const lv = data.games.filter(g => g.live && g.live.espn && g.live.estado !== 'post');
   const day = new Date().toLocaleDateString('sv-SE').replaceAll('-', '');
+  // taças: todos os jogos europeus de hoje, mesmo os que não têm análise (placar direto da ESPN)
+  const cupNow = calExtra.filter(x => x.taca && x.espn && Math.abs(new Date(x.kickoff) - Date.now()) < 3 * 3600e3 && (!x.live || x.live.estado !== 'post'));
+  for (const div of new Set(cupNow.map(x => x.div))) {
+    try {
+      const j = await (await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${ESPN_SLUG[div]}/scoreboard?dates=${day}`)).json();
+      for (const e of j.events || []) { const x = cupNow.find(y => y.espn === e.id); if (x && e.status.type.state !== 'pre') x.live = Object.assign(x.live || {}, espnState(e)); }
+    } catch (err) { /* a ESPN falhou: tenta no próximo minuto */ }
+  }
   for (const div of new Set(lv.map(g => g.div))) {
     try {
       const j = await (await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${ESPN_SLUG[div]}/scoreboard?dates=${day}`)).json();
@@ -1762,7 +1783,7 @@ async function espnRefresh() {
 async function pollLive() {
   if (!data || document.hidden && !('Notification' in window && Notification.permission === 'granted')) return;
   try {
-    const sig = () => JSON.stringify(data.games.map(g => [g.live, g.ao_vivo, g.ao_minuto, g.onzes]));
+    const sig = () => JSON.stringify([data.games.map(g => [g.live, g.ao_vivo, g.ao_minuto, g.onzes]), extraLive().map(x => x.live)]);
     const goals = Object.fromEntries(data.games.map(g => [g.id, g.live ? g.live.hg + g.live.ag : null]));
     const before = sig(), live = await api('/api/live');
     for (const g of data.games) Object.assign(g, live[g.id] || { live: null, ao_vivo: [], ao_minuto: [], onzes: g.onzes || null });

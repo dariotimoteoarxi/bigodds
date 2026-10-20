@@ -275,7 +275,9 @@ def calendario(games, leagues, now):
     """Jogos dos próximos 28 dias que ainda não estão na agenda (sem odds publicadas, logo sem análise)."""
     comps = {d: (SLUG[d], name) for d, name in leagues.items()} | CUPS
     months = {now.strftime("%Y%m"), (now.replace(day=1) + timedelta(days=32)).strftime("%Y%m")}
-    known = {(g["kickoff"][:10], norm(g["home"])) for g in games}
+    known_ids = {g.get("espn_id") for g in games}
+    known = [(g["kickoff"][:10], norm(g["home"]), norm(g["away"])) for g in games]
+    sim = lambda x, y: difflib.SequenceMatcher(None, x, y).ratio()
     out = []
     for div, (slug, name) in comps.items():
         for m in months:
@@ -292,9 +294,9 @@ def calendario(games, leagues, now):
                     continue
                 side = {t["homeAway"]: t["team"].get("shortDisplayName") or t["team"]["displayName"] for t in e["competitions"][0]["competitors"]}
                 day = ko.date().isoformat()
-                if any(d == day and difflib.SequenceMatcher(None, h, norm(side["home"])).ratio() > 0.6 for d, h in known):
-                    continue  # já está na agenda com odds e análise
-                item = {"id": "espn-" + e["id"], "div": div, "league": name, "kickoff": ko.isoformat(), "home": side["home"],
+                if e["id"] in known_ids or any(d == day and sim(h, norm(side["home"])) + sim(a, norm(side["away"])) > 1.2 for d, h, a in known):
+                    continue  # já está na agenda com análise (as duas equipas têm de bater: "Omonia" não é "Monaco")
+                item = {"id": "espn-" + e["id"], "espn": e["id"], "div": div, "league": name, "kickoff": ko.isoformat(), "home": side["home"],
                         "away": side["away"], "taca": div in CUPS}
                 if div in CUPS:
                     full = {t["homeAway"]: t["team"]["displayName"] for t in e["competitions"][0]["competitors"]}

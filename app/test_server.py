@@ -51,7 +51,10 @@ for bad in ({"odd": "1.0"}, {"stake": "0"}, {"sel": "outra"}, {"book": ""}):
     except ValueError:
         pass
 server.season_rows = lambda div, season: [{"Date": "19/10/2026", "HomeTeam": "Sp Braga", "FTHG": "2", "FTAG": "0", **fecho}]
+_espn = server.espn_return
+server.espn_return = lambda b: None  # o jogo de teste já se jogou a sério: sem isto o fecho iria buscar o resultado real à ESPN
 r = bets_report(now=datetime(2026, 10, 20, 9, 0, tzinfo=TZ))
+server.espn_return = _espn
 by = {b["sel"]: b for b in r["bets"]}
 assert by["1x2:1"]["result"] == "ganha" and by["1x2:1"]["profit"] == 9.0
 assert abs(by["1x2:1"]["clv"] - (1.90 * closing_p("1x2:1", None, fecho) - 1)) < 1e-3

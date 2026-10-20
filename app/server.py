@@ -196,7 +196,7 @@ def uefa_games(now):
                     continue
                 ph, pd, pa = elo.probs(R[h] - R[a] + (0 if c.get("neutralSite") else p["H"]), p)
                 date = ko.strftime("%d/%m/%Y")
-                out.append({"id": f"{div}-{date}-{h}", "league": name, "div": div, "taca": True, "ligas": (where[h], where[a]),
+                out.append({"id": f"{div}-{date}-{h}", "league": name, "div": div, "taca": True, "ligas": (where[h], where[a]), "espn_id": e["id"],
                             "mk": {"pH": ph, "pD": pd, "pA": pa}, "kickoff": ko.isoformat(), "date": date, "home": h, "away": a,
                             "referee": None, "markets": [], "pick": None, "verdict": "nao",
                             "reason": "Taça europeia: sem odds públicas. Escreve a odd da tua casa no caça-valor.", "minutes_to_ko": round(mins)})
