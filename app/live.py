@@ -294,7 +294,7 @@ def calendario(games, leagues, now):
                     _cache.setdefault(k, (0, []))  # sem rede: tenta outra vez no próximo pedido
             for e in _cache[k][1]:
                 ko = datetime.fromisoformat(e["date"].replace("Z", "+00:00")).astimezone(TZ)
-                if not (now <= ko <= now + timedelta(days=CAL_DAYS)):  # jogos já começados só contam se estiverem na agenda
+                if not (now - timedelta(hours=3) <= ko <= now + timedelta(days=CAL_DAYS)):  # os começados há <3 h ficam: placar ao vivo
                     continue
                 side = {t["homeAway"]: t["team"].get("shortDisplayName") or t["team"]["displayName"] for t in e["competitions"][0]["competitors"]}
                 day = ko.date().isoformat()
