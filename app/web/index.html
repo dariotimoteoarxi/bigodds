@@ -1573,6 +1573,68 @@ async function shrink(file) {
   const x = c.getContext('2d'); x.filter = 'grayscale(1) contrast(1.2)'; x.drawImage(img, 0, 0, c.width, c.height);
   return c;
 }
+// talão impresso da 22bet (tabela Data/Hora · Evento · Seleção · Odds, data sem ano): o leitor baralha as colunas.
+// Encontra as bordas da tabela na imagem (linhas finas escuras entre zonas claras), lê cada célula à parte, ampliada,
+// e monta o texto no formato que o parseSlipText já conhece. Devolve null se a imagem não tiver esta tabela.
+function tableGrid(cv) {
+  const Wd = cv.width, H = cv.height, px = cv.getContext('2d').getImageData(0, 0, Wd, H).data;
+  const v = (x, y) => x >= 0 && y >= 0 && x < Wd && y < H ? px[(y * Wd + x) * 4] : 255;
+  // pixel de uma linha fina (1–2 px, suavizada na captura): escuro aqui e claro a 3–4 px de pelo menos um lado
+  // (o texto encosta às bordas; um fundo escuro não tem lado claro)
+  const hp = (x, y) => Math.min(v(x, y), v(x, y + 1)) < 180 && (v(x, y - 3) > 170 || v(x, y + 4) > 170);
+  const vp = (x, y) => Math.min(v(x, y), v(x + 1, y)) < 180 && (v(x - 3, y) > 170 || v(x + 4, y) > 170);
+  const group = a => a.reduce((g, x) => (g.length && x - g.at(-1).at(-1) <= 2 ? g.at(-1).push(x) : g.push([x]), g), []).map(b => [b[0], b.at(-1)]);
+  const longest = (n, on) => { let best = [0, 0], start = -1, gap = 0;  // maior troço com falhas de no máximo 3 px
+    for (let i = 0; i < n; i++) {
+      if (on(i)) { if (start < 0) start = i; gap = 0; if (i - start > best[1] - best[0]) best = [start, i]; }
+      else if (start >= 0 && ++gap > 3) { start = -1; gap = 0; }
+    }
+    return best; };
+  const hs = [];
+  for (let y = 3; y < H - 4; y++) { const b = longest(Wd, x => hp(x, y)); if (b[1] - b[0] > Wd * 0.35) hs.push({ y, x0: b[0], x1: b[1] }); }
+  // a tabela: as linhas com a mesma largura (as bordas do papel ou outras riscas têm outra)
+  const by = {};
+  for (const h of hs) (by[Math.round(h.x0 / 10) + '-' + Math.round(h.x1 / 10)] ||= []).push(h);
+  const tab = Object.values(by).sort((a, b) => group(b.map(h => h.y)).length - group(a.map(h => h.y)).length)[0];
+  if (!tab || group(tab.map(h => h.y)).length < 3) return null;
+  const x0 = Math.min(...tab.map(h => h.x0)), x1 = Math.max(...tab.map(h => h.x1));
+  const rows = group(tab.map(h => h.y)), top = rows[0][1], bot = rows.at(-1)[0];
+  const vs = [];
+  for (let x = x0 - 4; x <= x1 + 4; x++) { const b = longest(bot - top, i => vp(x, top + i)); if (b[1] - b[0] > (bot - top) * 0.85) vs.push(x); }  // inclui as bordas de fora
+  const cols = group(vs);
+  return cols.length >= 5 && rows.length >= 3 ? { rows, cols } : null;
+}
+async function ticketText(w, cv) {
+  const g = tableGrid(cv);
+  if (!g) return null;
+  const cell = async (c0, c1, r0, r1, k = 3) => {
+    const x0 = g.cols[c0][1] + 2, x1 = g.cols[c1][0] - 2, y0 = r0[1] + 2, y1 = r1[0] - 2;
+    const c = document.createElement('canvas'); c.width = (x1 - x0) * k; c.height = Math.max(1, y1 - y0) * k;
+    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(cv, x0, y0, x1 - x0, y1 - y0, 0, 0, c.width, c.height);
+    return (await w.recognize(c)).data.text.replace(/[|[\]]/g, ' ').replace(/\s+/g, ' ').trim();
+  };
+  const year = new Date().getFullYear();
+  let out = '';
+  await w.setParameters({ tessedit_pageseg_mode: '6' });
+  for (let i = 0; i + 1 < g.rows.length; i++) {
+    const r0 = g.rows[i], r1 = g.rows[i + 1];
+    const when = (await cell(0, 1, r0, r1)).match(/(\d{2})[.,](\d{2})\s*(\d{1,2}:\d{2})/);
+    if (!when) continue;  // cabeçalho ou linha sem data
+    const ev = await cell(1, 2, r0, r1), sel = (await cell(2, 3, r0, r1)).replace(/individu\s+al/i, 'individual').replace(/^\W*\w?ota\W/i, 'Total ')
+      .replace(/\((\d)\s+(\d)\)?/, '($1.$2)');  // "(0 5)": o ponto perde-se na leitura
+    await w.setParameters({ tessedit_pageseg_mode: '7', tessedit_char_whitelist: '0123456789.,' });  // a odd: só algarismos
+    const reads = [];  // a odd lida em três tamanhos; fica a que aparece mais vezes (um "3" pode sair "8" num tamanho)
+    for (const k of [2, 4, 6]) reads.push(((await cell(3, 4, r0, r1, k)).match(/\d[.,]\d{2,3}/) || [])[0]);
+    const odd = reads.filter(Boolean).sort((a, b) => reads.filter(x => x === b).length - reads.filter(x => x === a).length)[0];
+    await w.setParameters({ tessedit_pageseg_mode: '6', tessedit_char_whitelist: '' });
+    if (!odd) continue;
+    const half = (ev.match(/\b([12])\s*[.,]?\s*[ºªo°aà]?\s*parte/i) || [])[1];  // "1.ª parte", lida às vezes "1 à parte"
+    const extra = [/cart/i.test(ev) && 'Cartões amarelos', /canto/i.test(ev) && 'Cantos', half && `${half}.ª parte`].filter(Boolean).join(' ');
+    out += `${when[1]}.${when[2]}.${year} (${when[3]})\n${ev}\n${sel} ${extra} ${odd}\n`;
+  }
+  await w.setParameters({ tessedit_pageseg_mode: '3' });
+  return out || null;
+}
 async function importPhotos(files) {
   if (!files.length) return;
   // ecrã de progresso: da 1.ª vez o leitor descarrega ~10–15 MB (programa + português) e no telemóvel demora
@@ -1596,7 +1658,11 @@ async function importPhotos(files) {
       if ($('#ocrBar') && m.progress) $('#ocrBar').style.width = Math.max(3, Math.round((m.status === 'recognizing text' ? 0.5 + m.progress / 2 : m.progress / 2) * 100)) + '%';
     } });
     let text = '';
-    for (const f of files) { step = 'preparar a imagem'; text += (await w.recognize(await shrink(f))).data.text + '\n'; }
+    for (const f of files) {
+      step = 'preparar a imagem';
+      const cv = await shrink(f);
+      text += ((await ticketText(w, cv)) ?? (await w.recognize(cv)).data.text) + '\n';
+    }
     await w.terminate();
     const r = parseSlipText(text);
     if (!r.legs.length) return fail('Não encontrei apostas nesta foto', r.falhas[0] || 'Li o texto, mas não encontrei a data, o jogo, o mercado e a odd no formato da 22bet ou da Betclic.');
